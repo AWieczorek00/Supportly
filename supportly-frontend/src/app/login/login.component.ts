@@ -1,9 +1,10 @@
 import {Component} from '@angular/core';
-import {MatCard, MatCardContent, MatCardTitle} from '@angular/material/card';
 import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
-import {MatFormField} from '@angular/material/form-field';
-import {MatInput} from '@angular/material/input';
-import {MatButton} from '@angular/material/button';
+import {MatCard, MatCardContent, MatCardModule, MatCardTitle} from '@angular/material/card';
+import {MatFormField, MatFormFieldModule} from '@angular/material/form-field';
+import {MatInput, MatInputModule} from '@angular/material/input';
+import {MatButton, MatButtonModule} from '@angular/material/button';
+
 
 @Component({
   selector: 'app-login',
@@ -14,7 +15,12 @@ import {MatButton} from '@angular/material/button';
     ReactiveFormsModule,
     MatFormField,
     MatInput,
-    MatButton
+    MatButton,
+    MatInputModule,
+    MatFormFieldModule,
+    MatButtonModule,
+    MatCardModule
+
   ],
   templateUrl: './login.component.html',
   standalone: true,
@@ -25,10 +31,18 @@ export class LoginComponent {
     username: new FormControl(''),
     password: new FormControl(''),
   });
+  loginForm = new FormGroup({
+    username: new FormControl(''),
+    password: new FormControl(''),
+  });
 
   submit() {
     // if (this.form.valid) {
     //   this.submitEM.emit(this.form.value);
     // }
+  }
+
+  onSumitedLogined(loginForm: FormGroup) {
+
   }
 }
