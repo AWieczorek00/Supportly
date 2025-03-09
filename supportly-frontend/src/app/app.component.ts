@@ -1,10 +1,11 @@
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import {Router, RouterOutlet} from '@angular/router';
 import {NavbarComponent} from './utils/navbar/navbar.component';
+import {NgIf} from '@angular/common';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, NavbarComponent],
+  imports: [RouterOutlet, NavbarComponent, NgIf],
 
   templateUrl: './app.component.html',
   standalone: true,
@@ -12,4 +13,11 @@ import {NavbarComponent} from './utils/navbar/navbar.component';
 })
 export class AppComponent {
   title = 'supportly-frontend';
+
+  constructor(private router :Router) {
+  }
+
+  showNavbar(): boolean {
+    return this.router.url !== '/login';
+  }
 }
