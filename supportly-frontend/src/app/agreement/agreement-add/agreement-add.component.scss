@@ -1,0 +1,12 @@
+form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;  /* Wyrównanie na środku w poziomie */
+  //padding: 10px;
+  gap: 13px;
+}
+
+mat-form-field {
+  width: 100%;  /* Opcjonalnie, aby formularz rozciągał się na pełną szerokość */
+  max-width: 500px;  /* Możesz dostosować szerokość formularza */
+}

@@ -7,12 +7,12 @@
         </mat-expansion-panel-header>
 
         <form [formGroup]="registrationForm" (ngSubmit)="onSubmit()" style="padding: 10px" class="registration-form">
-          <mat-form-field appearance="outline" class="full-width">
+          <mat-form-field appearance="outline" >
             <mat-label>Nazwa firmy</mat-label>
             <input matInput formControlName="name"/>
           </mat-form-field>
 
-          <mat-form-field appearance="outline" class="full-width">
+          <mat-form-field appearance="outline" >
             <mat-label>Dzień zawarcia umowy</mat-label>
             <input matInput [matDatepicker]="pickerFrom" formControlName="dateFrom">
             <mat-hint>MM/DD/YYYY</mat-hint>
@@ -47,11 +47,14 @@
 
           <!-- Dodanie przycisków poniżej pól formularza -->
           <div class="form-buttons" style="display: flex; justify-content: space-between; width: 100%;">
-            <button mat-raised-button color="primary" type="submit">
-              Szukaj
-            </button>
             <button mat-raised-button color="warn" type="button" (click)="onClear()">
               Wyczyść
+            </button>
+            <button mat-stroked-button color="warn" type="button" routerLink="agreement/list">
+              Dodaj nowa umowę
+            </button>
+            <button mat-raised-button color="primary" type="submit">
+              Szukaj
             </button>
           </div>
         </form>
