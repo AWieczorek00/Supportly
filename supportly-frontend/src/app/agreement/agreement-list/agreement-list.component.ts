@@ -1,4 +1,4 @@
-import {AfterViewInit, ChangeDetectionStrategy, Component, viewChild} from '@angular/core';
+import {AfterViewInit, ChangeDetectionStrategy, Component} from '@angular/core';
 import {
   MatCell,
   MatCellDef,
@@ -12,10 +12,10 @@ import {
   MatTable,
   MatTableDataSource
 } from '@angular/material/table';
-import {DatePipe} from '@angular/common';
+import {CommonModule, DatePipe} from '@angular/common';
 import {Agreement} from '../agreement';
 import {AgreementService} from '../agreement.service';
-import {MatAccordion, MatExpansionModule, MatExpansionPanel, MatExpansionPanelTitle} from '@angular/material/expansion';
+import {MatExpansionModule, MatExpansionPanel, MatExpansionPanelTitle} from '@angular/material/expansion';
 import {MatFormField, MatFormFieldModule} from '@angular/material/form-field';
 import {MatInput} from '@angular/material/input';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
@@ -28,6 +28,7 @@ import {
 } from '@angular/material/datepicker';
 import {DateAdapter, MAT_DATE_FORMATS, NativeDateAdapter} from '@angular/material/core';
 import {AgreementCriteria} from '../agreement-criteria';
+import {RouterLink} from '@angular/router';
 
 export const MY_DATE_FORMATS = {
   parse: {
@@ -44,6 +45,7 @@ export const MY_DATE_FORMATS = {
 @Component({
   selector: 'app-agreement-list',
   imports: [
+    CommonModule,
     MatTable,
     MatColumnDef,
     MatHeaderCell,
@@ -66,7 +68,8 @@ export const MY_DATE_FORMATS = {
     MatDatepickerInput,
     MatDatepickerToggle,
     MatDatepicker,
-    MatDatepickerModule
+    MatDatepickerModule,
+    RouterLink
   ],
   providers: [
     {provide: DateAdapter, useClass: NativeDateAdapter},
@@ -83,7 +86,8 @@ export class AgreementListComponent implements AfterViewInit {
 
   agreementColumns: string[] = ['name', 'dateFrom', 'dateTo', 'nip', 'addressEmail', 'city', 'street', 'number', 'period'];
   agreementTable = new MatTableDataSource<Agreement>()
-  accordion = viewChild.required(MatAccordion);
+
+  // accordion = viewChild.required(MatAccordion);
 
   ngAfterViewInit() {
     this.agreementTable.data = this.service.criteria()
