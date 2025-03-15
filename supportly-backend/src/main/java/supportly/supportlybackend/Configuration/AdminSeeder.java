@@ -44,8 +44,8 @@ public class AdminSeeder implements CommandLineRunner {
     private void createSuperAdministrator() {
         RegisterUserDto userDto = new RegisterUserDto();
         userDto.setFullName("Super Admin");
-        userDto.setEmail("super.admin@email.com");
-        userDto.setPassword("123456");
+        userDto.setEmail("super.admin@gmail.com");
+        userDto.setPassword(passwordEncoder.encode("123456"));
 
         Optional<Role> optionalRole = roleRepository.findByName(ERole.SUPER_ADMIN);
         Optional<User> optionalUser = userRepository.findByEmail(userDto.getEmail());
