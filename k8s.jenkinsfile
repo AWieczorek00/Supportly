@@ -29,16 +29,16 @@ pipeline{
     }
     post {
         success {
-            githubStatus 'SUCCESS', 'Build passed'
+            step([$class: 'GitHubCommitStatusSetter',
+                  context: 'Supporlty_PR',
+                  statusResultSource: [class: 'AnyBuildResultCommitStatusResultSource', result: 'SUCCESS']
+            ])
         }
         failure {
-            githubStatus 'FAILURE', 'Build failed'
-        }
-        always {
-            script {
-                echo "Wysyłam finalny status do GitHuba"
-                step([$class: 'GitHubCommitStatusSetter', state: 'FAILURE', description: 'Build zakończony'])
-            }
+            step([$class: 'GitHubCommitStatusSetter',
+                  context: 'Supporlty_PR',
+                  statusResultSource: [class: 'AnyBuildResultCommitStatusResultSource', result: 'FAILURE']
+            ])
         }
     }
 }
