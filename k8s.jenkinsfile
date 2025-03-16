@@ -1,0 +1,30 @@
+pipeline{
+    agent any
+
+    tools{
+        maven 'M3'
+        jdk 'JDK21'
+    }
+    stages{
+        stage('Build'){
+            steps{
+//                sh 'java -version'
+//                sh 'mvn clean compile'
+                sh 'echo "Build the app"'
+
+            }
+        }
+        stage('Test'){
+            steps{
+                sh 'echo "Testing the app"'
+//                sh "mvn verify -Dspring.profiles.active=test -Dmaven.test.failure.ignore=true"
+//                junit 'target/surefire-reports/*.xml'
+            }
+        }
+        stage('Deploy'){
+            steps{
+                sh 'echo "Deploying the app"'
+            }
+        }
+    }
+}
