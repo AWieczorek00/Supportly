@@ -30,14 +30,12 @@ pipeline{
     post {
         success {
             step([$class: 'GitHubCommitStatusSetter',
-                  context: 'Supporlty_PR',
-                  statusResultSource: [class: 'AnyBuildResultCommitStatusResultSource', result: 'SUCCESS']
+                  statusResultSource: [$class: 'DefaultCommitStatusResultSource']
             ])
         }
         failure {
             step([$class: 'GitHubCommitStatusSetter',
-                  context: 'Supporlty_PR',
-                  statusResultSource: [class: 'AnyBuildResultCommitStatusResultSource', result: 'FAILURE']
+                  statusResultSource: [$class: 'DefaultCommitStatusResultSource']
             ])
         }
     }
