@@ -193,17 +193,15 @@ def githubStatus = new GithubStatus(
 pipeline {
     agent any
     stages {
-        stage ('A') {
+        stage('A') {
             steps {
-                node('node') {
-                    script {
-                        githubStatus.setPending(this)
-                    }
+                script {
+                    githubStatus.setPending(this)
                 }
             }
         }
 
-        stage ('Test distribute') {
+        stage('Test distribute') {
             steps {
                 script {
                     githubStatus.setPending(this)
@@ -213,17 +211,13 @@ pipeline {
     }
     post {
         success {
-            node('master') {
-                script {
-                    githubStatus.setSuccess(this)
-                }
+            script {
+                githubStatus.setSuccess(this)
             }
         }
         unsuccessful {
-            node('master') {
-                script {
-                    githubStatus.setFailed(this)
-                }
+            script {
+                githubStatus.setFailed(this)
             }
         }
     }
