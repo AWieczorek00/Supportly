@@ -120,7 +120,7 @@ void setBuildStatus(String message, String state) {
             $class: "GitHubCommitStatusSetter",
             reposSource: [
                     $class: "ManuallyEnteredRepositorySource",
-                    url: "https://github.com/my-org/my-repo"  // Zaktualizuj URL swojego repozytorium
+                    url: "https://github.com/AWieczorek00/Supportly"  // Zaktualizuj URL swojego repozytorium
             ],
             contextSource: [
                     $class: "ManuallyEnteredCommitContextSource",
