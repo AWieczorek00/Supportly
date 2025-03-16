@@ -41,30 +41,105 @@
 //    }
 //}
 
+//pipeline {
+//    agent any
+//
+//    stages {
+//        stage('Checkout') {
+//            steps {
+//                checkout scm
+//            }
+//        }
+//
+//        stage('Build') {
+//            steps {
+//                sh 'mvn clean package'
+//            }
+//        }
+//
+//        stage('Test') {
+//            steps {
+//                sh 'mvn test'
+//            }
+//        }
+//    }
+//
+//    post {
+//        success {
+//            step([
+//                    $class: 'GitHubCommitStatusSetter',
+//                    statusResultSource: [$class: 'DefaultCommitStatus']
+//            ])
+//        }
+//
+//        failure {
+//            step([
+//                    $class: 'GitHubCommitStatusSetter',
+//                    statusResultSource: [$class: 'DefaultCommitStatus']
+//            ])
+//        }
+//    }
+//}
+
+
 pipeline {
     agent any
     stages {
         stage('Build') {
             steps {
-                script {
-                    step([$class: 'GitHubCommitStatusSetter',
-                          statusResultSource: [$class: 'AnyBuildResultCommitStatusResultSource']
-                    ])
-                }
-                sh 'exit 1'  // Symulacja błędu
+                sh 'echo "Build the app"'
+            }
+        }
+        stage('Test') {
+            steps {
+                sh 'echo "Testing the app"'
+            }
+        }
+        stage('Deploy') {
+            steps {
+                sh 'echo "Deploying the app"'
             }
         }
     }
     post {
         success {
-            step([$class: 'GitHubCommitStatusSetter',
-                  statusResultSource: [$class: 'AnyBuildResultCommitStatusResultSource']
-            ])
+            script {
+                setBuildStatus("Build succeeded", "SUCCESS")
+            }
         }
         failure {
-            step([$class: 'GitHubCommitStatusSetter',
-                  statusResultSource: [$class: 'AnyBuildResultCommitStatusResultSource']
-            ])
+            script {
+                setBuildStatus("Build failed", "FAILURE")
+            }
         }
     }
 }
+
+void setBuildStatus(String message, String state) {
+    step([
+            $class: "GitHubCommitStatusSetter",
+            reposSource: [
+                    $class: "ManuallyEnteredRepositorySource",
+                    url: "https://github.com/my-org/my-repo"  // Zaktualizuj URL swojego repozytorium
+            ],
+            contextSource: [
+                    $class: "ManuallyEnteredCommitContextSource",
+                    context: "ci/jenkins/build-status"
+            ],
+            errorHandlers: [
+                    [$class: "ChangingBuildStatusErrorHandler", result: "UNSTABLE"]
+            ],
+            statusResultSource: [
+                    $class: "ConditionalStatusResultSource",
+                    results: [
+                            [
+                                    $class: "AnyBuildResult",
+                                    message: message,
+                                    state: state
+                            ]
+                    ]
+            ]
+    ])
+}
+
+
