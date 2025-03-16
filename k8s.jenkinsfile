@@ -3,7 +3,7 @@ pipeline{
 
     tools{
         maven 'M3'
-        jdk 'JDK21'
+//        jdk 'JDK21'
     }
     stages{
         stage('Build'){
@@ -24,6 +24,20 @@ pipeline{
         stage('Deploy'){
             steps{
                 sh 'echo "Deploying the app"'
+            }
+        }
+    }
+    post {
+        success {
+            githubStatus 'SUCCESS', 'Build passed'
+        }
+        failure {
+            githubStatus 'FAILURE', 'Build failed'
+        }
+        always {
+            script {
+                echo "Wysyłam finalny status do GitHuba"
+                step([$class: 'GitHubCommitStatusSetter', state: 'FAILURE', description: 'Build zakończony'])
             }
         }
     }
