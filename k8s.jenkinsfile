@@ -82,64 +82,151 @@
 //}
 
 
+//pipeline {
+//    agent any
+//    stages {
+//        stage('Build') {
+//            steps {
+//                sh 'echo "Build the app"'
+//            }
+//        }
+//        stage('Test') {
+//            steps {
+//                sh 'echo "Testing the app"'
+//            }
+//        }
+//        stage('Deploy') {
+//            steps {
+//                sh 'echo "Deploying the app"'
+//            }
+//        }
+//    }
+//    post {
+//        success {
+//            script {
+//                setBuildStatus("Build succeeded", "SUCCESS")
+//            }
+//        }
+//        failure {
+//            script {
+//                setBuildStatus("Build failed", "FAILURE")
+//            }
+//        }
+//    }
+//}
+
+//void setBuildStatus(String message, String state) {
+//    step([
+//            $class: "GitHubCommitStatusSetter",
+//            reposSource: [
+//                    $class: "ManuallyEnteredRepositorySource",
+//                    url: "https://github.com/AWieczorek00/Supportly"  // Zaktualizuj URL swojego repozytorium
+//            ],
+//            contextSource: [
+//                    $class: "ManuallyEnteredCommitContextSource",
+//                    context: "ci/jenkins/build-status"
+//            ],
+//            errorHandlers: [
+//                    [$class: "ChangingBuildStatusErrorHandler", result: "UNSTABLE"]
+//            ],
+//            statusResultSource: [
+//                    $class: "ConditionalStatusResultSource",
+//                    results: [
+//                            [
+//                                    $class: "AnyBuildResult",
+//                                    message: message,
+//                                    state: state
+//                            ]
+//                    ]
+//            ]
+//    ])
+//}
+
+class GithubStatus {
+
+    // Repository to send status e.g: '/username/repo'
+    String ghprbGhRepository
+
+    // Commit hash to send status e.g: `909b76f97e`
+    String ghprbActualCommit
+
+    // Build url send status e.g: `https://jenkins/build/123`
+    String BUILD_URL
+
+    // Set pending status for this pull request
+    def setPending(script) {
+        this.setBuildStatusStep(script, "In Progress", "PENDING")
+    }
+
+    // Set failed status for this pull request
+    def setFailed(script) {
+        this.setBuildStatusStep(script, "Complete", "FAILURE")
+    }
+
+    // Set success status for this pull request
+    def setSuccess(script) {
+        this.setBuildStatusStep(script, "Complete", "SUCCESS")
+    }
+
+    // Manually set PR status via GitHub integration plugin. Manual status updates are needed
+    // Due to pipeline stage retries not propagating updates back to Github automatically
+    // https://github.com/KostyaSha/github-integration-plugin/issues/102#issuecomment-299641073
+    def setBuildStatusStep(script, String message, String state) {
+        def commitContextName = "Jenkins Build and Test"
+        script.step([
+                $class: "GitHubCommitStatusSetter",
+                reposSource: [$class: "ManuallyEnteredRepositorySource", url: "https://github.com/${this.ghprbGhRepository}"],
+                contextSource: [$class: "ManuallyEnteredCommitContextSource", context: commitContextName],
+                errorHandlers: [[$class: "ChangingBuildStatusErrorHandler", result: "UNSTABLE"]],
+                commitShaSource: [$class: "ManuallyEnteredShaSource", sha: this.ghprbActualCommit],
+                statusBackrefSource: [$class: "ManuallyEnteredBackrefSource", backref: "${this.BUILD_URL}flowGraphTable/"],
+                statusResultSource: [$class: "ConditionalStatusResultSource", results: [[$class: "AnyBuildResult", message: message, state: state]] ]
+        ])
+    }
+}
+def githubStatus = new GithubStatus(
+        ghprbGhRepository: env.ghprbGhRepository,
+        ghprbActualCommit: env.ghprbActualCommit,
+        BUILD_URL: env.BUILD_URL
+)
+
 pipeline {
     agent any
     stages {
-        stage('Build') {
+        stage ('A') {
             steps {
-                sh 'echo "Build the app"'
+                node('node') {
+                    script {
+                        githubStatus.setPending(this)
+                    }
+                }
             }
         }
-        stage('Test') {
+
+        stage ('Test distribute') {
             steps {
-                sh 'echo "Testing the app"'
-            }
-        }
-        stage('Deploy') {
-            steps {
-                sh 'echo "Deploying the app"'
+                script {
+                    githubStatus.setPending(this)
+                }
             }
         }
     }
     post {
         success {
-            script {
-                setBuildStatus("Build succeeded", "SUCCESS")
+            node('master') {
+                script {
+                    githubStatus.setSuccess(this)
+                }
             }
         }
-        failure {
-            script {
-                setBuildStatus("Build failed", "FAILURE")
+        unsuccessful {
+            node('master') {
+                script {
+                    githubStatus.setFailed(this)
+                }
             }
         }
     }
-}
-
-void setBuildStatus(String message, String state) {
-    step([
-            $class: "GitHubCommitStatusSetter",
-            reposSource: [
-                    $class: "ManuallyEnteredRepositorySource",
-                    url: "https://github.com/AWieczorek00/Supportly"  // Zaktualizuj URL swojego repozytorium
-            ],
-            contextSource: [
-                    $class: "ManuallyEnteredCommitContextSource",
-                    context: "ci/jenkins/build-status"
-            ],
-            errorHandlers: [
-                    [$class: "ChangingBuildStatusErrorHandler", result: "UNSTABLE"]
-            ],
-            statusResultSource: [
-                    $class: "ConditionalStatusResultSource",
-                    results: [
-                            [
-                                    $class: "AnyBuildResult",
-                                    message: message,
-                                    state: state
-                            ]
-                    ]
-            ]
-    ])
 }
 
 
