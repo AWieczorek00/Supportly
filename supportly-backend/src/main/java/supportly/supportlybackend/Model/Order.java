@@ -15,7 +15,7 @@ import java.util.List;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "ORDER")
+@Table(name = "\"order\"")
 @Proxy(lazy = false)
 public class Order {
 
