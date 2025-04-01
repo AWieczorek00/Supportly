@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>Supportly</groupId>
 	<artifactId>supportly-backend</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1</version>
 	<name>supportly-backend</name>
 	<description>supportly-backend</description>
 	<url/>
@@ -27,6 +27,7 @@
 		<url/>
 	</scm>
 	<properties>
+		<maven.build.timestamp.timezone>Europe/Warsaw</maven.build.timestamp.timezone>
 		<java.version>21</java.version>
 	</properties>
 	<dependencies>
@@ -144,6 +145,26 @@
 					</excludes>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>build-info</id>
+						<goals>
+							<goal>build-info</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<jvmArguments>-Dfile.encoding=UTF8 -Duser.timezone=${maven.build.timestamp.timezone}</jvmArguments>
+					<additionalProperties>
+						<time>${maven.build.timestamp}</time>
+					</additionalProperties>
+					<outputDirectory>../conf/backend/app</outputDirectory>
+				</configuration>
+			</plugin>
+
 		</plugins>
 	</build>
 
