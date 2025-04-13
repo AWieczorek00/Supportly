@@ -21,9 +21,9 @@ export class AgreementService {
           address: {
             city: 'Wrocław',
             street: 'Zielona',
-            buildingNumber: '33',
+            streetNumber: '33',
             apartmentNumber: 3,
-            postalCode: '50-123'
+            zipCode: '50-123'
           }
         },
         dateFrom: new Date('2023-03-10'),
@@ -42,9 +42,9 @@ export class AgreementService {
           address: {
             city: 'Poznań',
             street: 'Nowa',
-            buildingNumber: '48',
+            streetNumber: '48',
             apartmentNumber: 2,
-            postalCode: '60-001'
+            zipCode: '60-001'
           }
         },
         dateFrom: new Date('2022-06-01'),
@@ -63,9 +63,9 @@ export class AgreementService {
           address: {
             city: 'Katowice',
             street: 'Księżnej',
-            buildingNumber: '55',
+            streetNumber: '55',
             apartmentNumber: 1,
-            postalCode: '40-123'
+            zipCode: '40-123'
           }
         },
         dateFrom: new Date('2023-09-01'),
@@ -84,9 +84,9 @@ export class AgreementService {
           address: {
             city: 'Lublin',
             street: 'Rynkowska',
-            buildingNumber: '9',
+            streetNumber: '9',
             apartmentNumber: 10,
-            postalCode: '20-345'
+            zipCode: '20-345'
           }
         },
         dateFrom: new Date('2023-12-15'),
@@ -105,9 +105,9 @@ export class AgreementService {
           address: {
             city: 'Szczecin',
             street: 'Przemysłowa',
-            buildingNumber: '22',
+            streetNumber: '22',
             apartmentNumber: 8,
-            postalCode: '70-234'
+            zipCode: '70-234'
           }
         },
         dateFrom: new Date('2024-01-10'),
@@ -131,9 +131,9 @@ export class AgreementService {
           address: {
             city: 'Warszawa',
             street: 'Kwiatowa',
-            buildingNumber: '12A',
+            streetNumber: '12A',
             apartmentNumber: 5,
-            postalCode: '00-123'
+            zipCode: '00-123'
           }
         },
         dateFrom: new Date("2023-01-01"),
@@ -152,9 +152,9 @@ export class AgreementService {
           address: {
             city: 'Kraków',
             street: 'Długa',
-            buildingNumber: '25',
+            streetNumber: '25',
             apartmentNumber: 1,
-            postalCode: '30-123'
+            zipCode: '30-123'
           }
         },
         dateFrom: new Date('2022-05-15'),
@@ -173,9 +173,9 @@ export class AgreementService {
           address: {
             city: 'Gdańsk',
             street: 'Morska',
-            buildingNumber: '7',
+            streetNumber: '7',
             apartmentNumber: 5,
-            postalCode: '80-123'
+            zipCode: '80-123'
           }
         },
         dateFrom: new Date('2024-02-01'),
