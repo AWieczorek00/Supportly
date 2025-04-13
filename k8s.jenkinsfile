@@ -52,15 +52,15 @@ pipeline {
             }
         }
 
-        stage('Package Frontend') {
-            steps {
-                dir('supportly-frontend') {
-                    echo ">>>[PAKOWANIE FRONTENDU]<<<"
-                    sh 'tar -czf supportly-frontend.tar.gz -C dist/supportly-frontend/browser .'
-                    stash name: 'supportly-frontend-archive', includes: 'supportly-frontend.tar.gz', useDefaultExcludes: false
-                }
-            }
-        }
+//        stage('Package Frontend') {
+//            steps {
+//                dir('supportly-frontend') {
+//                    echo ">>>[PAKOWANIE FRONTENDU]<<<"
+//                    sh 'tar -czf supportly-frontend.tar.gz -C dist/supportly-frontend/browser .'
+//                    stash name: 'supportly-frontend-archive', includes: 'supportly-frontend.tar.gz', useDefaultExcludes: false
+//                }
+//            }
+//        }
 
         stage('Deploy') {
             steps {
