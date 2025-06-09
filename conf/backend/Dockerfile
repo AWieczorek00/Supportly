@@ -1,8 +1,10 @@
 FROM eclipse-temurin:21-jdk-alpine
 
+# Zainstaluj curl
+RUN apk add --no-cache curl
+
 # Kopiowanie plików aplikacji
 COPY app/supportly-backend-1.jar /app/supportly-backend-1.jar
-
 
 # Ustawienie katalogu roboczego
 WORKDIR /app
