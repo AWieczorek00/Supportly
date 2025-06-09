@@ -4,11 +4,18 @@ pipeline {
     tools {
         maven 'M3'
         jdk 'JDK21'
-        nodejs  'node'
+        nodejs 'node'
     }
 
     environment {
         PROFILE = 'production'
+        REGISTRY = '192.168.0.81:32000'
+    }
+
+    parameters{
+        booleanParam(name: 'DEPLOY_TO_KUBE', defaultValue: false, description: 'Czy wdrożyć do MicroK8s?')
+        booleanParam(name: 'E2E_TESTS', defaultValue: true, description: 'Czy uruchomić testy E2E?')
+        booleanParam(name: 'CLEANUP_DOCKER', defaultValue: true, description: 'Czy czyścić kontenery, obrazy i wolumeny Docker po testach E2E?')
     }
 
     stages {
@@ -16,10 +23,15 @@ pipeline {
             steps {
                 echo ">>>[Pobieranie najnowszych zmian]<<<"
                 script {
-                    if (fileExists('supportly-backend')) {
-                        sh 'git pull origin master'
+                    if (fileExists('conf/docker-compose.yml')) {
+                        sh '''
+                    git reset --hard HEAD
+                    git clean -fd
+                    git pull origin master
+                '''
                     } else {
-                        sh 'git clone https://github.com/AWieczorek00/Supportly.git'
+
+                        sh 'git clone https://github.com/AWieczorek00/Supportly.git .'
                     }
                     sh 'git fetch'
                 }
@@ -48,27 +60,154 @@ pipeline {
                                 }
                             }
                     )
+
+                    replaceInFile('localhost', '192.168.0.81', 'conf/docker-compose.yml')
+                    replaceInFile('PORT_DB', '1000', 'conf/docker-compose.yml')
+                    replaceInFile('PORT_BACKEND', '8082', 'conf/docker-compose.yml')
+                    replaceInFile('1009', '1000', 'conf/backend/backend.env')
+                    replaceInFile('localhost', '192.168.0.81', 'conf/backend/backend.env')
+
+                    sh 'cat conf/docker-compose.yml'
+                    sh 'cat conf/backend/backend.env'
+                    stash name: 'supportly', includes: 'conf/**', useDefaultExcludes: false
+
+                }
+            }
+        }
+        stage('Build & Push Images') {
+            agent { label 'docker-agent' } // <-- TO DODAJ
+            steps {
+                script {
+                    unstash 'supportly'
+
+                    echo ">>> Building and pushing Docker images to local registry..."
+                    dir('conf') {
+
+                        sh 'cat docker-compose.yml'
+                        sh 'cat backend/backend.env'
+
+                        // Buduj obrazy z tagami do rejestru
+                        sh 'docker compose build --no-cache'
+
+                    }
                 }
             }
         }
 
-//        stage('Package Frontend') {
-//            steps {
-//                dir('supportly-frontend') {
-//                    echo ">>>[PAKOWANIE FRONTENDU]<<<"
-//                    sh 'tar -czf supportly-frontend.tar.gz -C dist/supportly-frontend/browser .'
-//                    stash name: 'supportly-frontend-archive', includes: 'supportly-frontend.tar.gz', useDefaultExcludes: false
-//                }
-//            }
-//        }
+        stage('DeployE2E') {
+            when {
+                expression { params.E2E_TESTS }
+            }
+            agent { label 'docker-agent' }
 
-        stage('Deploy') {
             steps {
-                echo ">>>[DEPLOY]<<<"
-                sh 'echo "Deploying the app"'
-                // Dodaj tutaj kroki deployowania
+                script {
+                    echo ">>> Deploying docker-compose on remote host ..."
+
+                    unstash 'supportly'
+
+                    dir('conf') {
+                        // Zamiana 'latest' na '1' w docker-compose.yml
+                        replaceInFile('latest', '1', 'docker-compose.yml')
+
+
+                        echo ">>> Uruchamiam docker-compose lokalnie (na agencie)..."
+
+                        sh 'docker compose -f docker-compose.yml up -d'
+
+                        echo ">>> Sprawdzam, czy kontenery działają poprawnie..."
+
+                        waitForContainers(['supportly-backend', 'supportly-database'] as List<String>)
+
+                    }
+                }
             }
         }
+
+
+        stage('E2E') {
+            when {
+                expression { params.E2E_TESTS }
+            }
+            steps {
+                script {
+                    echo ">>> Testing E2E with Cypress ..."
+
+
+                }
+            }
+        }
+        stage('Cleanup Docker') {
+            when {
+                expression { params.E2E_TESTS && params.CLEANUP_DOCKER}
+            }
+            agent { label 'docker-agent' }
+            steps {
+                script {
+                    echo ">>> Cleanup docker containers, images and volumes"
+
+                    sh '''
+                docker compose -f conf/docker-compose.yml down --volumes --remove-orphans
+                docker image prune -f
+                docker volume prune -f
+            '''
+                }
+            }
+        }
+        stage('Deploy to kube') {
+            when {
+                expression { params.DEPLOY_TO_KUBE }
+            }
+            steps {
+                dir('conf') {
+                    script {
+                        // Sprawdzanie gotowości API serwera MicroK8s
+                        def checkHealthz = remoteMicrok8s('''
+                    for i in {1..10}; do
+                        echo ">>> Próba $i: sprawdzanie /healthz..."
+                         microk8s kubectl get --raw=/healthz && break
+                        echo ">>> API jeszcze nie gotowe, czekam 5s..."
+                        sleep 5
+                    done
+                ''')
+
+                        def deployCommand = """
+                    echo ">>> Wdrażanie do zdalnego MicroK8s ..."
+                    cat kube/k8s-deployment.yaml | ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no jenkins@192.168.0.81 ' microk8s kubectl apply --validate=false -f -'
+                """
+
+                        def verifyDeployment = remoteMicrok8s('''
+                    echo ">>> Weryfikacja wdrożenia (maks. 2 minuty)..."
+                    for i in {1..24}; do
+                        STATUS=$( microk8s kubectl get pods -n my-app --no-headers | awk '{print $3}' | grep -v Running | wc -l)
+                        if [ "$STATUS" -eq 0 ]; then
+                            echo ">>> Wszystkie pody działają poprawnie."
+                             microk8s kubectl get all -n my-app
+                            exit 0
+                        fi
+                        echo ">>> Czekam... ($i/24)"
+                        sleep 5
+                    done
+                    echo "❌ Nie wszystkie pody osiągnęły stan Running w ciągu 2 minut."
+                     microk8s kubectl get pods -n my-app
+                    exit 1
+                ''')
+
+                        sh """
+                    echo ">>> Sprawdzanie gotowości MicroK8s na hoście zdalnym..."
+                    ${checkHealthz}
+
+                    ${deployCommand}
+
+                    echo ">>> Sprawdzanie, czy wdrożenie się powiodło..."
+                    ${verifyDeployment}
+                """
+                    }
+                }
+            }
+        }
+
+
     }
 
     post {
@@ -89,4 +228,53 @@ pipeline {
             echo "Build aborted"
         }
     }
+}
+
+void replaceInFile(String pattern, String replacement, String filePath) {
+    sh "sed -i 's+${pattern}+${replacement}+g' ${filePath}"
+}
+
+static def remoteMicrok8s(String command) {
+    return """
+        ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no jenkins@192.168.0.81 '${command}'
+    """
+}
+
+def isContainerHealthy(String containerName) {
+    def status = sh(script: "docker inspect --format='{{.State.Status}}' ${containerName}", returnStdout: true).trim()
+    def health = sh(script: "docker inspect --format='{{if .State.Health}}{{.State.Health.Status}}{{else}}no_healthcheck{{end}}' ${containerName}", returnStdout: true).trim()
+
+    echo "Kontener ${containerName}: status=${status}, health=${health}"
+
+    if (status != 'running') {
+        echo "❌ Kontener ${containerName} NIE działa (status: ${status})"
+        return false
+    }
+    if (health != 'healthy' && health != 'no_healthcheck') {
+        echo "❌ Kontener ${containerName} ma zły stan zdrowia: ${health}"
+        return false
+    }
+    echo "✅ Kontener ${containerName} działa poprawnie i jest zdrowy."
+    return true
+}
+
+def waitForContainers(List<String> containers, int maxWaitSeconds = 120, int intervalSeconds = 10) {
+    int elapsed = 0
+    while (elapsed < maxWaitSeconds) {
+        echo "Sprawdzam kontenery, próba po ${elapsed} sekundach..."
+        boolean allHealthy = true
+        for (container in containers) {
+            if (!isContainerHealthy(container)) {
+                allHealthy = false
+            }
+        }
+        if (allHealthy) {
+            echo "✅ Wszystkie kontenery działają poprawnie."
+            return true
+        }
+        echo "Kontenery jeszcze nie są gotowe, czekam ${intervalSeconds} sekund..."
+        sleep(intervalSeconds)
+        elapsed += intervalSeconds
+    }
+    error("❌ Nie wszystkie kontenery działały prawidłowo po ${maxWaitSeconds} sekundach!")
 }
