@@ -4,6 +4,7 @@ services:
       context: postgres
       dockerfile: Dockerfile
     image: localhost:32000/conf-postgres:latest
+    container_name: supportly-datebase
     privileged: true
     ports:
       - PORT_DB:5432
@@ -21,7 +22,7 @@ services:
       context: backend
       dockerfile: Dockerfile
     image: localhost:32000/conf-backend:latest
-    container_name: spring-backend
+    container_name: supportly-backend
     env_file:
       - ./backend/backend.env
     depends_on:
