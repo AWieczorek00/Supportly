@@ -54,7 +54,11 @@ public class SecurityConfiguration {
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOrigins(List.of("http://localhost:8080"));
+        configuration.setAllowedOriginPatterns(List.of(
+                "http://localhost:*",               // lokalny frontend dev
+                "http://host.docker.internal:8080",// host.docker.internal (Windows/Mac)
+                "http://192.168.0.81:8080"        // adres frontend na sieci lokalnej (zmień na swój)
+        ));
         configuration.setAllowedMethods(List.of("GET","POST"));
         configuration.setAllowedHeaders(List.of("Authorization","Content-Type"));
 
