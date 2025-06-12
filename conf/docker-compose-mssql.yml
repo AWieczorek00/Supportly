@@ -1,0 +1,51 @@
+services:
+  mssql:
+    build:
+      context: mssql
+      dockerfile: mssql/Dockerfile
+    image: localhost:32000/conf-mssql:latest
+    privileged: true
+    ports:
+      - 1433:1433
+    volumes:
+      - mssql-data:/var/opt/mssql
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: Qwerty.1
+      MSSQL_PID: Express
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P Qwerty.1 -Q \"SELECT 1\""]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  backend:
+    build:
+      context: backend
+      dockerfile: Dockerfile
+    image: localhost:32000/conf-backend:latest
+    container_name: spring-backend
+    env_file:
+      - ./backend/backend.env
+    depends_on:
+      mssql:
+        condition: service_healthy
+    ports:
+      - PORT_BACKEND:8080
+
+  # frontend:
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile
+  #   image: localhost:32000/conf-frontend:latest
+  #   container_name: angular-frontend
+  #   environment:
+  #     BACKEND_URL: http://spring-backend:8080
+  #   depends_on:
+  #     - backend
+  #   ports:
+  #     - "4200:80"
+
+volumes:
+  mssql-data:
