@@ -176,6 +176,9 @@
                 <id>oracle</id>
                 <properties>
                     <spring.profiles.active>oracle</spring.profiles.active>
+                    <flyway.baselineOnMigrate>true</flyway.baselineOnMigrate>
+                    <flyway.baselineVersion>0.0.1</flyway.baselineVersion>
+                    <flyway.locations>classpath:db/migration/oracle</flyway.locations>
                 </properties>
                 <dependencies>
                     <dependency>
