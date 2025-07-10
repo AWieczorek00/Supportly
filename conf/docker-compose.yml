@@ -30,7 +30,6 @@ services:
         condition: service_healthy
     ports:
       - PORT_BACKEND:8080
-      -
 
 
 #  frontend: ten działa
