@@ -283,14 +283,14 @@ def waitForContainers(List<String> containers, int maxWaitSeconds = 120, int int
 void checkoutSources() {
 
     // Rozpoznawanie gałęzi i profilu
-    env.PIPELINE_TYPE = get_branch_name(['master', 'develop', 'MergeRequest'])
+    env.PIPELINE_TYPE = get_branch_name(['master', 'develop', 'PullRequest'])
     env.PROFILE = get_branch_name(['BOS', 'MBANK', 'PEKAO', 'TRIGON'])
 
     println("Build profile: ${env.PROFILE}, branch: ${env.PIPELINE_TYPE}")
     println("JOB_NAME: ${JOB_NAME}")
 
-    if ("MergeRequest".equals(env.PIPELINE_TYPE)) {
-        checkout_merge_request()
+    if ("PullRequest".equals(env.PIPELINE_TYPE)) {
+        checkout_pull_request()
         env.MERGE_REQUEST_BUILD = true
     } else {
         checkoutRepo(env.GIT_PROJECT_NAME, env.PIPELINE_TYPE)
@@ -306,7 +306,7 @@ void checkoutRepo(String project, String branch) {
             doGenerateSubmoduleConfigurations: false,
             extensions                       : [[$class: 'CloneOption', noTags: true]],
             userRemoteConfigs                : [[
-                                                        credentialsId: 'GitLab',
+                                                        credentialsId: 'Github',
                                                         url          : "https://github.com/AWieczorek00/${project}.git"
 
                                                 ]]
@@ -315,7 +315,7 @@ void checkoutRepo(String project, String branch) {
     env.GIT_COMMIT = scmVars.GIT_COMMIT
 }
 
-void checkout_merge_request() {
+void checkout_pull_request() {
     def url = gitlabSourceRepoHttpUrl
     def mrId = gitlabMergeRequestIid
     def targetBranch = gitlabTargetBranch
@@ -329,7 +329,7 @@ void checkout_merge_request() {
             ],
             userRemoteConfigs: [[
                                         url: "https://github.com/AWieczorek00/${project}.git",
-                                        credentialsId: 'GitHub'
+                                        credentialsId: 'Github'
                                 ]]
     ])
 }
