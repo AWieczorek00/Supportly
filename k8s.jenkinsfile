@@ -306,7 +306,7 @@ void checkoutRepo(String project, String branch) {
             doGenerateSubmoduleConfigurations: false,
             extensions                       : [[$class: 'CloneOption', noTags: true]],
             userRemoteConfigs                : [[
-                                                        credentialsId: 'GitLab',
+                                                        credentialsId: 'Github',
                                                         url          : "https://github.com/AWieczorek00/${project}.git"
 
                                                 ]]
@@ -329,7 +329,7 @@ void checkout_merge_request() {
             ],
             userRemoteConfigs: [[
                                         url: "https://github.com/AWieczorek00/${project}.git",
-                                        credentialsId: 'GitHub'
+                                        credentialsId: 'Github'
                                 ]]
     ])
 }
