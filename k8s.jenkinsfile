@@ -10,9 +10,10 @@ pipeline {
     environment {
         PROFILE = 'production'
         REGISTRY = '192.168.0.81:32000'
+        GIT_PROJECT_NAME = 'Supportly'
     }
 
-    parameters{
+    parameters {
         booleanParam(name: 'DEPLOY_TO_KUBE', defaultValue: false, description: 'Czy wdrożyć do MicroK8s?')
         booleanParam(name: 'E2E_TESTS', defaultValue: true, description: 'Czy uruchomić testy E2E?')
         booleanParam(name: 'CLEANUP_DOCKER', defaultValue: true, description: 'Czy czyścić kontenery, obrazy i wolumeny Docker po testach E2E?')
@@ -22,19 +23,19 @@ pipeline {
         stage('Checkout') {
             steps {
                 echo ">>>[Pobieranie najnowszych zmian]<<<"
-                script {
-                    if (fileExists('conf/docker-compose.yml')) {
-                        sh '''
-                    git reset --hard HEAD
-                    git clean -fd
-                    git pull origin master
-                '''
-                    } else {
-
-                        sh 'git clone https://github.com/AWieczorek00/Supportly.git .'
-                    }
-                    sh 'git fetch'
-                }
+//                script {
+//                    if (fileExists('conf/docker-compose.yml')) {
+//                        sh '''
+//                    git reset --hard HEAD
+//                    git clean -fd
+//                    git pull origin master
+//                '''
+//                    } else {
+//                        sh 'git clone https://github.com/AWieczorek00/Supportly.git .'
+//                    }
+//                    sh 'git fetch'
+//                }
+                checkoutSources()
             }
         }
 
@@ -139,7 +140,7 @@ pipeline {
         }
         stage('Cleanup Docker') {
             when {
-                expression { params.E2E_TESTS && params.CLEANUP_DOCKER}
+                expression { params.E2E_TESTS && params.CLEANUP_DOCKER }
             }
             agent { label 'docker-agent' }
             steps {
@@ -188,7 +189,7 @@ pipeline {
                         echo ">>> Czekam... ($i/24)"
                         sleep 5
                     done
-                    echo "❌ Nie wszystkie pody osiągnęły stan Running w ciągu 2 minut."
+                    echo "Nie wszystkie pody osiągnęły stan Running w ciągu 2 minut."
                      microk8s kubectl get pods -n my-app
                     exit 1
                 ''')
@@ -247,14 +248,14 @@ def isContainerHealthy(String containerName) {
     echo "Kontener ${containerName}: status=${status}, health=${health}"
 
     if (status != 'running') {
-        echo "❌ Kontener ${containerName} NIE działa (status: ${status})"
+        echo "Kontener ${containerName} NIE działa (status: ${status})"
         return false
     }
     if (health != 'healthy' && health != 'no_healthcheck') {
-        echo "❌ Kontener ${containerName} ma zły stan zdrowia: ${health}"
+        echo "Kontener ${containerName} ma zły stan zdrowia: ${health}"
         return false
     }
-    echo "✅ Kontener ${containerName} działa poprawnie i jest zdrowy."
+    echo "Kontener ${containerName} działa poprawnie i jest zdrowy."
     return true
 }
 
@@ -269,12 +270,75 @@ def waitForContainers(List<String> containers, int maxWaitSeconds = 120, int int
             }
         }
         if (allHealthy) {
-            echo "✅ Wszystkie kontenery działają poprawnie."
+            echo "Wszystkie kontenery działają poprawnie."
             return true
         }
         echo "Kontenery jeszcze nie są gotowe, czekam ${intervalSeconds} sekund..."
         sleep(intervalSeconds)
         elapsed += intervalSeconds
     }
-    error("❌ Nie wszystkie kontenery działały prawidłowo po ${maxWaitSeconds} sekundach!")
+    error("Nie wszystkie kontenery działały prawidłowo po ${maxWaitSeconds} sekundach!")
+}
+
+void checkoutSources() {
+
+    // Rozpoznawanie gałęzi i profilu
+    env.PIPELINE_TYPE = get_branch_name(['master', 'develop', 'MergeRequest'])
+    env.PROFILE = get_branch_name(['BOS', 'MBANK', 'PEKAO', 'TRIGON'])
+
+    println("Build profile: ${env.PROFILE}, branch: ${env.PIPELINE_TYPE}")
+    println("JOB_NAME: ${JOB_NAME}")
+
+    if ("MergeRequest".equals(env.PIPELINE_TYPE)) {
+        checkout_merge_request()
+        env.MERGE_REQUEST_BUILD = true
+    } else {
+        checkoutRepo(env.GIT_PROJECT_NAME, env.PIPELINE_TYPE)
+    }
+}
+
+void checkoutRepo(String project, String branch) {
+    println("[checkout] ${project} -> ${branch}")
+
+    def scmVars = checkout([
+            $class                           : 'GitSCM',
+            branches                         : [[name: "${branch}"]],
+            doGenerateSubmoduleConfigurations: false,
+            extensions                       : [[$class: 'CloneOption', noTags: true]],
+            userRemoteConfigs                : [[
+                                                        credentialsId: 'GitLab',
+                                                        url          : "https://github.com/AWieczorek00/${project}.git"
+
+                                                ]]
+    ])
+
+    env.GIT_COMMIT = scmVars.GIT_COMMIT
+}
+
+void checkout_merge_request() {
+    def url = gitlabSourceRepoHttpUrl
+    def mrId = gitlabMergeRequestIid
+    def targetBranch = gitlabTargetBranch
+
+    checkout([
+            $class: 'GitSCM',
+            branches: [[name: "refs/heads/master"]],
+            extensions: [
+                    [$class: 'PreBuildMerge', options: [mergeRemote: 'origin', mergeTarget: 'master']],
+                    [$class: 'CloneOption', noTags: true]
+            ],
+            userRemoteConfigs: [[
+                                        url: "https://github.com/AWieczorek00/${project}.git",
+                                        credentialsId: 'GitHub'
+                                ]]
+    ])
+}
+
+String get_branch_name(List<String> branches) {
+    for (branch in branches) {
+        if ("$JOB_NAME".toUpperCase().contains(branch.toUpperCase())) {
+            return branch
+        }
+    }
+    return 'develop' // domyślna wartość
 }
