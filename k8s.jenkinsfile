@@ -316,10 +316,6 @@ void checkoutRepo(String project, String branch) {
 }
 
 void checkout_pull_request() {
-    def url = gitlabSourceRepoHttpUrl
-    def mrId = gitlabMergeRequestIid
-    def targetBranch = gitlabTargetBranch
-
     checkout([
             $class: 'GitSCM',
             branches: [[name: "refs/heads/master"]],

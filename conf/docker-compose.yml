@@ -11,7 +11,7 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -d db_prod"]
+      test: [ "CMD-SHELL", "pg_isready -d db_prod" ]
       interval: 5s
       timeout: 5s
       retries: 3
@@ -32,13 +32,14 @@ services:
       - PORT_BACKEND:8080
 
 
-#  frontend: ten działa
-#    build:
-#      context: ..
-#      dockerfile: conf/frontend/Dockerfile
-#    container_name: supportly-frontend
-#    ports:
-#      - "4200:80"
+
+  #  frontend: ten działa
+  #    build:
+  #      context: ..
+  #      dockerfile: conf/frontend/Dockerfile
+  #    container_name: supportly-frontend
+  #    ports:
+  #      - "4200:80"
 
 
   # frontend:
