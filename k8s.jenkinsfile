@@ -144,11 +144,11 @@ pipeline {
             }
             agent { label 'docker-agent' }
 
-            unstash 'supportly'
 
             steps {
                 script {
                     echo ">>> Cleanup docker containers, images and volumes"
+                    unstash 'supportly'
                     sh '''
                 docker compose -f conf/docker-compose.yml down --volumes --remove-orphans
                 docker image prune -f
