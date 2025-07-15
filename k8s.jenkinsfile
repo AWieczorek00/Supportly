@@ -1,5 +1,6 @@
 pipeline {
-    agent any
+    agent { label 'docker-agent' } // globalnie
+
 
     tools {
         maven 'M3'
@@ -14,9 +15,9 @@ pipeline {
     }
 
     parameters {
-        booleanParam(name: 'DEPLOY_TO_KUBE', defaultValue: false, description: 'Czy wdrożyć do MicroK8s?')
         booleanParam(name: 'E2E_TESTS', defaultValue: true, description: 'Czy uruchomić testy E2E?')
         booleanParam(name: 'CLEANUP_DOCKER', defaultValue: true, description: 'Czy czyścić kontenery, obrazy i wolumeny Docker po testach E2E?')
+        booleanParam(name: 'DEPLOY_TO_KUBE', defaultValue: false, description: 'Czy wdrożyć do MicroK8s?')
     }
 
     stages {
@@ -76,7 +77,7 @@ pipeline {
             }
         }
         stage('Build & Push Images') {
-            agent { label 'docker-agent' } // <-- TO DODAJ
+//            agent { label 'docker-agent' } // <-- TO DODAJ
             steps {
                 script {
                     unstash 'supportly'
@@ -99,7 +100,7 @@ pipeline {
             when {
                 expression { params.E2E_TESTS }
             }
-            agent { label 'docker-agent' }
+//            agent { label 'docker-agent' }
 
             steps {
                 script {
@@ -142,11 +143,11 @@ pipeline {
             when {
                 expression { params.E2E_TESTS && params.CLEANUP_DOCKER }
             }
-            agent { label 'docker-agent' }
+//            agent { label 'docker-agent' }
+
             steps {
                 script {
                     echo ">>> Cleanup docker containers, images and volumes"
-
                     sh '''
                 docker compose -f conf/docker-compose.yml down --volumes --remove-orphans
                 docker image prune -f
