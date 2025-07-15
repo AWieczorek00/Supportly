@@ -317,17 +317,41 @@ void checkoutRepo(String project, String branch) {
     env.GIT_COMMIT = scmVars.GIT_COMMIT
 }
 
+//void checkout_pull_request(String project) {
+//    checkout([
+//            $class: 'GitSCM',
+//            branches: [[name: "refs/heads/master"]],
+//            extensions: [
+//                    [$class: 'PreBuildMerge', options: [mergeRemote: 'origin', mergeTarget: 'master']],
+//                    [$class: 'CloneOption', noTags: true]
+//            ],
+//            userRemoteConfigs: [[
+//                                        url: "https://github.com/AWieczorek00/${project}.git",
+//                                        credentialsId: 'Github'
+//                                ]]
+//    ])
+//}
+
 void checkout_pull_request(String project) {
+    def prId = env.CHANGE_ID
+    def targetBranch = env.CHANGE_TARGET ?: 'master'
+
+    println "Checkout PR #${prId}, merging into ${targetBranch}"
+
     checkout([
-            $class: 'GitSCM',
-            branches: [[name: "refs/heads/master"]],
-            extensions: [
-                    [$class: 'PreBuildMerge', options: [mergeRemote: 'origin', mergeTarget: 'master']],
+            $class           : 'GitSCM',
+            branches         : [[name: "*/${targetBranch}"]],
+            extensions       : [
+                    [$class: 'PreBuildMerge', options: [
+                            mergeRemote: 'origin',
+                            mergeTarget: targetBranch
+                    ]],
                     [$class: 'CloneOption', noTags: true]
             ],
             userRemoteConfigs: [[
-                                        url: "https://github.com/AWieczorek00/${project}.git",
-                                        credentialsId: 'Github'
+                                        url          : "https://github.com/AWieczorek00/${project}.git",
+                                        credentialsId: 'Github',
+                                        refspec      : "+refs/pull/${prId}/*:refs/remotes/origin/pr/${prId}/*"
                                 ]]
     ])
 }
