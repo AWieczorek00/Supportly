@@ -305,6 +305,21 @@ void checkoutRepo(String project, String branch) {
     env.GIT_COMMIT = scmVars.GIT_COMMIT
 }
 
+//void checkout_pull_request(String project) {
+//    checkout([
+//            $class: 'GitSCM',
+//            branches: [[name: "refs/heads/master"]],
+//            extensions: [
+//                    [$class: 'PreBuildMerge', options: [mergeRemote: 'origin', mergeTarget: 'master']],
+//                    [$class: 'CloneOption', noTags: true]
+//            ],
+//            userRemoteConfigs: [[
+//                                        url: "https://github.com/AWieczorek00/${project}.git",
+//                                        credentialsId: 'Github'
+//                                ]]
+//    ])
+//}
+
 void checkout_pull_request(String project) {
     def prId = env.CHANGE_ID
     def targetBranch = env.CHANGE_TARGET ?: 'master'
