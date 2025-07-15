@@ -290,7 +290,7 @@ void checkoutSources() {
     println("JOB_NAME: ${JOB_NAME}")
 
     if ("PullRequest".equals(env.PIPELINE_TYPE)) {
-        checkout_pull_request()
+        checkout_pull_request(env.GIT_PROJECT_NAME)
         env.MERGE_REQUEST_BUILD = true
     } else {
         checkoutRepo(env.GIT_PROJECT_NAME, env.PIPELINE_TYPE)
@@ -315,7 +315,7 @@ void checkoutRepo(String project, String branch) {
     env.GIT_COMMIT = scmVars.GIT_COMMIT
 }
 
-void checkout_pull_request() {
+void checkout_pull_request(String project) {
     checkout([
             $class: 'GitSCM',
             branches: [[name: "refs/heads/master"]],
