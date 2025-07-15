@@ -14,9 +14,9 @@ pipeline {
     }
 
     parameters {
-        booleanParam(name: 'DEPLOY_TO_KUBE', defaultValue: false, description: 'Czy wdrożyć do MicroK8s?')
         booleanParam(name: 'E2E_TESTS', defaultValue: true, description: 'Czy uruchomić testy E2E?')
         booleanParam(name: 'CLEANUP_DOCKER', defaultValue: true, description: 'Czy czyścić kontenery, obrazy i wolumeny Docker po testach E2E?')
+        booleanParam(name: 'DEPLOY_TO_KUBE', defaultValue: false, description: 'Czy wdrożyć do MicroK8s?')
     }
 
     stages {
@@ -143,10 +143,12 @@ pipeline {
                 expression { params.E2E_TESTS && params.CLEANUP_DOCKER }
             }
             agent { label 'docker-agent' }
+
+
             steps {
                 script {
                     echo ">>> Cleanup docker containers, images and volumes"
-
+                    unstash 'supportly'
                     sh '''
                 docker compose -f conf/docker-compose.yml down --volumes --remove-orphans
                 docker image prune -f
@@ -290,7 +292,7 @@ void checkoutSources() {
     println("JOB_NAME: ${JOB_NAME}")
 
     if ("PullRequest".equals(env.PIPELINE_TYPE)) {
-        checkout_pull_request()
+        checkout_pull_request(env.GIT_PROJECT_NAME)
         env.MERGE_REQUEST_BUILD = true
     } else {
         checkoutRepo(env.GIT_PROJECT_NAME, env.PIPELINE_TYPE)
@@ -315,7 +317,7 @@ void checkoutRepo(String project, String branch) {
     env.GIT_COMMIT = scmVars.GIT_COMMIT
 }
 
-void checkout_pull_request() {
+void checkout_pull_request(String project) {
     checkout([
             $class: 'GitSCM',
             branches: [[name: "refs/heads/master"]],
