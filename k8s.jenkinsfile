@@ -19,6 +19,13 @@ pipeline {
         booleanParam(name: 'DEPLOY_TO_KUBE', defaultValue: false, description: 'Czy wdrożyć do MicroK8s?')
     }
 
+    options {
+        timestamps()
+        timeout(time: 1, unit: 'HOURS')
+        buildDiscarder(logRotator(numToKeepStr: '5'))
+        disableConcurrentBuilds()
+        skipDefaultCheckout()
+    }
     stages {
         stage('Checkout') {
             steps {
