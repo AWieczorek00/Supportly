@@ -1,5 +1,5 @@
 pipeline {
-    agent any
+    agent { label 'built-in' }
 
     tools {
         maven 'M3'
@@ -23,18 +23,6 @@ pipeline {
         stage('Checkout') {
             steps {
                 echo ">>>[Pobieranie najnowszych zmian]<<<"
-//                script {
-//                    if (fileExists('conf/docker-compose.yml')) {
-//                        sh '''
-//                    git reset --hard HEAD
-//                    git clean -fd
-//                    git pull origin master
-//                '''
-//                    } else {
-//                        sh 'git clone https://github.com/AWieczorek00/Supportly.git .'
-//                    }
-//                    sh 'git fetch'
-//                }
                 checkoutSources()
             }
         }
