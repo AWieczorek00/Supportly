@@ -22,11 +22,8 @@ public class Agreement {
     @Column(name = "AGREEMENT_NUMBER", nullable = false)
     private String agreementNumber;
 
-    @Column(name = "DATE_FROM", nullable = false)
-    private LocalDate dateFrom;
-
-    @Column(name = "DATE_TO", nullable = false)
-    private LocalDate dateTo;
+    @Column(name = "SIGNED_DATE", nullable = false)
+    private LocalDate signedDate;
 
     @Column(name = "PERIOD", nullable = false)
     @Enumerated(EnumType.STRING)

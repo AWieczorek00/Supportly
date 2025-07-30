@@ -21,9 +21,6 @@ public class Address {
     @Column(name = "STREET", nullable = false)
     private String street;
 
-    @Column(name = "APARTMENT_NUMBER")
-    private String apartmentNumber;
-
     @Column(name = "STREET_NUMBER", nullable = false)
     private int streetNumber;
 
