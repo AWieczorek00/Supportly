@@ -7,7 +7,7 @@ services:
     container_name: supportly-database
     privileged: true
     ports:
-      - 5432:5432
+      - PORT_DB:5432
     volumes:
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
@@ -17,19 +17,19 @@ services:
       retries: 3
       start_period: 30s
 
-#  backend:
-#    build:
-#      context: backend
-#      dockerfile: Dockerfile
-#    image: localhost:32000/conf-backend:latest
-#    container_name: supportly-backend
-#    env_file:
-#      - ./backend/backend.env
-#    depends_on:
-#      postgres:
-#        condition: service_healthy
-#    ports:
-#      - PORT_BACKEND:8080
+  backend:
+    build:
+      context: backend
+      dockerfile: Dockerfile
+    image: localhost:32000/conf-backend:latest
+    container_name: supportly-backend
+    env_file:
+      - ./backend/backend.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - PORT_BACKEND:8080
 
 
 
