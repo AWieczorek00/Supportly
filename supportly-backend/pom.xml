@@ -106,22 +106,42 @@
             <version>2.3.232</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>jakarta.persistence</groupId>
+            <artifactId>jakarta.persistence-api</artifactId>
+            <version>3.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
+            <version>1.5.5.Final</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct-processor</artifactId>
+            <version>1.5.5.Final</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
-            <!--			<plugin>-->
-            <!--				<groupId>org.apache.maven.plugins</groupId>-->
-            <!--				<artifactId>maven-compiler-plugin</artifactId>-->
-            <!--				<configuration>-->
-            <!--					<annotationProcessorPaths>-->
-            <!--						<path>-->
-            <!--							<groupId>org.projectlombok</groupId>-->
-            <!--							<artifactId>lombok</artifactId>-->
-            <!--						</path>-->
-            <!--					</annotationProcessorPaths>-->
-            <!--				</configuration>-->
-            <!--			</plugin>-->
+<!--            <plugin>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-compiler-plugin</artifactId>-->
+<!--                <version>3.11.0</version>-->
+<!--                <configuration>-->
+<!--                    <source>17</source>  &lt;!&ndash; lub 11 jeśli używasz Java 11 &ndash;&gt;-->
+<!--                    <target>17</target>-->
+<!--                    <annotationProcessorPaths>-->
+<!--                        <path>-->
+<!--                            <groupId>org.mapstruct</groupId>-->
+<!--                            <artifactId>mapstruct-processor</artifactId>-->
+<!--                            <version>1.5.5.Final</version>-->
+<!--                        </path>-->
+<!--                    </annotationProcessorPaths>-->
+<!--                </configuration>-->
+<!--            </plugin>-->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
@@ -143,6 +163,11 @@
                         <exclude>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
+                            <path>
+                                <groupId>org.mapstruct</groupId>
+                                <artifactId>mapstruct-processor</artifactId>
+                                <version>1.5.5.Final</version>
+                            </path>
                         </exclude>
                     </excludes>
                 </configuration>
@@ -151,71 +176,71 @@
         </plugins>
     </build>
 
-        <profiles>
-            <profile>
-                <id>dev</id>
-                <properties>
-                    <spring.profiles.active>dev</spring.profiles.active>
-                    <flyway.baselineOnMigrate>true</flyway.baselineOnMigrate>
-                    <flyway.baselineVersion>0.0.1</flyway.baselineVersion>
-                    <flyway.locations>classpath:db/migration/dev</flyway.locations>
-                </properties>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.postgresql</groupId>
-                        <artifactId>postgresql</artifactId>
-                        <scope>runtime</scope>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.flywaydb</groupId>
-                        <artifactId>flyway-database-postgresql</artifactId>
-                    </dependency>
-                </dependencies>
-            </profile>
-            <profile>
-                <id>oracle</id>
-                <properties>
-                    <spring.profiles.active>oracle</spring.profiles.active>
-                    <flyway.baselineOnMigrate>true</flyway.baselineOnMigrate>
-                    <flyway.baselineVersion>0.0.1</flyway.baselineVersion>
-                    <flyway.locations>classpath:db/migration/oracle</flyway.locations>
-                </properties>
-                <dependencies>
-                    <dependency>
-                        <groupId>com.oracle.database.jdbc</groupId>
-                        <artifactId>ojdbc11</artifactId>
-                        <version>23.5.0.24.07</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.flywaydb</groupId>
-                        <artifactId>flyway-database-oracle</artifactId>
-                        <version>11.8.2</version>
-                        <scope>runtime</scope>
-                    </dependency>
-                </dependencies>
-            </profile>
-            <profile>
-                <id>mssql</id>
-                <properties>
-                    <spring.profiles.active>mssql</spring.profiles.active>
-                    <flyway.baselineOnMigrate>true</flyway.baselineOnMigrate>
-                    <flyway.baselineVersion>0.0.1</flyway.baselineVersion>
-                    <flyway.locations>classpath:db/migration/mssql</flyway.locations>
-                </properties>
-                <dependencies>
-                    <dependency>
-                        <groupId>com.microsoft.sqlserver</groupId>
-                        <artifactId>mssql-jdbc</artifactId>
-                        <version>12.10.0.jre11</version>
-                        <scope>compile</scope>
-                    </dependency>
-                    <!-- https://mvnrepository.com/artifact/org.flywaydb/flyway-core -->
-                    <dependency>
-                        <groupId>org.flywaydb</groupId>
-                        <artifactId>flyway-sqlserver</artifactId>
-                    </dependency>
-                </dependencies>
-            </profile>
-        </profiles>
+    <profiles>
+        <profile>
+            <id>dev</id>
+            <properties>
+                <spring.profiles.active>dev</spring.profiles.active>
+                <flyway.baselineOnMigrate>true</flyway.baselineOnMigrate>
+                <flyway.baselineVersion>0.0.1</flyway.baselineVersion>
+                <flyway.locations>classpath:db/migration/dev</flyway.locations>
+            </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>org.postgresql</groupId>
+                    <artifactId>postgresql</artifactId>
+                    <scope>runtime</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.flywaydb</groupId>
+                    <artifactId>flyway-database-postgresql</artifactId>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>oracle</id>
+            <properties>
+                <spring.profiles.active>oracle</spring.profiles.active>
+                <flyway.baselineOnMigrate>true</flyway.baselineOnMigrate>
+                <flyway.baselineVersion>0.0.1</flyway.baselineVersion>
+                <flyway.locations>classpath:db/migration/oracle</flyway.locations>
+            </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>com.oracle.database.jdbc</groupId>
+                    <artifactId>ojdbc11</artifactId>
+                    <version>23.5.0.24.07</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.flywaydb</groupId>
+                    <artifactId>flyway-database-oracle</artifactId>
+                    <version>11.8.2</version>
+                    <scope>runtime</scope>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>mssql</id>
+            <properties>
+                <spring.profiles.active>mssql</spring.profiles.active>
+                <flyway.baselineOnMigrate>true</flyway.baselineOnMigrate>
+                <flyway.baselineVersion>0.0.1</flyway.baselineVersion>
+                <flyway.locations>classpath:db/migration/mssql</flyway.locations>
+            </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>com.microsoft.sqlserver</groupId>
+                    <artifactId>mssql-jdbc</artifactId>
+                    <version>12.10.0.jre11</version>
+                    <scope>compile</scope>
+                </dependency>
+                <!-- https://mvnrepository.com/artifact/org.flywaydb/flyway-core -->
+                <dependency>
+                    <groupId>org.flywaydb</groupId>
+                    <artifactId>flyway-sqlserver</artifactId>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
 
 </project>
