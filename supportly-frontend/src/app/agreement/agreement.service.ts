@@ -23,7 +23,7 @@ export class AgreementService {
             street: 'Zielona',
             streetNumber: '33',
             apartmentNumber: 3,
-            zipCode: '50-123'
+            postalCode: '50-123'
           }
         },
         dateFrom: new Date('2023-03-10'),
@@ -44,7 +44,7 @@ export class AgreementService {
             street: 'Nowa',
             streetNumber: '48',
             apartmentNumber: 2,
-            zipCode: '60-001'
+            postalCode: '60-001'
           }
         },
         dateFrom: new Date('2022-06-01'),
@@ -65,7 +65,7 @@ export class AgreementService {
             street: 'Księżnej',
             streetNumber: '55',
             apartmentNumber: 1,
-            zipCode: '40-123'
+            postalCode: '40-123'
           }
         },
         dateFrom: new Date('2023-09-01'),
@@ -86,7 +86,7 @@ export class AgreementService {
             street: 'Rynkowska',
             streetNumber: '9',
             apartmentNumber: 10,
-            zipCode: '20-345'
+            postalCode: '20-345'
           }
         },
         dateFrom: new Date('2023-12-15'),
@@ -107,7 +107,7 @@ export class AgreementService {
             street: 'Przemysłowa',
             streetNumber: '22',
             apartmentNumber: 8,
-            zipCode: '70-234'
+            postalCode: '70-234'
           }
         },
         dateFrom: new Date('2024-01-10'),
@@ -133,7 +133,7 @@ export class AgreementService {
             street: 'Kwiatowa',
             streetNumber: '12A',
             apartmentNumber: 5,
-            zipCode: '00-123'
+            postalCode: '00-123'
           }
         },
         dateFrom: new Date("2023-01-01"),
@@ -154,7 +154,7 @@ export class AgreementService {
             street: 'Długa',
             streetNumber: '25',
             apartmentNumber: 1,
-            zipCode: '30-123'
+            postalCode: '30-123'
           }
         },
         dateFrom: new Date('2022-05-15'),
@@ -175,7 +175,7 @@ export class AgreementService {
             street: 'Morska',
             streetNumber: '7',
             apartmentNumber: 5,
-            zipCode: '80-123'
+            postalCode: '80-123'
           }
         },
         dateFrom: new Date('2024-02-01'),

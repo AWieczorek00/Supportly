@@ -11,7 +11,7 @@ import jakarta.persistence.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "PART")
-public class Part {
+public class    Part {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID", nullable = false)
@@ -26,7 +26,7 @@ public class Part {
     @Column(name = "TAX")
     private float tax;
 
-    @Column(name = "AMOUNT")
-    private int amount;
+    @Column(name = "QUANTITY")
+    private int quantity;
 
 }
