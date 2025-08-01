@@ -1,0 +1,16 @@
+<h1 mat-dialog-title>Podaj ilość dla: {{ data.name }}</h1>
+<div mat-dialog-content>
+  <p>Dostępna ilość: {{ data.quantity }}</p>
+  <mat-form-field appearance="outline">
+    <input matInput type="number" [formControl]="quantityControl" placeholder="Ilość"/>
+    <mat-error *ngIf="quantityControl.hasError('required')">Ilość jest wymagana</mat-error>
+    <mat-error *ngIf="quantityControl.hasError('min')">Musi być większa niż 0</mat-error>
+    <mat-error *ngIf="quantityControl.hasError('max')">
+      Maksymalnie {{ data.quantity }}
+    </mat-error>
+  </mat-form-field>
+</div>
+<div mat-dialog-actions>
+  <button mat-button (click)="dialogRef.close()">Anuluj</button>
+  <button mat-button color="primary" [disabled]="quantityControl.invalid" (click)="submit()">Dodaj</button>
+</div>

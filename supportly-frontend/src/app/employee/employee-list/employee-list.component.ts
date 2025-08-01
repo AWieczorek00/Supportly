@@ -26,11 +26,11 @@ import {MatError, MatFormField, MatFormFieldModule, MatHint, MatLabel, MatSuffix
 import {MatInput} from '@angular/material/input';
 import {RouterLink} from '@angular/router';
 import {Employee} from '../Employee';
-import {EmployeeService} from '../employee.service';
 import {AgreementCriteria} from '../../agreement/agreement-criteria';
 import {EmployeeCriteria} from '../EmployeeCriteria';
 import {MatDialog} from '@angular/material/dialog';
 import {EmployeeAddComponent} from '../employee-add/employee-add.component';
+import {EmployeeService} from '../employee.service';
 
 @Component({
   selector: 'app-employee-list',
@@ -59,14 +59,18 @@ import {EmployeeAddComponent} from '../employee-add/employee-add.component';
     MatDatepickerToggle,
     MatDatepicker,
     MatDatepickerModule,
-    RouterLink
+    RouterLink,
+    MatDatepickerInput,
+    MatDatepickerToggle,
+    MatDatepicker,
+    MatDatepickerModule,
   ],
   templateUrl: './employee-list.component.html',
   styleUrl: './employee-list.component.scss'
 })
 export class EmployeeListComponent implements AfterViewInit {
 
-  constructor(private service: EmployeeService,private dialog: MatDialog) {
+  constructor(private service: EmployeeService, private dialog: MatDialog) {
 
   }
 
