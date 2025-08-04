@@ -47,7 +47,7 @@ public class PdfGeneration {
 
             PdfPTable titleTable = new PdfPTable(1);
             titleTable.setHorizontalAlignment(ALIGN_CENTER);
-            titleTable.addCell(new PdfPCell(new Paragraph("PROTOKÓŁ Z WYKONANYCH CZYNOŚCI SERWISOWYCH NR "+numberProtocol(order.getDateOfExecution(),order.getClient().getName()) , titleOfTableFont))).setHorizontalAlignment(ALIGN_CENTER);
+//            titleTable.addCell(new PdfPCell(new Paragraph("PROTOKÓŁ Z WYKONANYCH CZYNOŚCI SERWISOWYCH NR "+numberProtocol(order.getDateOfExecution(),order.getClient().getName()) , titleOfTableFont))).setHorizontalAlignment(ALIGN_CENTER);
             titleTable.setSpacingBefore(10f);
             titleTable.setSpacingAfter(12.5f);
 
@@ -55,12 +55,12 @@ public class PdfGeneration {
             tableWithDataClient.setWidths(new float[]{40, 60});
             tableWithDataClient.setHorizontalAlignment(ALIGN_CENTER);
             tableWithDataClient.addCell(new PdfPCell(new Paragraph("Klient: "))).setHorizontalAlignment(Element.ALIGN_RIGHT);
-            tableWithDataClient.addCell(new PdfPCell(new Paragraph(order.getClient().getName()))).setHorizontalAlignment(ALIGN_CENTER);
+//            tableWithDataClient.addCell(new PdfPCell(new Paragraph(order.getClient().getName()))).setHorizontalAlignment(ALIGN_CENTER);
             tableWithDataClient.addCell(new PdfPCell(new Paragraph("Adres/Dane do faktury:"))).setHorizontalAlignment(Element.ALIGN_RIGHT);
             PdfPCell pdfPCell = new PdfPCell();
             pdfPCell.setHorizontalAlignment(ALIGN_CENTER);
-            pdfPCell.addElement(new Paragraph(order.getClient().getAddress() + " " + order.getClient().getStreetNumber() + "/" + order.getClient().getApartmentNumber()));
-            pdfPCell.addElement(new Paragraph(order.getClient().getZipcode() + " " + order.getClient().getCity()));
+//            pdfPCell.addElement(new Paragraph(order.getClient().getAddress() + " " + order.getClient().getStreetNumber() + "/" + order.getClient().getApartmentNumber()));
+//            pdfPCell.addElement(new Paragraph(order.getClient().getZipcode() + " " + order.getClient().getCity()));
             pdfPCell.setColspan(2);
             tableWithDataClient.addCell(pdfPCell).setHorizontalAlignment(ALIGN_CENTER);
             tableWithDataClient.setSpacingBefore(20f);
@@ -99,7 +99,7 @@ public class PdfGeneration {
             if (!order.getPartList().isEmpty()) {
                 for (Part parts : order.getPartList()) {
                     tableWithPartsAndMaterials.addCell(new PdfPCell(new Paragraph(parts.getName(), elementsOfTableFont)));
-                    tableWithPartsAndMaterials.addCell(new PdfPCell(new Paragraph(String.valueOf(parts.getAmount()), elementsOfTableFont)));
+//                    tableWithPartsAndMaterials.addCell(new PdfPCell(new Paragraph(String.valueOf(parts.getAmount()), elementsOfTableFont)));
                 }
             } else {
                 tableWithPartsAndMaterials.addCell(new PdfPCell(new Paragraph("Brak", elementsOfTableFont))).setHorizontalAlignment(ALIGN_CENTER);
@@ -169,7 +169,7 @@ public class PdfGeneration {
 
             PdfPTable titleTable = new PdfPTable(1);
             titleTable.setHorizontalAlignment(ALIGN_CENTER);
-            titleTable.addCell(new PdfPCell(new Paragraph("Faktura "+numberInvoice(order.getDateOfExecution(),order.getClient().getName()) , titleOfTableFont))).setHorizontalAlignment(ALIGN_CENTER);
+//            titleTable.addCell(new PdfPCell(new Paragraph("Faktura "+numberInvoice(order.getDateOfExecution(),order.getClient().getName()) , titleOfTableFont))).setHorizontalAlignment(ALIGN_CENTER);
             titleTable.setSpacingBefore(10f);
             titleTable.setSpacingAfter(12.5f);
 
@@ -177,12 +177,12 @@ public class PdfGeneration {
             tableWithDataClient.setWidths(new float[]{40, 60});
             tableWithDataClient.setHorizontalAlignment(ALIGN_CENTER);
             tableWithDataClient.addCell(new PdfPCell(new Paragraph("Klient: "))).setHorizontalAlignment(Element.ALIGN_RIGHT);
-            tableWithDataClient.addCell(new PdfPCell(new Paragraph(order.getClient().getName()))).setHorizontalAlignment(ALIGN_CENTER);
+//            tableWithDataClient.addCell(new PdfPCell(new Paragraph(order.getClient().getName()))).setHorizontalAlignment(ALIGN_CENTER);
             tableWithDataClient.addCell(new PdfPCell(new Paragraph("Adres/Dane do faktury:"))).setHorizontalAlignment(Element.ALIGN_RIGHT);
             PdfPCell pdfPCell = new PdfPCell();
             pdfPCell.setHorizontalAlignment(ALIGN_CENTER);
-            pdfPCell.addElement(new Paragraph(order.getClient().getAddress() + " " + order.getClient().getStreetNumber() + "/" + order.getClient().getApartmentNumber()));
-            pdfPCell.addElement(new Paragraph(order.getClient().getZipcode() + " " + order.getClient().getCity()));
+//            pdfPCell.addElement(new Paragraph(order.getClient().getAddress() + " " + order.getClient().getStreetNumber() + "/" + order.getClient().getApartmentNumber()));
+//            pdfPCell.addElement(new Paragraph(order.getClient().getZipcode() + " " + order.getClient().getCity()));
             pdfPCell.setColspan(2);
             tableWithDataClient.addCell(pdfPCell).setHorizontalAlignment(ALIGN_CENTER);
             tableWithDataClient.setSpacingBefore(20f);
@@ -221,11 +221,11 @@ public class PdfGeneration {
             if (!order.getPartList().isEmpty()) {
                 for (Part parts : order.getPartList()) {
                     tableWithPartsAndMaterials.addCell(new PdfPCell(new Paragraph(parts.getName(), elementsOfTableFont)));
-                    tableWithPartsAndMaterials.addCell(new PdfPCell(new Paragraph(String.valueOf(parts.getAmount()), elementsOfTableFont)));
+//                    tableWithPartsAndMaterials.addCell(new PdfPCell(new Paragraph(String.valueOf(parts.getAmount()), elementsOfTableFont)));
                     tableWithPartsAndMaterials.addCell(new PdfPCell(new Paragraph(parts.getPrice()+" zł", elementsOfTableFont)));
                     tableWithPartsAndMaterials.addCell(new PdfPCell(new Paragraph(parts.getTax() + "%", elementsOfTableFont)));
                     tableWithPartsAndMaterials.addCell(new PdfPCell(new Paragraph(df.format(parts.getTax()*parts.getPrice()*10), elementsOfTableFont)));
-                    summaryParts += ((parts.getTax()*parts.getPrice())*parts.getAmount())*10;
+//                    summaryParts += ((parts.getTax()*parts.getPrice())*parts.getAmount())*10;
                 }
             } else {
                 tableWithPartsAndMaterials.addCell(new PdfPCell(new Paragraph("Brak", elementsOfTableFont))).setHorizontalAlignment(ALIGN_CENTER);

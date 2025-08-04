@@ -92,7 +92,7 @@ public class GenericSpecificationBuilder<T> {
                 return switch (operator) {
                     case EQUAL -> cb.equal(entityFieldPath, value);
                     case LIKE ->
-                            cb.like(cb.lower(entityFieldPath.as(String.class)), "%" + value.toString().toLowerCase() + "%");
+                        cb.like(cb.lower(entityFieldPath.as(String.class)), cb.literal("%" + value.toString().toLowerCase() + "%"));
                     case GREATER_THAN -> cb.greaterThan(entityFieldPath.as(Comparable.class), (Comparable) value);
                     case LESS_THAN -> cb.lessThan(entityFieldPath.as(Comparable.class), (Comparable) value);
                     case GREATER_THAN_OR_EQUAL ->

@@ -1,20 +1,24 @@
 package supportly.supportlybackend.Security.Service;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import supportly.supportlybackend.Dto.LoginDto;
 import supportly.supportlybackend.Dto.RegisterUserDto;
+import supportly.supportlybackend.Model.Employee;
 import supportly.supportlybackend.Model.Role;
 import supportly.supportlybackend.Model.User;
 import supportly.supportlybackend.Enum.ERole;
 import supportly.supportlybackend.Repository.RoleRepository;
 import supportly.supportlybackend.Repository.UserRepository;
+import supportly.supportlybackend.Service.EmployeeService;
 
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class AuthenticationService {
     private final UserRepository userRepository;
 
@@ -22,29 +26,22 @@ public class AuthenticationService {
 
     private final PasswordEncoder passwordEncoder;
 
+    private final EmployeeService employeeService;
+
     private final AuthenticationManager authenticationManager;
 
-    public AuthenticationService(
-            UserRepository userRepository, RoleRepository roleRepository,
-            AuthenticationManager authenticationManager,
-            PasswordEncoder passwordEncoder
-    ) {
-        this.roleRepository = roleRepository;
-        this.authenticationManager = authenticationManager;
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
 
     public User signup(RegisterUserDto input) {
         Optional<Role> optionalRole = roleRepository.findByName(ERole.USER);
+        Optional<Employee> optionalEmployee = employeeService.findEmployeeByNumberPhone(input.getPhoneNumber());
 
-        if (optionalRole.isEmpty()) {
-            return null;
+        if (optionalRole.isEmpty() || optionalEmployee.isEmpty()) {
+            throw new RuntimeException("Role or Employee not found");
         }
 
+        //todo: Dokończ rejestracje nowego użytkownika
 
-        User user = new User(input.getFullName(),input.getEmail(),passwordEncoder.encode(input.getPassword()),optionalRole.get());
-
+        User user = new User(input.getUsername(),input.getEmail(),passwordEncoder.encode(input.getPassword()),optionalRole.get(),optionalEmployee.get());
 
         return userRepository.save(user);
     }

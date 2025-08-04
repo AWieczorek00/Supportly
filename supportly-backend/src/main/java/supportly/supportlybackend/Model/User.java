@@ -23,11 +23,12 @@ import java.util.List;
 public class User implements UserDetails {
 
 
-    public User(String fullName, String email, String password, Role role) {
-        this.fullName = fullName;
+    public User(String username, String email, String password, Role role, Employee employee) {
+        this.username = username;
         this.email = email;
         this.password = password;
         this.role = role;
+        this.employee = employee;
     }
 
     @Id
@@ -35,8 +36,8 @@ public class User implements UserDetails {
     @Column(name = "ID", nullable = false)
     private Integer id;
 
-    @Column(name = "FULL_NAME", nullable = false)
-    private String fullName;
+    @Column(name = "USERNAME", nullable = false)
+    private String username;
 
     @Column(name = "EMAIL", unique = true, length = 100, nullable = false)
     @Email
@@ -56,6 +57,9 @@ public class User implements UserDetails {
     @ManyToOne(cascade = CascadeType.REMOVE)
     @JoinColumn(name = "role_id", referencedColumnName = "id", nullable = false)
     private Role role;
+
+    @OneToOne
+    private Employee employee;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

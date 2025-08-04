@@ -41,16 +41,16 @@ public class TaskController {
         return new ResponseEntity<>(taskList, HttpStatus.OK);
     }
 
-    @PostMapping("/add")
-    public ResponseEntity<Task> createTask(@RequestBody Task taskBody) throws MessagingException {
-        Task task = taskService.createTask(taskBody);
-        EmailDto emailDto = new EmailDto(taskBody.getEmployee().getEmail(), "Dostałeś/aś nowe zadanie",
-                "<p style=\"text - align:center;\"><strong>Do twojego konta zostało dodane nowe zadanie.</strong></p>" +
-                "\n" +
-                "<p style=\" text - align:center;\"><strong>Sprawdzi je u siebie</strong></p>", true);
-        mailService.sendMail(emailDto);
-        return new ResponseEntity<>(task, HttpStatus.CREATED);
-    }
+//    @PostMapping("/add")
+//    public ResponseEntity<Task> createTask(@RequestBody Task taskBody) throws MessagingException {
+//        Task task = taskService.createTask(taskBody);
+//        EmailDto emailDto = new EmailDto(taskBody.getEmployee().getEmail(), "Dostałeś/aś nowe zadanie",
+//                "<p style=\"text - align:center;\"><strong>Do twojego konta zostało dodane nowe zadanie.</strong></p>" +
+//                "\n" +
+//                "<p style=\" text - align:center;\"><strong>Sprawdzi je u siebie</strong></p>", true);
+//        mailService.sendMail(emailDto);
+//        return new ResponseEntity<>(task, HttpStatus.CREATED);
+//    }
 
     @PutMapping("/update")
     public ResponseEntity<Task> updateTask(@RequestBody Task taskBody) {

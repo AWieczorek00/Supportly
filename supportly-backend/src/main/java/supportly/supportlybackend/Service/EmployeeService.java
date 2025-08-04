@@ -1,15 +1,20 @@
 package supportly.supportlybackend.Service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import supportly.supportlybackend.Criteria.EmployeeSC;
+import supportly.supportlybackend.Criteria.GenericSpecificationBuilder;
+import supportly.supportlybackend.Dto.EmployeeDto;
+import supportly.supportlybackend.Mapper.Mapper;
 import supportly.supportlybackend.Model.Employee;
 import supportly.supportlybackend.Repository.EmployeeRepository;
 
-import java.time.LocalDate;
 import java.util.List;
-import java.util.Random;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class EmployeeService {
@@ -30,11 +35,20 @@ public class EmployeeService {
         return employeeRepository.findAll();
     }
 
-    public Employee createNewEmployee(Employee employeeBody) {
-        employeeBody.setIndividualId(generateIndividualIdForEmployee());
-        employeeBody.setDateOfCreation(LocalDate.now());
+    @Transactional
+    public Employee add(EmployeeDto employeeBody) {
+        Employee employee = Mapper.toEntity(employeeBody);
+        return employeeRepository.save(employee);
+    }
 
-        return employeeRepository.save(employeeBody);
+    public List<EmployeeDto> search(EmployeeSC criteria) {
+        GenericSpecificationBuilder<Employee> builder = new GenericSpecificationBuilder<>();
+        Specification<Employee> spec = builder.build(criteria);
+        return employeeRepository.findAll(spec).stream().map(Mapper::toDto).collect(Collectors.toList());
+    }
+
+    public Optional<Employee> findEmployeeByNumberPhone(String numberPhone) {
+        return employeeRepository.findByPhoneNumber(numberPhone);
     }
 
     @Transactional
@@ -44,7 +58,6 @@ public class EmployeeService {
                     employeeUpdate.setFirstName(employeeBody.getFirstName());
                     employeeUpdate.setSecondName(employeeBody.getSecondName());
                     employeeUpdate.setLastName(employeeBody.getLastName());
-                    employeeUpdate.setEmail(employeeBody.getEmail());
                     employeeUpdate.setPhoneNumber(employeeBody.getPhoneNumber());
                     return employeeRepository.save(employeeUpdate);
                 }).orElseThrow(() -> new ResourceNotFoundException("Nie zaleziono takiego pracownika"));
@@ -52,10 +65,5 @@ public class EmployeeService {
 
     public void deleteEmployeeById(Long individualId) {
         employeeRepository.deleteById(individualId);
-    }
-
-    private Long generateIndividualIdForEmployee() {
-        Random random = new Random();
-        return Long.valueOf(String.valueOf(LocalDate.now()).replace("-", "") + random.nextLong(10, 100));
     }
 }
