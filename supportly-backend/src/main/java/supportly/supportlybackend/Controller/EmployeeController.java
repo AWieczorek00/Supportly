@@ -5,6 +5,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import supportly.supportlybackend.Criteria.EmployeeSC;
+import supportly.supportlybackend.Dto.EmployeeDto;
 import supportly.supportlybackend.Model.Employee;
 import supportly.supportlybackend.Service.EmployeeService;
 
@@ -13,7 +15,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/employee")
 @CrossOrigin(origins = "*")
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
 public class EmployeeController {
 
     private final EmployeeService employeeService;
@@ -31,6 +33,12 @@ public class EmployeeController {
         return new ResponseEntity<>(employeeList, HttpStatus.OK);
     }
 
+    @PostMapping("/search")
+    public ResponseEntity<List<EmployeeDto>> searchEmployee(@RequestBody EmployeeSC criteria) {
+        List<EmployeeDto> employeeList = employeeService.search(criteria);
+        return new ResponseEntity<>(employeeList, HttpStatus.OK);
+    }
+
     @GetMapping("/{individualId}")
     public ResponseEntity<Employee> getEmployee(@PathVariable Long individualId) {
         Employee employee = employeeService.findEmployeeByIndividualId(individualId);
@@ -38,8 +46,8 @@ public class EmployeeController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<Employee> createEmployee(@RequestBody Employee employeeBody) {
-        Employee employee = employeeService.createNewEmployee(employeeBody);
+    public ResponseEntity<Employee> createEmployee(@RequestBody EmployeeDto employeeBody) {
+        Employee employee = employeeService.add(employeeBody);
         return new ResponseEntity<>(employee, HttpStatus.CREATED);
     }
 
@@ -54,4 +62,6 @@ public class EmployeeController {
         employeeService.deleteEmployeeById(individualId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+
 }

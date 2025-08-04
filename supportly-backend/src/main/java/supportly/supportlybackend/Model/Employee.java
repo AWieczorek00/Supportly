@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDate;
 
@@ -25,14 +26,14 @@ public class Employee {
     @Column(name = "SECOND_NAME")
     private String secondName;
 
-    @Column(name="LAST_NAME", nullable = false)
+    @Column(name = "LAST_NAME", nullable = false)
     private String lastName;
 
-    private String email;
+    //todo dodac aby był uniklany
+    @Column(name = "PHONE_NUMBER", nullable = false, length = 9, unique = true)
+    private String phoneNumber;
 
-    @Column(name="PHONE_NUMBER", nullable = false,length = 9)
-    private Long phoneNumber;
-
-    @Column(name="DATA_OF_CREATION", nullable = false)
+    @Column(name = "DATA_OF_CREATION", nullable = false)
+    @CreationTimestamp
     private LocalDate dateOfCreation;
 }
