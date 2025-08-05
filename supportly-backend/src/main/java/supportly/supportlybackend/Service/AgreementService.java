@@ -11,6 +11,7 @@ import supportly.supportlybackend.Model.Agreement;
 import supportly.supportlybackend.Model.Company;
 import supportly.supportlybackend.Repository.AgreementRepository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,5 +38,9 @@ public class AgreementService {
         GenericSpecificationBuilder<Agreement> builder = new GenericSpecificationBuilder<>();
         Specification<Agreement> spec = builder.build(criteria);
         return agreementRepository.findAll(spec).stream().map(Mapper::toDto).collect(Collectors.toList());
+    }
+
+    public List<Agreement> findByNextRun(LocalDate nextRun) {
+        return  agreementRepository.findAllByNextServiceDate(nextRun);
     }
 }

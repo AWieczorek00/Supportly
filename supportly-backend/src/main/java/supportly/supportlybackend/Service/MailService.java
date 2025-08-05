@@ -18,7 +18,13 @@ public class MailService {
 
 
 
-    public void sendMail(EmailDto emailDto) throws MessagingException {
+    public void sendMail(String email ) throws MessagingException {
+        EmailDto emailDto = new EmailDto(email, "Dostałeś/aś nowe zadanie",
+                "<p style=\"text - align:center;\"><strong>Do twojego konta zostało dodane nowe zadanie.</strong></p>" +
+                        "\n" +
+                        "<p style=\" text - align:center;\"><strong>Sprawdzi je u siebie</strong></p>", true);
+
+
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
         mimeMessageHelper.setTo(emailDto.getEmail());

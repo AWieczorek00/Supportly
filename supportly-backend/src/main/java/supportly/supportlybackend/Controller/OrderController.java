@@ -1,6 +1,7 @@
 package supportly.supportlybackend.Controller;
 
 import com.itextpdf.text.DocumentException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
@@ -10,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.bind.annotation.*;
+import supportly.supportlybackend.Criteria.OrderSc;
+import supportly.supportlybackend.Dto.OrderDto;
 import supportly.supportlybackend.Model.Order;
 import supportly.supportlybackend.PdfGeneration;
 import supportly.supportlybackend.Service.OrderService;
@@ -22,23 +25,19 @@ import java.util.List;
 @RequestMapping("/order")
 @CrossOrigin(origins = "*")
 @EnableTransactionManagement
+@RequiredArgsConstructor
 public class OrderController {
 
     private final OrderService orderService;
 
-    @Autowired
-    public OrderController(OrderService orderService) throws DocumentException, IOException {
-        this.orderService = orderService;
-    }
-
-    @GetMapping("/all")
-    public ResponseEntity<List<Order>> getAllOrders() {
-        List<Order> orderList = orderService.findAllOrders();
+    @PostMapping("/search")
+    public ResponseEntity<List<OrderDto>> getAllOrders(@RequestBody OrderSc criteria) {
+        List<OrderDto> orderList = orderService.search(criteria);
         return new ResponseEntity<>(orderList, HttpStatus.OK);
     }
 
     @PostMapping("/add")
-    public ResponseEntity<Order> createOrder(@RequestBody Order orderBody) {
+    public ResponseEntity<Order> createOrder(@RequestBody OrderDto orderBody) {
         Order newOrder = orderService.createNewOrder(orderBody);
         return new ResponseEntity<>(newOrder, HttpStatus.CREATED);
     }
@@ -51,11 +50,11 @@ public class OrderController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @PostMapping("/duplicate")
-    public ResponseEntity<Order> createDuplicatedOrder(@RequestBody Long id) {
-        Order duplicateOrder = orderService.duplicateOrderById(id);
-        return new ResponseEntity<>(duplicateOrder, HttpStatus.CREATED);
-    }
+//    @PostMapping("/duplicate")
+//    public ResponseEntity<Order> createDuplicatedOrder(@RequestBody Long id) {
+//        Order duplicateOrder = orderService.duplicateOrderById(id);
+//        return new ResponseEntity<>(duplicateOrder, HttpStatus.CREATED);
+//    }
 
     @GetMapping("/one/{id}")
     public ResponseEntity<Order> getOneOrder(@PathVariable Long id) {

@@ -1,43 +1,42 @@
 package supportly.supportlybackend.Service;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import supportly.supportlybackend.Criteria.GenericSpecificationBuilder;
+import supportly.supportlybackend.Criteria.OrderSc;
+import supportly.supportlybackend.Dto.OrderDto;
+import supportly.supportlybackend.Enum.Priority;
+import supportly.supportlybackend.Mapper.Mapper;
+import supportly.supportlybackend.Model.Agreement;
+import supportly.supportlybackend.Model.Client;
 import supportly.supportlybackend.Model.Order;
 import supportly.supportlybackend.Repository.OrderRepository;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
+@RequiredArgsConstructor
 public class OrderService {
     private final OrderRepository orderRepository;
     private final ActivitiesService activitiesService;
     private final PartService partService;
+    private final AgreementService agreementService;
     private final ClientService clientService;
 
-    @Autowired
-    public OrderService(OrderRepository orderRepository, ActivitiesService activitiesService, PartService partService, ClientService clientService) {
-        this.orderRepository = orderRepository;
-        this.activitiesService = activitiesService;
-        this.partService = partService;
-        this.clientService = clientService;
-    }
 
-    public List<Order> findAllOrders() {
-        return orderRepository.findAll();
-    }
+
 
     @Transactional()
-    public Order createNewOrder(Order orderBody) {
-        activitiesService.createAllActivitiesFromList(orderBody.getActivitiesList());
-        partService.createAllParts(orderBody.getPartList());
-        if (orderBody.getClient().getId() == null) {
-            clientService.createClient(orderBody.getClient());
-        }
-        return orderRepository.saveAndFlush(orderBody);
+    public Order createNewOrder(OrderDto orderBody) {
+        return orderRepository.saveAndFlush(Mapper.toEntity(orderBody));
     }
 
     @Transactional
@@ -45,17 +44,17 @@ public class OrderService {
         orderRepository.deleteById(id);
     }
 
-    @Transactional
-    public Order duplicateOrderById(Long id) {
-        return orderRepository.findById(id)
-                .map(order -> {
-                    Order orderDuplicate = new Order(
-                            0l, order.getClient(), null, null, null, LocalDate.now(), null,
-                            0f, 0f, order.getPriority(), order.getStatus(), order.getPeriod(), order.getNote()
-                    );
-                    return orderRepository.save(orderDuplicate);
-                }).orElseThrow(() -> new ResourceNotFoundException("Nie zaleziono takiego zelecenia do powielenia"));
-    }
+//    @Transactional
+//    public Order duplicateOrderById(Long id) {
+//        return orderRepository.findById(id)
+//                .map(order -> {
+//                    Order orderDuplicate = new Order(
+//                            0l, order.getClient(), null, null, null, LocalDate.now(), null,
+//                            0f, 0f, order.getPriority(), order.getStatus(), order.getPeriod(), order.getNote()
+//                    );
+//                    return orderRepository.save(orderDuplicate);
+//                }).orElseThrow(() -> new ResourceNotFoundException("Nie zaleziono takiego zelecenia do powielenia"));
+//    }
 
     public Order findOrderById(Long id) {
         return orderRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Nie znaleziono zlecenia o takim id: " + id));
@@ -77,5 +76,33 @@ public class OrderService {
             return orderRepository.save(orderUpdate);
         }).orElseThrow(() -> new ResourceNotFoundException("nie znaleziono"));
     }
+
+    public List<OrderDto> search(OrderSc criteria) {
+        GenericSpecificationBuilder<Order> builder = new GenericSpecificationBuilder<>();
+        Specification<Order> spec = builder.build(criteria);
+        return orderRepository.findAll(spec).stream().map(Mapper::toDto).collect(Collectors.toList());
+    }
+
+    public void createOrderFromSchedule() {
+        List<Agreement> agreements = agreementService.findByNextRun(LocalDate.now().plusDays(10));
+        orderRepository.saveAll(createOrderList(agreements));
+    }
+
+    private List<Order> createOrderList(List<Agreement> agreements) {
+        List<Order> orders = new ArrayList<>();
+
+        for (Agreement agreement : agreements) {
+            Client client = clientService.findClientByCompany(agreement.getCompany());
+            Order order = new Order();
+            order.setClient(client);
+            order.setPriority(Priority.NORMAL);
+            orders.add(order);
+        }
+
+        return orders;
+    }
+
+
+
 }
 

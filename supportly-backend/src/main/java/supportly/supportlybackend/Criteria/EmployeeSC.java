@@ -2,7 +2,6 @@ package supportly.supportlybackend.Criteria;
 
 import lombok.Getter;
 import lombok.Setter;
-import supportly.supportlybackend.Annotation.OperatorSql;
 import supportly.supportlybackend.Annotation.SpecField;
 import supportly.supportlybackend.Enum.ERole;
 
@@ -19,5 +18,4 @@ public class EmployeeSC {
     @SpecField(path = "phoneNumber", operator = LIKE)
     private String phoneNumber;
     private ERole role;
-    // Additional fields can be added as needed
 }

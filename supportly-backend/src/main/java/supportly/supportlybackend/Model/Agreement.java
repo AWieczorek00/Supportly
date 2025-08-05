@@ -25,6 +25,12 @@ public class Agreement {
     @Column(name = "SIGNED_DATE", nullable = false)
     private LocalDate signedDate;
 
+    @Column(name = "NEXT_SERVICE_DATE" , nullable = false)
+    private  LocalDate nextServiceDate;
+
+    @Column(name = "LAST_SERVICE_DATE")
+    private LocalDate lastServiceDate;
+
     @Column(name = "PERIOD", nullable = false)
     @Enumerated(EnumType.STRING)
     private Period period;
