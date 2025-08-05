@@ -1,6 +1,7 @@
 package supportly.supportlybackend.Controller;
 
 import jakarta.mail.MessagingException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import supportly.supportlybackend.Dto.EmailDto;
 import supportly.supportlybackend.Model.Task;
 import supportly.supportlybackend.Service.MailService;
+import supportly.supportlybackend.Service.TaskDto;
 import supportly.supportlybackend.Service.TaskService;
 
 import java.util.List;
@@ -17,17 +19,13 @@ import java.util.List;
 @RequestMapping("/task")
 @CrossOrigin(origins = "*")
 @PreAuthorize("hasRole('ADMIN')")
+@RequiredArgsConstructor
 public class TaskController {
 
     private final TaskService taskService;
-
     private final MailService mailService;
 
-    @Autowired
-    public TaskController(TaskService taskService, MailService mailService) {
-        this.taskService = taskService;
-        this.mailService = mailService;
-    }
+
 
     @GetMapping("/all")
     public ResponseEntity<List<Task>> getAllTasks() {
@@ -41,16 +39,11 @@ public class TaskController {
         return new ResponseEntity<>(taskList, HttpStatus.OK);
     }
 
-//    @PostMapping("/add")
-//    public ResponseEntity<Task> createTask(@RequestBody Task taskBody) throws MessagingException {
-//        Task task = taskService.createTask(taskBody);
-//        EmailDto emailDto = new EmailDto(taskBody.getEmployee().getEmail(), "Dostałeś/aś nowe zadanie",
-//                "<p style=\"text - align:center;\"><strong>Do twojego konta zostało dodane nowe zadanie.</strong></p>" +
-//                "\n" +
-//                "<p style=\" text - align:center;\"><strong>Sprawdzi je u siebie</strong></p>", true);
-//        mailService.sendMail(emailDto);
-//        return new ResponseEntity<>(task, HttpStatus.CREATED);
-//    }
+    @PostMapping("/add")
+    public ResponseEntity<Task> createTask(@RequestBody TaskDto taskBody) throws MessagingException {
+        Task task = taskService.createTask(taskBody);
+        return new ResponseEntity<>(task, HttpStatus.CREATED);
+    }
 
     @PutMapping("/update")
     public ResponseEntity<Task> updateTask(@RequestBody Task taskBody) {

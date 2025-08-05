@@ -7,6 +7,7 @@ import org.hibernate.annotations.Proxy;
 import org.springframework.context.annotation.Lazy;
 
 import jakarta.persistence.*;
+import supportly.supportlybackend.Enum.Priority;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -40,7 +41,7 @@ public class Order {
     @JoinColumn(name = "ACTIVITIES_ID")
     private List<Activities> activitiesList;
 
-    @OneToMany()
+    @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "PART_ID")
     private List<Part> partList;
 
@@ -57,7 +58,8 @@ public class Order {
     private float distance;
 
     @Column(name="PRIORITY")
-    private String priority;
+    @Enumerated(EnumType.STRING)
+    private Priority priority;
 
     @Column(name="STATUS")
     private String status;
