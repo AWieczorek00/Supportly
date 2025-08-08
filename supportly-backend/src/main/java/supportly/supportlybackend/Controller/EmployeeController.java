@@ -15,7 +15,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/employee")
 @CrossOrigin(origins = "*")
-@PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
+//@PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
 public class EmployeeController {
 
     private final EmployeeService employeeService;
