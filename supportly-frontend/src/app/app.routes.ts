@@ -10,23 +10,23 @@ import {EmployeeListComponent} from './employee/employee-list/employee-list.comp
 import {EmployeeAddComponent} from './employee/employee-add/employee-add.component';
 import {TaskListComponent} from './task/task-list/task-list.component';
 import {TaskAddComponent} from './task/task-add/task-add.component';
+import {authenticationGuard} from './auth/authentication.guard';
 
 export const routes: Routes = [
   {
     path: '',
-    // canActivate: [AuthenticationGuard],
     children: [
-      { path: '', component: HomeComponent },
-      { path: 'dsada', component:  AppComponent },
-      { path: 'login', component: LoginComponent },
-      { path: 'agreement/list', component: AgreementListComponent },
-      { path: 'agreement/add', component: AgreementAddComponent },
-      { path: 'order/list', component: OrderListComponent },
-      { path: 'order/add', component:  OrderAddComponent },
-      { path: 'employee/list', component:  EmployeeListComponent },
-      { path: 'employee/add', component:  EmployeeAddComponent },
-      { path: 'task/list', component:  TaskListComponent },
-      { path: 'task/add', component:  TaskAddComponent },
+      { path: '', component: HomeComponent, canActivate: [authenticationGuard] },
+      { path: 'dsada', component: AppComponent, canActivate: [authenticationGuard] },
+      { path: 'login', component: LoginComponent }, // NIE chronimy logowania
+      { path: 'agreement/list', component: AgreementListComponent, canActivate: [authenticationGuard] },
+      { path: 'agreement/add', component: AgreementAddComponent, canActivate: [authenticationGuard] },
+      { path: 'order/list', component: OrderListComponent, canActivate: [authenticationGuard] },
+      { path: 'order/add', component: OrderAddComponent, canActivate: [authenticationGuard] },
+      { path: 'employee/list', component: EmployeeListComponent},
+      { path: 'employee/add', component: EmployeeAddComponent, canActivate: [authenticationGuard] },
+      { path: 'task/list', component: TaskListComponent, canActivate: [authenticationGuard] },
+      { path: 'task/add', component: TaskAddComponent, canActivate: [authenticationGuard] },
       { path: '**', redirectTo: '' },
     ],
   },

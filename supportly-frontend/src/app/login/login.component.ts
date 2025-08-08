@@ -4,6 +4,9 @@ import {MatCard, MatCardContent, MatCardModule, MatCardTitle} from '@angular/mat
 import {MatFormField, MatFormFieldModule} from '@angular/material/form-field';
 import {MatInput, MatInputModule} from '@angular/material/input';
 import {MatButton, MatButtonModule} from '@angular/material/button';
+import {EmployeeCriteria} from '../employee/EmployeeCriteria';
+import {Login} from './Login';
+import {HttpLoginService} from './service/http-login.service';
 
 
 @Component({
@@ -27,12 +30,12 @@ import {MatButton, MatButtonModule} from '@angular/material/button';
   styleUrl: './login.component.scss'
 })
 export class LoginComponent {
-  form: FormGroup = new FormGroup({
-    username: new FormControl(''),
-    password: new FormControl(''),
-  });
+
+  constructor(private http:HttpLoginService) {
+  }
+
   loginForm = new FormGroup({
-    username: new FormControl(''),
+    email: new FormControl(''),
     password: new FormControl(''),
   });
 
@@ -43,6 +46,23 @@ export class LoginComponent {
   }
 
   onSumitedLogined(loginForm: FormGroup) {
+    const formValue = this.loginForm.value;
+
+    const login: Login = {
+      email: formValue.email ?? null,
+      password: formValue.password ?? null,
+    };
+
+    this.http.login(login).subscribe({
+      next: res => {
+        console.log("Zalogowano!");
+        localStorage.setItem('token',res.token)
+      },
+      error: err => {
+        console.error("Błąd logowania:");
+      }
+    });
+
 
   }
 }
