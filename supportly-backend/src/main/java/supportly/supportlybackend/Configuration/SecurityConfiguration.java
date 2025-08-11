@@ -33,16 +33,15 @@ public class SecurityConfiguration {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf()
-                .disable()
-                .authorizeHttpRequests()
-                .requestMatchers("/auth/**", "/users/**","/ping", "/agreement/**")
-                .permitAll()
-                .anyRequest()
-                .authenticated()
+        http
+                .cors() // <- 🔥 TO JEST KLUCZOWE!
                 .and()
-                .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .csrf().disable()
+                .authorizeHttpRequests()
+                .requestMatchers("/auth/**", "/users/**","/ping", "/agreement/**").permitAll()
+                .anyRequest().authenticated()
+                .and()
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
@@ -55,17 +54,16 @@ public class SecurityConfiguration {
         CorsConfiguration configuration = new CorsConfiguration();
 
         configuration.setAllowedOriginPatterns(List.of(
-                "http://localhost:*",               // lokalny frontend dev
-                "http://host.docker.internal:8080",// host.docker.internal (Windows/Mac)
-                "http://192.168.0.81:8080"        // adres frontend na sieci lokalnej (zmień na swój)
+                "http://localhost:*",
+                "http://host.docker.internal:8080",
+                "http://192.168.0.81:8080"
         ));
-        configuration.setAllowedMethods(List.of("GET","POST"));
-        configuration.setAllowedHeaders(List.of("Authorization","Content-Type"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        configuration.setAllowCredentials(true); // jeśli przesyłasz token lub cookie
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-
-        source.registerCorsConfiguration("/**",configuration);
-
+        source.registerCorsConfiguration("/**", configuration);
         return source;
     }
 }
