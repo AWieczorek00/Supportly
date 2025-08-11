@@ -31,6 +31,7 @@ import {EmployeeCriteria} from '../EmployeeCriteria';
 import {MatDialog} from '@angular/material/dialog';
 import {EmployeeAddComponent} from '../employee-add/employee-add.component';
 import {EmployeeService} from '../employee.service';
+import {HttpEmployeeService} from '../service/http-employee.service';
 
 @Component({
   selector: 'app-employee-list',
@@ -70,7 +71,7 @@ import {EmployeeService} from '../employee.service';
 })
 export class EmployeeListComponent implements AfterViewInit {
 
-  constructor(private service: EmployeeService, private dialog: MatDialog) {
+  constructor(private service: EmployeeService, private dialog: MatDialog, private http:HttpEmployeeService) {
 
   }
 
@@ -91,15 +92,24 @@ export class EmployeeListComponent implements AfterViewInit {
   onSubmit() {
     const formValue = this.criteriaForm.value;
 
-    const employeeCriteria: EmployeeCriteria = {
+    const criteria: EmployeeCriteria = {
       firstName: formValue.firstName,
       lastName: formValue.lastName,
       phoneNumber: formValue.phoneNumber,
       role: formValue.role
     };
 
+    this.http.search(criteria).subscribe({
+      next: data => {
+        console.log('Otrzymane dane:', data);
+      },
+      error: err => {
+        console.error('Błąd podczas wyszukiwania:', err);
+      }
+    });
+
     this.employeeTable.data = this.service.criteria() // Zmienic jak bede miał backend
-    console.log(employeeCriteria);  // Możesz teraz wysłać te dane na serwer lub użyć ich w aplikacji
+    // console.log(employeeCriteria);  // Możesz teraz wysłać te dane na serwer lub użyć ich w aplikacji
   }
 
   onClear(): void {
