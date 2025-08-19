@@ -3,7 +3,6 @@ package supportly.supportlybackend.Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import supportly.supportlybackend.Dto.EmployeeDto;
 import supportly.supportlybackend.Dto.RegisterUserDto;
 import supportly.supportlybackend.Enum.ERole;
 import supportly.supportlybackend.Model.Employee;
@@ -49,6 +48,10 @@ public class UserService {
     public User getUserByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
+    }
+
+    public Optional<User> getUserByEmployee(Employee employee) {
+        return userRepository.findByEmployeeId(employee.getIndividualId());
     }
 
 }

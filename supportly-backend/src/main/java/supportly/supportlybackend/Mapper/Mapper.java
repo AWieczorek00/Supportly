@@ -5,10 +5,8 @@ import supportly.supportlybackend.Dto.AgreementDto;
 import supportly.supportlybackend.Dto.CompanyDto;
 import supportly.supportlybackend.Dto.EmployeeDto;
 import supportly.supportlybackend.Dto.OrderDto;
-import supportly.supportlybackend.Model.Agreement;
-import supportly.supportlybackend.Model.Company;
-import supportly.supportlybackend.Model.Employee;
-import supportly.supportlybackend.Model.Order;
+import supportly.supportlybackend.Model.*;
+import supportly.supportlybackend.Service.TaskDto;
 
 public class Mapper {
 
@@ -16,6 +14,7 @@ public class Mapper {
     private static final CompanyMapper companyMapper = Mappers.getMapper(CompanyMapper.class);
     private static final EmployeeMapper employeeMapper = Mappers.getMapper(EmployeeMapper.class);
     private static final OrderMapper orderMapper = Mappers.getMapper(OrderMapper.class);
+    private static final TaskMapper taskMapper = Mappers.getMapper(TaskMapper.class);
 
     public static Agreement toEntity(AgreementDto agreementDto) {
         return agreementMapper.toEntity(agreementDto);
@@ -47,6 +46,14 @@ public class Mapper {
 
     public static OrderDto toDto(Order order) {
         return orderMapper.toDto(order);
+    }
+
+    public static Task toEntity(TaskDto taskDto) {
+        return taskMapper.toEntity(taskDto);
+    }
+
+    public static TaskDto toDto(Task task) {
+        return taskMapper.toDto(task);
     }
 
 }
