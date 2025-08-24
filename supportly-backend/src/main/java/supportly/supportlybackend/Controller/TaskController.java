@@ -22,7 +22,6 @@ import java.util.List;
 public class TaskController {
 
     private final TaskService taskService;
-    private final MailService mailService;
 
 
     @GetMapping("/search")
@@ -31,11 +30,6 @@ public class TaskController {
         return new ResponseEntity<>(taskList, HttpStatus.OK);
     }
 
-    @GetMapping("/employee/all")
-    public ResponseEntity<List<Task>> getAllTaskByEmployee(@RequestParam Long individualId) {
-        List<Task> taskList = taskService.findAllTaskForEmployeeByIndividualId(individualId);
-        return new ResponseEntity<>(taskList, HttpStatus.OK);
-    }
 
     @PostMapping("/add")
     public ResponseEntity<Void> createTask(@RequestBody TaskDto taskBody) throws MessagingException {

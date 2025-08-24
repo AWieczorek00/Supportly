@@ -18,4 +18,6 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
 
     List<Employee> findAll(Specification<Employee> spec);
 
+    List<Employee> findAllByLastNameContainingIgnoreCase(String lastName);
+
 }

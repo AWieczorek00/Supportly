@@ -1,0 +1,102 @@
+.custom-table-container {
+  background: #fafafa; /* Jasne tło jak w mat-expansion-panel */
+  border-radius: 12px; /* Zaokrąglone rogi */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Cień */
+  border: 1px solid #ddd; /* Subtelna ramka */
+  overflow: hidden; /* Kluczowe dla zaokrąglonych rogów */
+  margin-top: 20px; /* Odstęp między formularzem a tabelą */
+}
+
+table.mat-table {
+  width: 100%;
+  border-collapse: separate; /* Zapobiega "łapaniu" styli przez komórki */
+  border-spacing: 0; /* Eliminuje odstępy między komórkami */
+  overflow: hidden;
+}
+
+.mat-form-field {
+  padding: 10px;
+}
+
+.mat-header-row:first-child th:first-child {
+  border-top-left-radius: 12px; /* Górny lewy róg */
+}
+
+.mat-header-row:first-child th:last-child {
+  border-top-right-radius: 12px; /* Górny prawy róg */
+}
+
+.mat-row:last-child td:first-child {
+  border-bottom-left-radius: 12px; /* Dolny lewy róg */
+}
+
+.mat-row:last-child td:last-child {
+  border-bottom-right-radius: 12px; /* Dolny prawy róg */
+}
+
+.mat-header-row {
+  background-color: #f5f5f5 !important; /* Dopasowanie do nagłówka expansion panel */
+  font-weight: bold;
+  height: 48px;
+}
+
+.mat-header-cell {
+  font-size: 14px;
+  color: #333; /* Ciemniejszy tekst */
+  padding: 12px;
+}
+
+.mat-row {
+  background: white;
+  height: 48px;
+}
+
+.mat-row:nth-child(even) {
+  background-color: #f9f9f9; /* Lekka zmiana koloru co drugi wiersz */
+}
+
+.mat-cell {
+  font-size: 14px;
+  padding: 12px;
+  border-bottom: 1px solid #ddd;
+}
+
+/* Formularz */
+.registration-form {
+  display: flex;
+  flex-direction: row;
+  gap: 16px; /* Ustawienie odległości między polami */
+  flex-wrap: wrap; /* Zapewnia, że formularz będzie się ładnie dopasowywał do mniejszych ekranów */
+  width: 100%;
+}
+
+.registration-form mat-form-field {
+  flex: 1; /* Zapewnia, że wszystkie pola będą miały jednakową szerokość */
+  min-width: 200px; /* Minimalna szerokość dla każdego pola */
+}
+
+/* Przyciski */
+.form-buttons {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 20px;
+}
+
+button.mat-raised-button {
+  flex: 1; /* Sprawia, że przyciski będą miały równą szerokość */
+  min-width: 150px; /* Minimalna szerokość dla przycisków */
+  margin-right: 10px;
+}
+
+button.mat-raised-button:last-child {
+  margin-right: 0;
+}
+
+.row-done {
+  background-color: #e6ffe6; // delikatna zieleń
+}
+
+.row-not-done {
+  background-color: #ffe6e6; // delikatna czerwień
+}

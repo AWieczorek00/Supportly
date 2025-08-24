@@ -39,7 +39,9 @@ export class NavbarComponent {
   }
 
   logout() {
+    localStorage.clear()
     console.log("User logged out");
+    window.location.reload();
   }
 
   toggleMenu() {

@@ -66,4 +66,8 @@ public class EmployeeService {
     public void deleteEmployeeById(Long individualId) {
         employeeRepository.deleteById(individualId);
     }
+
+    public List<Employee> findEmployeeByLastName(String lastName) {
+        return employeeRepository.findAllByLastNameContainingIgnoreCase(lastName);
+    }
 }

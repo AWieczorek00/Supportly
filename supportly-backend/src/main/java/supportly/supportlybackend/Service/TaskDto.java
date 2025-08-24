@@ -11,6 +11,7 @@ import java.util.List;
 @Data
 public class TaskDto {
 
+    private Long id;
 
     private String name;
 
@@ -25,3 +26,4 @@ public class TaskDto {
     private List<Employee> employees;
 
 }
+

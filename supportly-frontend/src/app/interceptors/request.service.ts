@@ -1,20 +1,23 @@
-import {Injectable} from '@angular/core';
+import {Inject, Injectable, PLATFORM_ID} from '@angular/core';
 import {HttpEvent, HttpHandler, HttpInterceptor, HttpRequest} from '@angular/common/http';
 import {Observable} from 'rxjs';
+import {isPlatformBrowser} from '@angular/common';
 
 @Injectable({
   providedIn: 'root'
 })
 export class RequestInterceptor implements HttpInterceptor {
+  constructor(@Inject(PLATFORM_ID) private platformId: Object) {
+  }
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    // Pobierz token z localStorage
-    const token = localStorage.getItem('token');
-    console.log('Interceptor called. Token:', token);
+    let token: string | null = null;
+
+    if (isPlatformBrowser(this.platformId)) {
+      token = localStorage.getItem('token');
+    }
 
     if (token) {
-
-      // Klonuj żądanie i dodaj nagłówek Authorization
       const cloned = req.clone({
         setHeaders: {
           Authorization: `Bearer ${token}`
@@ -22,7 +25,6 @@ export class RequestInterceptor implements HttpInterceptor {
       });
       return next.handle(cloned);
     } else {
-      // Jeśli brak tokena, przekazuj żądanie bez zmian
       return next.handle(req);
     }
   }

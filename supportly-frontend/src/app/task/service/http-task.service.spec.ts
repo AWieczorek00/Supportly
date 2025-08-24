@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 
-import { AgreementService } from './agreement.service';
+import { HttpTaskService } from './http-task.service';
 
-describe('AgreementService', () => {
-  let service: AgreementService;
+describe('HttpTaskService', () => {
+  let service: HttpTaskService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(AgreementService);
+    service = TestBed.inject(HttpTaskService);
   });
 
   it('should be created', () => {

@@ -16,11 +16,11 @@ export const appConfig: ApplicationConfig = {
     provideAnimationsAsync(),
     provideHttpClient(withInterceptorsFromDi()),
     {
-      provide: 'app-startup',
-      useFactory: () => {
-        const configService = inject(ConfigService);
-        return configService.loadConfig();
+      provide: APP_INITIALIZER,
+      useFactory: (configService: ConfigService) => {
+        return () => configService.loadConfig(); // funkcja zwracająca Promise
       },
+      deps: [ConfigService],
       multi: true
     },
     {

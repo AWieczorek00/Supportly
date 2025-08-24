@@ -14,15 +14,11 @@ import java.util.Optional;
 @Repository
 public interface TaskRepository extends JpaRepository<Task, Long> {
 
-    Optional<List<Task>> findAllByEmployeeIndividualId(Long individualId);
-
-
     @Override
     Optional<Task> findById(Long id);
 
     Optional<Task> findTaskByOrder(Order order);
 
     List<Task> findAll(Specification<Task> spec);
-
 
 }

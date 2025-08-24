@@ -63,5 +63,9 @@ public class EmployeeController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-
+    @GetMapping("/list")
+    public ResponseEntity<List<Employee>> getAllEmployeesByLastName(@RequestParam String lastName) {
+        List<Employee> employeeByLastName = employeeService.findEmployeeByLastName(lastName);
+        return new ResponseEntity<>(employeeByLastName, HttpStatus.OK);
+    }
 }

@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @Entity
@@ -28,13 +30,13 @@ public class Task {
     @JoinColumn(name = "ORDER_ID")
     private Order order;
 
-    @OneToOne
-    @JoinColumn(name = "EMPLOYEE_ID")
-    private Employee employee;
-
-    @ManyToOne
-    @JoinColumn(name = "GROUP_ID")
-    private TaskGroup group;
+    @ManyToMany
+    @JoinTable(
+            name = "TASK_EMPLOYEE", // tabela łącznikowa
+            joinColumns = @JoinColumn(name = "TASK_ID"), // kolumna wskazująca na Task
+            inverseJoinColumns = @JoinColumn(name = "EMPLOYEE_ID") // kolumna wskazująca na Employee
+    )
+    private List<Employee> employees = new ArrayList<>();
 
     @Column(name = "DONE")
     private Boolean done;

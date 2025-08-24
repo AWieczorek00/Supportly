@@ -7,6 +7,7 @@ import {MatButton, MatButtonModule} from '@angular/material/button';
 import {EmployeeCriteria} from '../employee/EmployeeCriteria';
 import {Login} from './Login';
 import {HttpLoginService} from './service/http-login.service';
+import {Router, RouterLink} from '@angular/router';
 
 
 @Component({
@@ -31,7 +32,7 @@ import {HttpLoginService} from './service/http-login.service';
 })
 export class LoginComponent {
 
-  constructor(private http:HttpLoginService) {
+  constructor(private http:HttpLoginService,private router: Router) {
   }
 
   loginForm = new FormGroup({
@@ -57,6 +58,8 @@ export class LoginComponent {
       next: res => {
         console.log("Zalogowano!");
         localStorage.setItem('token',res.token)
+        this.router.navigate([''
+        ])
       },
       error: err => {
         console.error("Błąd logowania:");
