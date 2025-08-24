@@ -26,4 +26,8 @@ public class ClientService {
     public Client findClientByCompany(Company company) {
         return clientRepository.findClientByCompany(company);
     }
+
+    public List<Client> findClientByCompanyNameContaining(String companyName) {
+        return clientRepository.findClientByCompanyNameContainingIgnoreCase(companyName);
+    }
 }

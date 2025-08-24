@@ -1,33 +1,20 @@
-import {AfterViewInit, ChangeDetectionStrategy, Component} from '@angular/core';
-import {
-  MatCell,
-  MatCellDef,
-  MatColumnDef,
-  MatHeaderCell,
-  MatHeaderCellDef,
-  MatHeaderRow,
-  MatHeaderRowDef,
-  MatRow,
-  MatRowDef,
-  MatTable,
-  MatTableDataSource
-} from '@angular/material/table';
-import {CommonModule, DatePipe} from '@angular/common';
-import {Agreement} from '../agreement';
-import {AgreementService} from '../agreement.service';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import {CommonModule} from '@angular/common';
 import {MatExpansionModule, MatExpansionPanel, MatExpansionPanelTitle} from '@angular/material/expansion';
 import {MatFormField, MatFormFieldModule} from '@angular/material/form-field';
 import {MatInput} from '@angular/material/input';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {MatButton} from '@angular/material/button';
-import {
-  MatDatepicker,
-  MatDatepickerInput,
-  MatDatepickerModule,
-  MatDatepickerToggle
-} from '@angular/material/datepicker';
-import {DateAdapter, MAT_DATE_FORMATS, NativeDateAdapter} from '@angular/material/core';
-import {AgreementCriteria} from '../agreement-criteria';
+import {MatDatepickerModule} from '@angular/material/datepicker';
+import {DateAdapter, MAT_DATE_FORMATS, MatOption, NativeDateAdapter} from '@angular/material/core';
+import {MatAutocomplete, MatAutocompleteTrigger} from '@angular/material/autocomplete';
+import {debounceTime, distinctUntilChanged, Observable, of, switchMap} from 'rxjs';
+import { Company } from '../company';
+import * as http from 'node:http';
+import {HttpClientService} from '../../client/service/http-client.service';
+import {Client} from '../../order/Client';
+import {HttpAgreementService} from '../service/http-agreement.service';
+import {Agreement} from '../agreement';
 
 export const MY_DATE_FORMATS = {
   parse: {
@@ -46,17 +33,6 @@ export const MY_DATE_FORMATS = {
   selector: 'app-agreement-add',
   imports: [
     CommonModule,
-    MatTable,
-    MatColumnDef,
-    MatHeaderCell,
-    MatCell,
-    MatHeaderCellDef,
-    MatCellDef,
-    MatHeaderRow,
-    MatRow,
-    MatHeaderRowDef,
-    MatRowDef,
-    DatePipe,
     MatExpansionPanel,
     MatExpansionPanelTitle,
     MatExpansionModule,
@@ -65,10 +41,10 @@ export const MY_DATE_FORMATS = {
     MatInput,
     ReactiveFormsModule,
     MatButton,
-    MatDatepickerInput,
-    MatDatepickerToggle,
-    MatDatepicker,
-    MatDatepickerModule
+    MatDatepickerModule,
+    MatAutocompleteTrigger,
+    MatAutocomplete,
+    MatOption
 
   ],
   providers: [
@@ -81,9 +57,10 @@ export const MY_DATE_FORMATS = {
   changeDetection: ChangeDetectionStrategy.OnPush,
 
 })
-export class AgreementAddComponent {
-  // agreementForm: FormGroup;
+export class AgreementAddComponent implements OnInit {
 
+
+  constructor(private service: HttpClientService,private cd: ChangeDetectorRef, private agreementService:HttpAgreementService) {}
 
   agreementForm = new FormGroup({
     name: new FormControl(''),
@@ -99,17 +76,83 @@ export class AgreementAddComponent {
     postalCode: new FormControl(''),
 
     costForServicePerHour: new FormControl(''),
-    numberAgreement: new FormControl(''),
+    agreementNumber: new FormControl(''),
     dateFrom: new FormControl(''),
     dateTo: new FormControl(''),
-    period: new FormControl('')
+    period: new FormControl(''),
+
+    client: new FormControl<Client | null>(null)
 
   });
 
   submitForm() {
     if (this.agreementForm.valid) {
-      console.log(this.agreementForm.value);
+      const raw = this.agreementForm.value;
+
+      const agreement: Agreement = {
+        company: raw.client?.company!,   // zakładam, że w polu `client` masz obiekt typu Company
+        dateFrom: raw.dateFrom ? new Date(raw.dateFrom) : new Date(),
+        dateTo: raw.dateTo ? new Date(raw.dateTo) : new Date(),
+        period: raw.period ? Number(raw.period) : 0,
+        costForServicePerHour: raw.costForServicePerHour ? Number(raw.costForServicePerHour) : 0,
+        agreementNumber: raw.agreementNumber ?? '',
+        signedDate: new Date()  // możesz brać z formularza, jeśli dodasz pole signedDate
+      };
+
+      this.agreementService.add(agreement).subscribe({
+        next: (res) => {
+          console.log('Umowa dodana:', res);
+          this.agreementForm.reset();
+        },
+        error: (err) => {
+          console.error('Błąd przy dodawaniu umowy:', err);
+        }
+      });
     }
+  }
+
+  filteredClients$!: Observable<Client[]>;          // ✅ jawny typ
+
+
+  ngOnInit() {
+    this.filteredClients$ = this.agreementForm.get('client')!.valueChanges.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap(value => {
+        const query = typeof value === 'string' ? value : value?.company?.name;
+        if (query && query.length > 1) {
+          return this.service.searchCompanies(query); // metoda w serwisie
+        }
+        return of([]);
+      })
+    );
+  }
+
+  displayClient(client: Client): string {
+    return client?.company?.name ?? '';
+  }
+
+  onClientSelected(client: Client) {
+    if (!client) return;
+
+
+    // wypełnianie pól formularza na podstawie wybranego klienta
+    this.agreementForm.patchValue({
+      name: client.company.name,
+      nip: client.company.nip ?? '',
+      regon: client.company.regon ?? '',
+      phoneNumber: client.company.phoneNumber ?? '',
+      addressEmail: client.company.email ?? '',
+      city: client.company.address?.city ?? '',
+      street: client.company.address?.street ?? '',
+      // buildingNumber: client.company.address?.buildingNumber ?? '',
+      apartmentNumber: client.company.address?.apartmentNumber?.toString() ?? '',
+      postalCode: client.company.address?.zipCode ?? ''
+    });
+
+    console.log('After patchValue:', this.agreementForm.value);
+    this.cd.detectChanges(); // wymusza aktualizację widoku
+
   }
 
 }

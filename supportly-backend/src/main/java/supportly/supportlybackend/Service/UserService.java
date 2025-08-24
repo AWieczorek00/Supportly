@@ -50,8 +50,6 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
     }
 
-    public Optional<User> getUserByEmployee(Employee employee) {
-        return userRepository.findByEmployeeId(employee.getIndividualId());
-    }
+
 
 }

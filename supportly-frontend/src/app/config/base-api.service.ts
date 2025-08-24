@@ -27,7 +27,7 @@ export abstract class BaseApiService<TCriteria, TResult> {
 
   add(entity: Partial<TResult>): Observable<TResult> {
     return this.http.post<TResult>(
-      this.buildUrl(`/${this.resourcePath}`),
+      this.buildUrl(`/${this.resourcePath}/add`),
       entity
     );
   }

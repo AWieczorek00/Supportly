@@ -36,16 +36,12 @@ public class Order {
             name = "ORDER_EMPLOYEE",
             joinColumns = @JoinColumn(name = "ORDER_ID"),
             inverseJoinColumns = @JoinColumn(name = "EMPLOYEE_ID"))
-
     private List<Employee> employeeList;
 
-    @OneToMany()
-    @JoinColumn(name = "ACTIVITIES_ID")
-    private List<Activities> activitiesList;
 
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name = "PART_ID")
-    private List<Part> partList;
+//    @OneToMany(cascade = CascadeType.ALL)
+//    @JoinColumn(name = "PART_ID")
+//    private List<Part> partList;
 
     @Column(name="DATE_OF_ADMISSION")
     private LocalDate dateOfAdmission;

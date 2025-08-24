@@ -2,7 +2,6 @@ package supportly.supportlybackend.Controller;
 
 import com.itextpdf.text.DocumentException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -11,8 +10,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.bind.annotation.*;
-import supportly.supportlybackend.Criteria.OrderSc;
+import supportly.supportlybackend.Criteria.OrderSC;
 import supportly.supportlybackend.Dto.OrderDto;
+import supportly.supportlybackend.Model.Client;
 import supportly.supportlybackend.Model.Order;
 import supportly.supportlybackend.PdfGeneration;
 import supportly.supportlybackend.Service.OrderService;
@@ -31,7 +31,7 @@ public class OrderController {
     private final OrderService orderService;
 
     @PostMapping("/search")
-    public ResponseEntity<List<OrderDto>> getAllOrders(@RequestBody OrderSc criteria) {
+    public ResponseEntity<List<OrderDto>> getAllOrders(@RequestBody OrderSC criteria) {
         List<OrderDto> orderList = orderService.search(criteria);
         return new ResponseEntity<>(orderList, HttpStatus.OK);
     }
@@ -48,6 +48,12 @@ public class OrderController {
     public ResponseEntity<?> deleteOrder(@PathVariable Long id) {
         orderService.deleteOrderById(id);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping("/list")
+    public ResponseEntity<List<Order>> findOrderByCompanyName(@RequestParam String companyName) {
+        List<Order> orderList = orderService.findOrdersByCompanyName(companyName);
+        return new ResponseEntity<>(orderList, HttpStatus.OK);
     }
 
 //    @PostMapping("/duplicate")

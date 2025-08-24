@@ -50,7 +50,7 @@
             <button mat-raised-button color="warn" type="button" (click)="onClear()">
               Wyczyść
             </button>
-            <button mat-stroked-button color="warn" type="button" routerLink="agreement/list">
+            <button mat-stroked-button color="warn" type="button" routerLink="/agreement/add">
               Dodaj nowa umowę
             </button>
             <button mat-raised-button color="primary" type="submit">
@@ -69,7 +69,7 @@
         </ng-container>
         <ng-container matColumnDef="dateFrom">
           <th mat-header-cell *matHeaderCellDef> Data zawarcia</th>
-          <td mat-cell *matCellDef="let element"> {{ element.dateFrom | date }}</td>
+          <td mat-cell *matCellDef="let element"> {{ element.signedDate | date }}</td>
         </ng-container>
         <ng-container matColumnDef="dateTo">
           <th mat-header-cell *matHeaderCellDef> Data zakończenia</th>
@@ -94,7 +94,7 @@
         <ng-container matColumnDef="number">
           <th mat-header-cell *matHeaderCellDef> Numer budynku/Numer mieszkania</th>
           <td mat-cell *matCellDef="let element">
-            {{ element.company.address.buildingNumber }} / {{ element.company.address.apartmentNumber }}
+            {{ element.company.address.streetNumber }} / {{ element.company.address.apartmentNumber }}
           </td>
         </ng-container>
         <ng-container matColumnDef="period">

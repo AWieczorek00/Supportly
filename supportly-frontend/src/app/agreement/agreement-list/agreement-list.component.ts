@@ -14,7 +14,6 @@ import {
 } from '@angular/material/table';
 import {CommonModule, DatePipe} from '@angular/common';
 import {Agreement} from '../agreement';
-import {AgreementService} from '../agreement.service';
 import {MatExpansionModule, MatExpansionPanel, MatExpansionPanelTitle} from '@angular/material/expansion';
 import {MatFormField, MatFormFieldModule} from '@angular/material/form-field';
 import {MatInput} from '@angular/material/input';
@@ -29,6 +28,7 @@ import {
 import {DateAdapter, MAT_DATE_FORMATS, NativeDateAdapter} from '@angular/material/core';
 import {AgreementCriteria} from '../agreement-criteria';
 import {RouterLink} from '@angular/router';
+import {HttpAgreementService} from '../service/http-agreement.service';
 
 export const MY_DATE_FORMATS = {
   parse: {
@@ -81,7 +81,7 @@ export const MY_DATE_FORMATS = {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AgreementListComponent implements AfterViewInit {
-  constructor(private service: AgreementService) {
+  constructor(private service: HttpAgreementService) {
   }
 
   agreementColumns: string[] = ['name', 'dateFrom', 'dateTo', 'nip', 'addressEmail', 'city', 'street', 'number', 'period'];
@@ -90,7 +90,12 @@ export class AgreementListComponent implements AfterViewInit {
   // accordion = viewChild.required(MatAccordion);
 
   ngAfterViewInit() {
-    this.agreementTable.data = this.service.criteria()
+    this.service.search({} as AgreementCriteria).subscribe({
+      next: (agreements) => {
+        this.agreementTable.data = agreements;
+      },
+      error: (err) => console.error('Błąd przy pobieraniu danych:', err)
+    });
   }
 
   registrationForm = new FormGroup({
@@ -115,8 +120,14 @@ export class AgreementListComponent implements AfterViewInit {
       email: formValue.email ?? null
     };
 
-    this.agreementTable.data = this.service.criteria2(agreementCriteria)
-    console.log(agreementCriteria);  // Możesz teraz wysłać te dane na serwer lub użyć ich w aplikacji
+    this.service.search(agreementCriteria).subscribe({
+      next: (agreements: Agreement[]) => {
+        this.agreementTable.data = agreements; // teraz to już zwykła tablica
+      },
+      error: (err) => {
+        console.error('Błąd przy pobieraniu danych:', err);
+      }
+    });    console.log(agreementCriteria);  // Możesz teraz wysłać te dane na serwer lub użyć ich w aplikacji
   }
 
 // Funkcja pomocnicza do konwersji daty

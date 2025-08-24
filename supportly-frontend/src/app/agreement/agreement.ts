@@ -6,5 +6,6 @@ export interface Agreement {
   dateTo: Date;
   period: number;
   costForServicePerHour: number;
-  numberAgreement: string;
+  agreementNumber: string;
+  signedDate:Date;
 }

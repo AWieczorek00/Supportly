@@ -3,5 +3,5 @@ export interface Address {
   street: string;
   streetNumber: string;
   apartmentNumber: number;
-  postalCode: string;
+  zipCode: string;
 }

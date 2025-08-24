@@ -1,4 +1,4 @@
-import {Component} from '@angular/core';
+import {AfterViewInit, Component} from '@angular/core';
 import {
   MatCell,
   MatCellDef,
@@ -29,6 +29,7 @@ import {RouterLink} from '@angular/router';
 import {provideNativeDateAdapter} from '@angular/material/core';
 import {OrderCriteria} from '../OrderCriteria';
 import {HttpOrderService} from '../service/http-order.service';
+import {EmployeeCriteria} from '../../employee/EmployeeCriteria';
 
 @Component({
   selector: 'app-order-list',
@@ -62,10 +63,19 @@ import {HttpOrderService} from '../service/http-order.service';
   templateUrl: './order-list.component.html',
   styleUrl: './order-list.component.scss'
 })
-export class OrderListComponent {
+export class OrderListComponent implements AfterViewInit{
 
-  constructor(private http: HttpOrderService) {
+  constructor(private service: HttpOrderService) {
 
+  }
+
+  ngAfterViewInit() {
+    this.service.search({} as OrderCriteria).subscribe({
+      next: (orders) => {
+        this.orderTable.data = orders;
+      },
+      error: (err) => console.error('Błąd przy pobieraniu danych:', err)
+    });
   }
 
 
@@ -107,7 +117,7 @@ export class OrderListComponent {
     };
 
 
-    this.http.search(criteria).subscribe({
+    this.service.search(criteria).subscribe({
       next: data => {
         console.log('Otrzymane dane:', data);
       },
