@@ -29,7 +29,6 @@ import {RouterLink} from '@angular/router';
 import {provideNativeDateAdapter} from '@angular/material/core';
 import {OrderCriteria} from '../OrderCriteria';
 import {HttpOrderService} from '../service/http-order.service';
-import {EmployeeCriteria} from '../../employee/EmployeeCriteria';
 
 @Component({
   selector: 'app-order-list',
@@ -63,7 +62,7 @@ import {EmployeeCriteria} from '../../employee/EmployeeCriteria';
   templateUrl: './order-list.component.html',
   styleUrl: './order-list.component.scss'
 })
-export class OrderListComponent implements AfterViewInit{
+export class OrderListComponent implements AfterViewInit {
 
   constructor(private service: HttpOrderService) {
 
