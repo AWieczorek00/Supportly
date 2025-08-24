@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Data
@@ -32,6 +34,9 @@ public class Employee {
     //todo dodac aby był uniklany
     @Column(name = "PHONE_NUMBER", nullable = false, length = 9, unique = true)
     private String phoneNumber;
+
+    @ManyToMany(mappedBy = "employees")
+    private List<Task> tasks = new ArrayList<>();
 
     @Column(name = "DATA_OF_CREATION", nullable = false)
     @CreationTimestamp

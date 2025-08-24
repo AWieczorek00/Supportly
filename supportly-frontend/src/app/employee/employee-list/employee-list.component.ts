@@ -3,30 +3,23 @@ import {
   MatCell,
   MatCellDef,
   MatColumnDef,
-  MatHeaderCell, MatHeaderCellDef,
-  MatHeaderRow, MatHeaderRowDef, MatRow, MatRowDef, MatTable,
+  MatHeaderCell,
+  MatHeaderCellDef,
+  MatHeaderRow,
+  MatHeaderRowDef,
+  MatRow,
+  MatRowDef,
+  MatTable,
   MatTableDataSource
 } from '@angular/material/table';
-import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import {CommonModule, DatePipe, NgIf} from '@angular/common';
-import {
-  MatAccordion, MatExpansionModule,
-  MatExpansionPanel,
-  MatExpansionPanelHeader,
-  MatExpansionPanelTitle
-} from '@angular/material/expansion';
+import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
+import {CommonModule} from '@angular/common';
+import {MatExpansionModule, MatExpansionPanel, MatExpansionPanelTitle} from '@angular/material/expansion';
 import {MatButton} from '@angular/material/button';
-import {
-  MatDatepicker,
-  MatDatepickerInput,
-  MatDatepickerModule,
-  MatDatepickerToggle
-} from '@angular/material/datepicker';
-import {MatError, MatFormField, MatFormFieldModule, MatHint, MatLabel, MatSuffix} from '@angular/material/form-field';
+import {MatDatepickerModule} from '@angular/material/datepicker';
+import {MatFormField, MatFormFieldModule} from '@angular/material/form-field';
 import {MatInput} from '@angular/material/input';
-import {RouterLink} from '@angular/router';
 import {Employee} from '../Employee';
-import {AgreementCriteria} from '../../agreement/agreement-criteria';
 import {EmployeeCriteria} from '../EmployeeCriteria';
 import {MatDialog} from '@angular/material/dialog';
 import {EmployeeAddComponent} from '../employee-add/employee-add.component';
@@ -47,7 +40,6 @@ import {HttpEmployeeService} from '../service/http-employee.service';
     MatRow,
     MatHeaderRowDef,
     MatRowDef,
-    DatePipe,
     MatExpansionPanel,
     MatExpansionPanelTitle,
     MatExpansionModule,
@@ -56,14 +48,7 @@ import {HttpEmployeeService} from '../service/http-employee.service';
     MatInput,
     ReactiveFormsModule,
     MatButton,
-    MatDatepickerInput,
-    MatDatepickerToggle,
-    MatDatepicker,
     MatDatepickerModule,
-    RouterLink,
-    MatDatepickerInput,
-    MatDatepickerToggle,
-    MatDatepicker,
     MatDatepickerModule,
   ],
   templateUrl: './employee-list.component.html',
@@ -71,7 +56,7 @@ import {HttpEmployeeService} from '../service/http-employee.service';
 })
 export class EmployeeListComponent implements AfterViewInit {
 
-  constructor(private service: EmployeeService, private dialog: MatDialog, private http:HttpEmployeeService) {
+  constructor(private service: EmployeeService, private dialog: MatDialog, private http: HttpEmployeeService) {
 
   }
 

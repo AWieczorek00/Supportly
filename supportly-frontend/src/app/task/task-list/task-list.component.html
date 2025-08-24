@@ -1,1 +1,78 @@
-<p>task-list works!</p>
+<div style="display: flex; justify-content: center; align-items: start; height: auto; padding-top: 20px">
+  <div style="display: flex; flex-direction: column; align-items: center; width: 90%;">
+    <mat-accordion style="width: 100%">
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title> Kryteria wyszukiwania</mat-panel-title>
+        </mat-expansion-panel-header>
+
+        <form [formGroup]="criteriaForm" (ngSubmit)="onSubmit()" style="padding: 10px" class="registration-form">
+          <mat-form-field appearance="outline">
+            <mat-label>Nazwa zadania</mat-label>
+            <input matInput formControlName="name"/>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Imię pracownika</mat-label>
+            <input matInput formControlName="firstName"/>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Nazwisko pracownika</mat-label>
+            <input matInput formControlName="lastName"/>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Nazwa firmy</mat-label>
+            <input matInput formControlName="companyName"/>
+          </mat-form-field>
+
+          <mat-checkbox formControlName="done">
+            Wykonane?
+          </mat-checkbox>
+
+
+          <!-- Dodanie przycisków poniżej pól formularza -->
+          <div class="form-buttons" style="display: flex; justify-content: space-between; width: 100%;">
+            <button mat-raised-button color="warn" type="button" (click)="onClear()">
+              Wyczyść
+            </button>
+            <button mat-stroked-button color="warn" type="button" (click)="openDialog()">
+              Dodaj nowe zadanie
+            </button>
+            <button mat-raised-button color="primary" type="submit">
+              Szukaj
+            </button>
+          </div>
+        </form>
+      </mat-expansion-panel>
+    </mat-accordion>
+
+    <div class="custom-table-container" style="width: 100%;">
+      <table mat-table [dataSource]="taskTable" class="mat-elevation-z8" style="width: 100%;">
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef> Imię</th>
+          <td mat-cell *matCellDef="let element"> {{ element.name }}</td>
+        </ng-container>
+        <ng-container matColumnDef="employee">
+          <th mat-header-cell *matHeaderCellDef> Pracownicy</th>
+          <td mat-cell *matCellDef="let element">
+              <span *ngFor="let emp of element.employees; let last = last">
+                {{ emp.firstName }} {{ emp.lastName }}<span *ngIf="!last">, </span>
+              </span>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="companyName">
+          <th mat-header-cell *matHeaderCellDef> Nazwa firmy</th>
+          <td mat-cell *matCellDef="let element"> {{ element.order }}</td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="taskColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: taskColumns;" [ngClass]="row.done ? 'row-done' : 'row-not-done'">
+          >
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>
+

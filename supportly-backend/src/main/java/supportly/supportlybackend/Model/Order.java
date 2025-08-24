@@ -25,6 +25,8 @@ public class Order {
     @Column(name = "ID", nullable = false)
     private Long id;
 
+
+
     @OneToOne()
     @JoinColumn(name = "CLIENT_ID")
     private Client client;

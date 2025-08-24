@@ -1,33 +1,43 @@
 package supportly.supportlybackend.Model;
 
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name="TASK")
+@Table(name = "TASK")
 public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID", nullable = false)
     private Long id;
 
-    @Column(name="NAME", nullable = false)
+    @Column(name = "NAME", nullable = false)
     private String name;
 
-    @Column(name="EXECUTION_TIME")
+    @Column(name = "EXECUTION_TIME")
     private LocalDate executionTime;
 
-    @Column(name="DONE")
-    private Boolean done;
-
     @OneToOne
-    @JoinColumn(name = "EMPLOYEE_ID")
-    private Employee employee;
+    @JoinColumn(name = "ORDER_ID")
+    private Order order;
+
+    @ManyToMany
+    @JoinTable(
+            name = "TASK_EMPLOYEE", // tabela łącznikowa
+            joinColumns = @JoinColumn(name = "TASK_ID"), // kolumna wskazująca na Task
+            inverseJoinColumns = @JoinColumn(name = "EMPLOYEE_ID") // kolumna wskazująca na Employee
+    )
+    private List<Employee> employees = new ArrayList<>();
+
+    @Column(name = "DONE")
+    private Boolean done;
 }

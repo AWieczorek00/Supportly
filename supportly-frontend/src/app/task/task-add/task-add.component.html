@@ -1,1 +1,54 @@
-<p>task-add works!</p>
+<h2 mat-dialog-title>Dodaj dane</h2>
+
+<div mat-dialog-content [formGroup]="form" class="flex flex-col gap-4">
+
+  <mat-form-field appearance="outline">
+    <mat-label>Nazwa</mat-label>
+    <input matInput formControlName="name" placeholder="Podaj nazwę">
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Zamówienie</mat-label>
+    <input matInput formControlName="orderSearch" [matAutocomplete]="autoOrder">
+    <mat-autocomplete #autoOrder="matAutocomplete"
+                      [displayWith]="displayOrder"
+                      (optionSelected)="onOrderSelected($event.option.value)">
+      <mat-option *ngFor="let o of filteredOrders$ | async" [value]="o">
+        {{ o.client?.company?.name }}
+      </mat-option>
+    </mat-autocomplete>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Pracownicy</mat-label>
+    <input matInput formControlName="employeeSearch" [matAutocomplete]="autoEmp">
+    <mat-autocomplete #autoEmp="matAutocomplete"
+                      [displayWith]="displayEmployee"
+                      (optionSelected)="onEmployeeSelected($event.option.value)">
+      <mat-option *ngFor="let e of filteredEmployees$ | async" [value]="e">
+        {{ e.firstName }} {{ e.lastName }}
+      </mat-option>
+    </mat-autocomplete>
+  </mat-form-field>
+
+
+  <mat-chip-list>
+    <mat-chip
+      *ngFor="let e of selectedEmployees"
+      [removable]="true"
+      (removed)="removeEmployee(e)"
+    >
+      {{ e.firstName }} {{ e.lastName }}
+      <button matChipRemove>&times;</button>
+    </mat-chip>
+  </mat-chip-list>
+
+
+  <mat-checkbox formControlName="done">Zakończone</mat-checkbox>
+
+</div>
+
+<div mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()">Anuluj</button>
+  <button mat-raised-button color="primary" (click)="submit()" [disabled]="form.invalid">Zapisz</button>
+</div>
