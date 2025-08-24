@@ -7,7 +7,7 @@ import supportly.supportlybackend.Annotation.SpecField;
 
 @Getter
 @Setter
-public class OrderSc {
+public class OrderSC {
 
     @SpecField(path = "client.company.name")
     private String nameCompany;

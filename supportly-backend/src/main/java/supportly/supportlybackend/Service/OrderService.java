@@ -1,13 +1,12 @@
 package supportly.supportlybackend.Service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import supportly.supportlybackend.Criteria.GenericSpecificationBuilder;
-import supportly.supportlybackend.Criteria.OrderSc;
+import supportly.supportlybackend.Criteria.OrderSC;
 import supportly.supportlybackend.Dto.OrderDto;
 import supportly.supportlybackend.Enum.Priority;
 import supportly.supportlybackend.Mapper.Mapper;
@@ -64,9 +63,8 @@ public class OrderService {
     public Order updateOrder(Order orderBody) {
         return orderRepository.findById(orderBody.getId()).map(orderUpdate -> {
             orderUpdate.setClient(orderBody.getClient());
-            orderUpdate.setActivitiesList(activitiesService.updateActivitiesList(orderBody.getActivitiesList(), orderUpdate.getActivitiesList()));
             orderUpdate.setEmployeeList(orderBody.getEmployeeList());
-            orderUpdate.setPartList(partService.updatePartList(orderBody.getPartList(), orderUpdate.getPartList()));
+//            orderUpdate.setPartList(partService.updatePartList(orderBody.getPartList(), orderUpdate.getPartList()));
             orderUpdate.setPeriod(orderBody.getPeriod());
             orderUpdate.setStatus(orderBody.getStatus());
             orderUpdate.setPriority(orderBody.getPriority());
@@ -77,12 +75,13 @@ public class OrderService {
         }).orElseThrow(() -> new ResourceNotFoundException("nie znaleziono"));
     }
 
-    public List<OrderDto> search(OrderSc criteria) {
+    public List<OrderDto> search(OrderSC criteria) {
         GenericSpecificationBuilder<Order> builder = new GenericSpecificationBuilder<>();
         Specification<Order> spec = builder.build(criteria);
         return orderRepository.findAll(spec).stream().map(Mapper::toDto).collect(Collectors.toList());
     }
 
+    @Transactional
     public void createOrderFromSchedule() {
         List<Agreement> agreements = agreementService.findByNextRun(LocalDate.now().plusDays(10));
         orderRepository.saveAll(createOrderList(agreements));
@@ -102,7 +101,8 @@ public class OrderService {
         return orders;
     }
 
-
-
+    public List<Order> findOrdersByCompanyName(String companyName) {
+        return  orderRepository.findAllByClient_Company_NameContainingIgnoreCase(companyName);
+    }
 }
 

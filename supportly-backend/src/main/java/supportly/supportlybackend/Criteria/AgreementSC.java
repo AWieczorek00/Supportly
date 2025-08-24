@@ -2,6 +2,7 @@ package supportly.supportlybackend.Criteria;
 
 import lombok.Getter;
 import lombok.Setter;
+import supportly.supportlybackend.Annotation.OperatorSql;
 import supportly.supportlybackend.Annotation.SpecField;
 
 import java.time.LocalDate;
@@ -11,7 +12,7 @@ import java.time.Period;
 @Setter
 public class AgreementSC {
 
-    @SpecField(path = "company.name")
+    @SpecField(path = "company.name",operator = OperatorSql.LIKE)
     private String name;
     @SpecField(path = "signedDate")
     private LocalDate signedDateFrom;

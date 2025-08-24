@@ -23,8 +23,8 @@ import {Employee} from '../Employee';
 import {EmployeeCriteria} from '../EmployeeCriteria';
 import {MatDialog} from '@angular/material/dialog';
 import {EmployeeAddComponent} from '../employee-add/employee-add.component';
-import {EmployeeService} from '../employee.service';
 import {HttpEmployeeService} from '../service/http-employee.service';
+import {AgreementCriteria} from '../../agreement/agreement-criteria';
 
 @Component({
   selector: 'app-employee-list',
@@ -56,7 +56,7 @@ import {HttpEmployeeService} from '../service/http-employee.service';
 })
 export class EmployeeListComponent implements AfterViewInit {
 
-  constructor(private service: EmployeeService, private dialog: MatDialog, private http: HttpEmployeeService) {
+  constructor(private service: HttpEmployeeService, private dialog: MatDialog, private http: HttpEmployeeService) {
 
   }
 
@@ -64,7 +64,12 @@ export class EmployeeListComponent implements AfterViewInit {
   employeeTable = new MatTableDataSource<Employee>()
 
   ngAfterViewInit() {
-    this.employeeTable.data = this.service.criteria();
+    this.service.search({} as EmployeeCriteria).subscribe({
+      next: (employees) => {
+        this.employeeTable.data = employees;
+      },
+      error: (err) => console.error('Błąd przy pobieraniu danych:', err)
+    });
   }
 
   criteriaForm = new FormGroup({
@@ -93,7 +98,6 @@ export class EmployeeListComponent implements AfterViewInit {
       }
     });
 
-    this.employeeTable.data = this.service.criteria() // Zmienic jak bede miał backend
     // console.log(employeeCriteria);  // Możesz teraz wysłać te dane na serwer lub użyć ich w aplikacji
   }
 

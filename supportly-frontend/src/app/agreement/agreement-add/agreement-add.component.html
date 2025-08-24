@@ -6,10 +6,25 @@
         <mat-panel-title> Firma</mat-panel-title>
       </mat-expansion-panel-header>
       <div style="gap: 16px;">
-      <mat-form-field appearance="outline" style="padding: 10px;">
-        <mat-label>Company Name</mat-label>
-        <input matInput formControlName="name" required>
-      </mat-form-field>
+<!--      <mat-form-field appearance="outline" style="padding: 10px;">-->
+<!--        <mat-label>Nazwa firmy</mat-label>-->
+<!--        <input matInput formControlName="name" required>-->
+<!--      </mat-form-field>-->
+
+        <mat-form-field appearance="outline" style="padding: 10px;">
+          <mat-label>Firma</mat-label>
+          <input type="text"
+                 matInput
+                 formControlName="client"
+                 [matAutocomplete]="auto">
+
+          <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayClient"
+                            (optionSelected)="onClientSelected($event.option.value)">
+            <mat-option *ngFor="let client of filteredClients$ | async" [value]="client">
+              {{ client.company?.name }}
+            </mat-option>
+          </mat-autocomplete>
+        </mat-form-field>
 
       <mat-form-field appearance="outline" style="padding: 10px;">
         <mat-label>NIP</mat-label>
@@ -30,6 +45,7 @@
         <mat-label>Email</mat-label>
         <input matInput type="email" formControlName="addressEmail" required>
       </mat-form-field>
+
       </div>
     </mat-expansion-panel>
 
@@ -91,7 +107,7 @@
 
       <mat-form-field appearance="outline" style="padding: 10px;">
         <mat-label>Agreement Number</mat-label>
-        <input matInput formControlName="numberAgreement" required>
+        <input matInput formControlName="agreementNumber" required>
       </mat-form-field>
     </mat-expansion-panel>
   </mat-accordion>

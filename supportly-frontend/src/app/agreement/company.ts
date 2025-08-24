@@ -5,6 +5,6 @@ export interface Company {
   nip: string;
   regon: string;
   phoneNumber: string;
-  addressEmail: string;
+  email: string;
   address: Address;
 }

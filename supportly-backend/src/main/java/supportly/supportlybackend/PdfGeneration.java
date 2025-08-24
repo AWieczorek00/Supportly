@@ -84,10 +84,7 @@ public class PdfGeneration {
             PdfPTable tableWithActivitie = new PdfPTable(2);
             tableWithActivitie.addCell(new PdfPCell(new Paragraph("Opis Czyności", elementsOfTableFont))).setHorizontalAlignment(ALIGN_CENTER);
             tableWithActivitie.addCell(new PdfPCell(new Paragraph("Informacje o wykonaniu", elementsOfTableFont))).setHorizontalAlignment(ALIGN_CENTER);
-            for (Activities activity : order.getActivitiesList()) {
-                tableWithActivitie.addCell(new PdfPCell(new Paragraph(activity.getName(), elementsOfTableFont)));
-                tableWithActivitie.addCell(new PdfPCell(new Paragraph(activity.getAttention(), elementsOfTableFont)));
-            }
+
             tableWithActivitie.setSpacingAfter(12.5f);
 
 
@@ -96,14 +93,14 @@ public class PdfGeneration {
             titleOfPartsAndMaterials.addCell(new PdfPCell(new Paragraph("ZAINSTALOWANE CZĘŚCI/MATERIAŁY", titleOfTableFont))).setHorizontalAlignment(ALIGN_CENTER);
             titleOfPartsAndMaterials.addCell(new PdfPCell(new Paragraph("Nazwa części,materiałów/Ilość", elementsOfTableFont))).setHorizontalAlignment(ALIGN_CENTER);
             PdfPTable tableWithPartsAndMaterials = new PdfPTable(2);
-            if (!order.getPartList().isEmpty()) {
-                for (Part parts : order.getPartList()) {
-                    tableWithPartsAndMaterials.addCell(new PdfPCell(new Paragraph(parts.getName(), elementsOfTableFont)));
-//                    tableWithPartsAndMaterials.addCell(new PdfPCell(new Paragraph(String.valueOf(parts.getAmount()), elementsOfTableFont)));
-                }
-            } else {
-                tableWithPartsAndMaterials.addCell(new PdfPCell(new Paragraph("Brak", elementsOfTableFont))).setHorizontalAlignment(ALIGN_CENTER);
-            }
+//            if (!order.getPartList().isEmpty()) {
+//                for (Part parts : order.getPartList()) {
+//                    tableWithPartsAndMaterials.addCell(new PdfPCell(new Paragraph(parts.getName(), elementsOfTableFont)));
+////                    tableWithPartsAndMaterials.addCell(new PdfPCell(new Paragraph(String.valueOf(parts.getAmount()), elementsOfTableFont)));
+//                }
+//            } else {
+//                tableWithPartsAndMaterials.addCell(new PdfPCell(new Paragraph("Brak", elementsOfTableFont))).setHorizontalAlignment(ALIGN_CENTER);
+//            }
             tableWithPartsAndMaterials.setSpacingAfter(12.5f);
 
             PdfPTable tableWithComments = new PdfPTable(1);
@@ -206,10 +203,6 @@ public class PdfGeneration {
             PdfPTable tableWithActivitie = new PdfPTable(2);
             tableWithActivitie.addCell(new PdfPCell(new Paragraph("Opis Czyności", elementsOfTableFont))).setHorizontalAlignment(ALIGN_CENTER);
             tableWithActivitie.addCell(new PdfPCell(new Paragraph("Informacje o wykonaniu", elementsOfTableFont))).setHorizontalAlignment(ALIGN_CENTER);
-            for (Activities activity : order.getActivitiesList()) {
-                tableWithActivitie.addCell(new PdfPCell(new Paragraph(activity.getName(), elementsOfTableFont)));
-                tableWithActivitie.addCell(new PdfPCell(new Paragraph(activity.getAttention(), elementsOfTableFont)));
-            }
             tableWithActivitie.setSpacingAfter(12.5f);
 
 
@@ -218,18 +211,18 @@ public class PdfGeneration {
             titleOfPartsAndMaterials.addCell(new PdfPCell(new Paragraph("ZAINSTALOWANE CZĘŚCI/MATERIAŁY", titleOfTableFont))).setHorizontalAlignment(ALIGN_CENTER);
             titleOfPartsAndMaterials.addCell(new PdfPCell(new Paragraph("Nazwa części,materiałów/Ilość/Kwota", elementsOfTableFont))).setHorizontalAlignment(ALIGN_CENTER);
             PdfPTable tableWithPartsAndMaterials = new PdfPTable(5);
-            if (!order.getPartList().isEmpty()) {
-                for (Part parts : order.getPartList()) {
-                    tableWithPartsAndMaterials.addCell(new PdfPCell(new Paragraph(parts.getName(), elementsOfTableFont)));
-//                    tableWithPartsAndMaterials.addCell(new PdfPCell(new Paragraph(String.valueOf(parts.getAmount()), elementsOfTableFont)));
-                    tableWithPartsAndMaterials.addCell(new PdfPCell(new Paragraph(parts.getPrice()+" zł", elementsOfTableFont)));
-                    tableWithPartsAndMaterials.addCell(new PdfPCell(new Paragraph(parts.getTax() + "%", elementsOfTableFont)));
-                    tableWithPartsAndMaterials.addCell(new PdfPCell(new Paragraph(df.format(parts.getTax()*parts.getPrice()*10), elementsOfTableFont)));
-//                    summaryParts += ((parts.getTax()*parts.getPrice())*parts.getAmount())*10;
-                }
-            } else {
-                tableWithPartsAndMaterials.addCell(new PdfPCell(new Paragraph("Brak", elementsOfTableFont))).setHorizontalAlignment(ALIGN_CENTER);
-            }
+//            if (!order.getPartList().isEmpty()) {
+//                for (Part parts : order.getPartList()) {
+//                    tableWithPartsAndMaterials.addCell(new PdfPCell(new Paragraph(parts.getName(), elementsOfTableFont)));
+////                    tableWithPartsAndMaterials.addCell(new PdfPCell(new Paragraph(String.valueOf(parts.getAmount()), elementsOfTableFont)));
+//                    tableWithPartsAndMaterials.addCell(new PdfPCell(new Paragraph(parts.getPrice()+" zł", elementsOfTableFont)));
+//                    tableWithPartsAndMaterials.addCell(new PdfPCell(new Paragraph(parts.getTax() + "%", elementsOfTableFont)));
+//                    tableWithPartsAndMaterials.addCell(new PdfPCell(new Paragraph(df.format(parts.getTax()*parts.getPrice()*10), elementsOfTableFont)));
+////                    summaryParts += ((parts.getTax()*parts.getPrice())*parts.getAmount())*10;
+//                }
+//            } else {
+//                tableWithPartsAndMaterials.addCell(new PdfPCell(new Paragraph("Brak", elementsOfTableFont))).setHorizontalAlignment(ALIGN_CENTER);
+//            }
             tableWithPartsAndMaterials.setSpacingAfter(12.5f);
 
             PdfPTable tableWithComments = new PdfPTable(1);
