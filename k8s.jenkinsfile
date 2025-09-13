@@ -355,7 +355,7 @@ def checkout_pull_request(String project) {
     // Pobranie listy otwartych PR z GitHub API
     def response = httpRequest(
             url: "https://api.github.com/repos/AWieczorek00/${project}/pulls?state=open&sort=updated&direction=desc&per_page=1",
-            authentication: 'Github', // credentialsId w Jenkins
+            credentialsId: 'Github', // credentialsId w Jenkins
             httpMode: 'GET',
             acceptType: 'APPLICATION_JSON'
     )
