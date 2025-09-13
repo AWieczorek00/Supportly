@@ -350,20 +350,20 @@ void checkoutRepo(String project, String branch) {
 //                                ]]
 //    ])
 //}
+
 void checkout_pull_request(String project) {
-    // Pobranie najnowszych PR jako String
+    // Pobieramy JSON i od razu wyciągamy tylko potrzebne wartości
     def response = sh(script: "curl -s https://api.github.com/repos/AWieczorek00/${project}/pulls", returnStdout: true).trim()
 
-    // Parsowanie JSON w lokalnym bloku
-    def jsonSlurper = new groovy.json.JsonSlurper()
-    def pulls = jsonSlurper.parseText(response)
+    // Parsowanie JSON tylko lokalnie w tym bloku
+    def pulls = new groovy.json.JsonSlurper().parseText(response)
 
     if (pulls.size() == 0) {
         error("No Pull Requests found for project ${project}")
     }
 
-    // Wyciągamy tylko potrzebne, serializowalne wartości
-    def prId = pulls[0].number
+    // Wyciągamy tylko serializowalne typy
+    def prId = pulls[0].number.toString()
     def sourceBranch = pulls[0].head.ref.toString()
     def targetBranch = pulls[0].base.ref.toString()
 
@@ -386,6 +386,7 @@ void checkout_pull_request(String project) {
                                 ]]
     ])
 }
+
 
 String get_branch_name(List<String> branches) {
     for (branch in branches) {
