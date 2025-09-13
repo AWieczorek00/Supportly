@@ -1,30 +1,29 @@
 import {AfterViewInit, Component, ViewChild} from '@angular/core';
-import {MatGridList, MatGridTile} from '@angular/material/grid-list';
 import {MatPaginator} from '@angular/material/paginator';
 import {
-  MatCell, MatCellDef,
+  MatCell,
+  MatCellDef,
   MatColumnDef,
-  MatHeaderCell, MatHeaderCellDef,
+  MatHeaderCell,
+  MatHeaderCellDef,
   MatHeaderRow,
   MatHeaderRowDef,
   MatRow,
-  MatRowDef, MatTable, MatTableDataSource
+  MatRowDef,
+  MatTable,
+  MatTableDataSource
 } from '@angular/material/table';
 import {MaintenanceTask} from './maintenance-task/maintenance-task';
 import {MaintenanceTaskService} from './maintenance-task/maintenance-task.service';
-import {DatePipe, NgClass, NgForOf, NgIf} from '@angular/common';
-import {MatButton} from '@angular/material/button';
+import {NgClass, NgForOf, NgIf} from '@angular/common';
 import {MatCheckbox} from '@angular/material/checkbox';
 import {Task} from '../task/Task';
 import {HttpTaskService} from '../task/service/http-task.service';
 import {BaseComponent} from '../config/base-component';
-import {TaskCriteria} from '../task/TaskCriteria';
 
 @Component({
   selector: 'app-home',
   imports: [
-    MatGridList,
-    MatGridTile,
     MatPaginator,
     MatHeaderRow,
     MatRow,
@@ -36,8 +35,6 @@ import {TaskCriteria} from '../task/TaskCriteria';
     MatCellDef,
     MatHeaderCellDef,
     MatTable,
-    DatePipe,
-    MatButton,
     MatCheckbox,
     NgForOf,
     NgIf,
