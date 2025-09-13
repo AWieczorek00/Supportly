@@ -352,19 +352,14 @@ void checkoutRepo(String project, String branch) {
 //}
 void checkout_pull_request(String project) {
 
-    def pr = sh(
-            script: "curl -s https://api.github.com/repos/AWieczorek00/Supportly/pulls | jq '.[0]'",
-            returnStdout: true
-    ).trim()
+    def response = sh(script: "curl -s https://api.github.com/repos/AWieczorek00/Supportly/pulls", returnStdout: true)
+    def pulls = readJSON text: response
+    def pr = pulls[0]  // pobiera najnowszy PR
+    def prId = pr.number
+    def sourceBranch = pr.head.ref
+    def targetBranch = pr.base.ref
 
-    def prId = sh(script: "echo $pr | jq '.number'", returnStdout: true).trim()
-    def sourceBranch = sh(script: "echo $pr | jq -r '.head.ref'", returnStdout: true).trim()
-    def targetBranch = sh(script: "echo $pr | jq -r '.base.ref'", returnStdout: true).trim()
-
-//    // Sprawdź czy zmienne PR są ustawione
-//    def prId = env.CHANGE_ID
-//    def sourceBranch = env.CHANGE_BRANCH
-//    def targetBranch = env.CHANGE_TARGET ?: 'master'
+    echo "PR ID: ${prId}, source: ${sourceBranch}, target: ${targetBranch}"
 
     if (!prId || !sourceBranch) {
         error("This build is not triggered by a Pull Request. CHANGE_ID or CHANGE_BRANCH is missing.")
