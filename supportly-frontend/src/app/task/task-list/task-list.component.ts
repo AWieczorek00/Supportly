@@ -26,6 +26,8 @@ import {CommonModule, NgClass, NgIf} from '@angular/common';
 import {TaskAddComponent} from '../task-add/task-add.component';
 import {OrderCriteria} from '../../order/OrderCriteria';
 import {TaskCriteria} from '../TaskCriteria';
+import {BaseComponent} from '../../config/base-component';
+import {EmployeeCriteria} from '../../employee/EmployeeCriteria';
 
 @Component({
   selector: 'app-task-list',
@@ -50,10 +52,10 @@ import {TaskCriteria} from '../TaskCriteria';
   templateUrl: './task-list.component.html',
   styleUrl: './task-list.component.scss'
 })
-export class TaskListComponent implements AfterViewInit {
+export class TaskListComponent extends BaseComponent implements AfterViewInit {
 
   constructor(private dialog: MatDialog, private service: HttpTaskService) {
-
+    super();
   }
 
   ngAfterViewInit() {
@@ -65,7 +67,7 @@ export class TaskListComponent implements AfterViewInit {
     });
   }
 
-  taskColumns: String[] = ['name', 'employee', 'companyName']
+  taskColumns: String[] = ['name', 'employee', 'companyName','done']
   taskTable = new MatTableDataSource<Task>()
 
 
@@ -79,8 +81,30 @@ export class TaskListComponent implements AfterViewInit {
 
 
   onSubmit() {
+    const formValue = this.criteriaForm.value;
+
+
+    const criteria: TaskCriteria = {
+      name: formValue.name ?? '',
+      companyName: formValue.companyName ?? '',
+      firstName: formValue.firstName ?? '',
+      lastName: formValue.lastName ?? '',
+      done: formValue.done ?? false
+    };
+
+    this.service.search(criteria).subscribe({
+      next: data => {
+        console.log('Otrzymane dane:', data);
+        this.taskTable.data = data;
+      },
+      error: err => {
+        console.error('Błąd podczas wyszukiwania:', err);
+      }
+    });
 
   }
+
+
 
   onClear(): void {
     this.criteriaForm.reset(); // Resetuje formularz
@@ -99,5 +123,24 @@ export class TaskListComponent implements AfterViewInit {
       }
     });
   }
+
+  onToggleDone(task: Task) {
+    const updatedTask = { ...task, done: !task.done };
+    this.service.updateDone(updatedTask).subscribe({
+      next: (res) => {
+        // podmiana obiektu w tabeli
+        const index = this.taskTable.data.findIndex(t => t.id === res.id);
+        if (index !== -1) {
+          this.taskTable.data[index] = res;
+          this.taskTable._updateChangeSubscription(); // odśwież tabelę
+        }
+      },
+      error: (err) => {
+        console.error('Błąd przy update', err);
+      }
+    });
+  }
+
+
 
 }

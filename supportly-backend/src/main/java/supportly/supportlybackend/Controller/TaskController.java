@@ -17,14 +17,14 @@ import java.util.List;
 @RestController
 @RequestMapping("/task")
 @CrossOrigin(origins = "*")
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
 @RequiredArgsConstructor
 public class TaskController {
 
     private final TaskService taskService;
 
 
-    @GetMapping("/search")
+    @PostMapping("/search")
     public ResponseEntity<List<TaskDto>> search(@RequestBody TaskSC criteria) {
         List<TaskDto> taskList = taskService.search(criteria);
         return new ResponseEntity<>(taskList, HttpStatus.OK);
@@ -32,27 +32,20 @@ public class TaskController {
 
 
     @PostMapping("/add")
-    public ResponseEntity<Void> createTask(@RequestBody TaskDto taskBody) throws MessagingException {
+    public ResponseEntity<Void> createTask(@RequestBody TaskDto taskBody)  {
         taskService.createTask(taskBody);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
+    @GetMapping("/{individualId}")
+    public ResponseEntity<List<TaskDto>> getTasksForEmployee(@PathVariable Long individualId) {
+        taskService.getTasksForEmployee(individualId);
+        return new ResponseEntity<>(taskService.getTasksForEmployee(individualId), HttpStatus.OK);
+    }
 
-//    @PutMapping("/update")
-//    public ResponseEntity<Task> updateTask(@RequestBody Task taskBody) {
-//        Task task = taskService.updateTask(taskBody);
-//        return new ResponseEntity<>(task, HttpStatus.OK);
-//    }
-//
-//    @DeleteMapping("/delete/{id}")
-//    public ResponseEntity<?> deleteTask(@PathVariable Long id) {
-//        taskService.deleteTaskById(id);
-//        return new ResponseEntity<>(HttpStatus.OK);
-//    }
-//
-//    @PutMapping("/update/done")
-//    public ResponseEntity<Task> updateTaskCompleted(@RequestBody Task taskBody) {
-//        Task task = taskService.taskCompletion(taskBody);
-//        return new ResponseEntity<>(task, HttpStatus.OK);
-//    }
+    @PutMapping("/update/done")
+    public ResponseEntity<TaskDto> daneTask(@RequestBody TaskDto taskBody) {
+        TaskDto task = taskService.daneTask(taskBody);
+        return new ResponseEntity<>(task, HttpStatus.OK);
+    }
 }

@@ -12,8 +12,13 @@ import {
 } from '@angular/material/table';
 import {MaintenanceTask} from './maintenance-task/maintenance-task';
 import {MaintenanceTaskService} from './maintenance-task/maintenance-task.service';
-import {DatePipe} from '@angular/common';
+import {DatePipe, NgClass, NgForOf, NgIf} from '@angular/common';
 import {MatButton} from '@angular/material/button';
+import {MatCheckbox} from '@angular/material/checkbox';
+import {Task} from '../task/Task';
+import {HttpTaskService} from '../task/service/http-task.service';
+import {BaseComponent} from '../config/base-component';
+import {TaskCriteria} from '../task/TaskCriteria';
 
 @Component({
   selector: 'app-home',
@@ -32,15 +37,23 @@ import {MatButton} from '@angular/material/button';
     MatHeaderCellDef,
     MatTable,
     DatePipe,
-    MatButton
+    MatButton,
+    MatCheckbox,
+    NgForOf,
+    NgIf,
+    NgClass
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss'
 })
-export class HomeComponent implements AfterViewInit {
+export class HomeComponent extends BaseComponent implements AfterViewInit {
+
+
 
   constructor(
-    private service: MaintenanceTaskService) {
+    private services: MaintenanceTaskService,
+    private service: HttpTaskService) {
+    super();
   }
 
   displayedColumns: string[] = ['position', 'name', 'weight', 'symbol'];
@@ -52,13 +65,49 @@ export class HomeComponent implements AfterViewInit {
 
   ngAfterViewInit() {
     this.dataSource.paginator = this.paginator;
-    this.maintenanceTask.data = this.service.getAll();
+    this.maintenanceTask.data = this.services.getAll();
     // console.log(this.maintenanceTask.data);
+    console.log(this.getUserId())
+
+    this.service.getTaskForEmployee(this.getUserId()).subscribe({
+      next: (task) => {
+        this.taskTable.data = task;
+      },
+      error: (err) => console.error('Błąd przy pobieraniu danych:', err)
+    });
   }
 
-  onActionClick(element:any) {
 
+  taskColumns: String[] = ['name', 'employee', 'companyName','done']
+  taskTable = new MatTableDataSource<Task>()
+
+
+
+  onToggleDone(task: Task) {
+    const updatedTask = { ...task, done: !task.done };
+    this.service.updateDone(updatedTask).subscribe({
+      next: (res) => {
+        // podmiana obiektu w tabeli
+        const index = this.taskTable.data.findIndex(t => t.id === res.id);
+        if (index !== -1) {
+          this.taskTable.data[index] = res;
+          this.taskTable._updateChangeSubscription(); // odśwież tabelę
+        }
+      },
+      error: (err) => {
+        console.error('Błąd przy update', err);
+      }
+    });
   }
+
+
+
+
+
+
+
+
+
 }
 
 export interface PeriodicElement {
@@ -67,6 +116,8 @@ export interface PeriodicElement {
   weight: number;
   symbol: string;
 }
+
+
 
 const ELEMENT_DATA: PeriodicElement[] = [
   {position: 1, name: 'Hydrogen', weight: 1.0079, symbol: 'H'},

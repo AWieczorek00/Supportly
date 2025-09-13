@@ -95,6 +95,8 @@ public class OrderService {
             Order order = new Order();
             order.setClient(client);
             order.setPriority(Priority.NORMAL);
+            order.setDateOfAdmission(LocalDate.now());
+            order.setAgreementNumber(agreement.getAgreementNumber());
             orders.add(order);
         }
 

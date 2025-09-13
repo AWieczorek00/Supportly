@@ -1,11 +1,8 @@
-import {Order} from '../order/Order';
-import {Employee} from '../employee/Employee';
-
-export interface TaskCriteria{
-  name:string
-  companyName:string;
-  firstName:string;
-  lastName:string;
-  done:boolean;
+export interface TaskCriteria {
+  name: string | null;
+  companyName: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  done: boolean | null;
 
 }

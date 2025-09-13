@@ -58,6 +58,7 @@ export class LoginComponent {
       next: res => {
         console.log("Zalogowano!");
         localStorage.setItem('token',res.token)
+        debugger
         this.router.navigate([''
         ])
       },

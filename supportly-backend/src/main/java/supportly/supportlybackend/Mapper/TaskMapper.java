@@ -4,7 +4,7 @@ import org.mapstruct.Mapper;
 import supportly.supportlybackend.Model.Task;
 import supportly.supportlybackend.Service.TaskDto;
 
-@Mapper()
+@Mapper(uses = {OrderMapper.class, EmployeeMapper.class})
 public interface TaskMapper {
     TaskDto toDto(Task task);
 

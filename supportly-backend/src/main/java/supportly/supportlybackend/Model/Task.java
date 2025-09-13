@@ -1,5 +1,6 @@
 package supportly.supportlybackend.Model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -28,6 +29,7 @@ public class Task {
 
     @OneToOne
     @JoinColumn(name = "ORDER_ID")
+    @JsonManagedReference
     private Order order;
 
     @ManyToMany

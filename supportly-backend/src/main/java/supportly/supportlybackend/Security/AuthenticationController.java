@@ -11,6 +11,9 @@ import supportly.supportlybackend.Model.User;
 import supportly.supportlybackend.Security.Jwt.JwtService;
 import supportly.supportlybackend.Security.Service.AuthenticationService;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @RequestMapping("/auth")
 @RestController
 public class AuthenticationController {
@@ -35,7 +38,11 @@ public class AuthenticationController {
     public ResponseEntity<LoginResponse> authenticate(@RequestBody LoginDto loginUserDto) {
         User authenticatedUser = authenticationService.authenticate(loginUserDto);
 
-        String jwtToken = jwtService.generateToken(authenticatedUser);
+        Map<String, Object> extraClaims = new HashMap<>();
+//        extraClaims.put("role", authenticatedUser.getRole());
+        extraClaims.put("id", authenticatedUser.getEmployee().getIndividualId());
+
+        String jwtToken = jwtService.generateToken(extraClaims, authenticatedUser);
 
         LoginResponse loginResponse = new LoginResponse(jwtToken, jwtService.getExpirationTime());
 
