@@ -351,28 +351,32 @@ void checkoutRepo(String project, String branch) {
 //    ])
 //}
 
-void checkout_pull_request(String project) {
-    // Pobieramy JSON i od razu wyciągamy tylko potrzebne wartości
-    def response = sh(script: "curl -s https://api.github.com/repos/AWieczorek00/${project}/pulls", returnStdout: true).trim()
+def checkout_pull_request(String project) {
+    // Pobranie listy otwartych PR z GitHub API
+    def response = httpRequest(
+            url: "https://api.github.com/repos/AWieczorek00/${project}/pulls?state=open&sort=updated&direction=desc&per_page=1",
+            authentication: 'Github', // credentialsId w Jenkins
+            httpMode: 'GET',
+            acceptType: 'APPLICATION_JSON'
+    )
 
-    // Parsowanie JSON tylko lokalnie w tym bloku
-    def pulls = new groovy.json.JsonSlurper().parseText(response)
+    def prs = readJSON text: response.content
 
-    if (pulls.size() == 0) {
-        error("No Pull Requests found for project ${project}")
+    if (prs.size() == 0) {
+        error "Nie znaleziono żadnych otwartych PR w repozytorium ${project}"
     }
 
-    // Wyciągamy tylko serializowalne typy
-    def prId = pulls[0].number.toString()
-    def sourceBranch = pulls[0].head.ref.toString()
-    def targetBranch = pulls[0].base.ref.toString()
+    def pr = prs[0]
+    def prId = pr.number.toString()
+    def sourceBranch = pr.head.ref
+    def targetBranch = pr.base.ref
 
-    echo "PR ID: ${prId}, source: ${sourceBranch}, target: ${targetBranch}"
+    println "Checkout latest PR #${prId}: ${sourceBranch} -> ${targetBranch}"
 
-    // Checkout PR
+    // Checkout PR i merge z target branch
     checkout([
             $class: 'GitSCM',
-            branches: [[name: "*/${sourceBranch}"]],
+            branches: [[name: "*/${targetBranch}"]],
             extensions: [
                     [$class: 'PreBuildMerge', options: [
                             mergeRemote: 'origin',
@@ -382,7 +386,8 @@ void checkout_pull_request(String project) {
             ],
             userRemoteConfigs: [[
                                         url: "https://github.com/AWieczorek00/${project}.git",
-                                        credentialsId: 'Github'
+                                        credentialsId: 'Github',
+                                        refspec: "+refs/heads/${sourceBranch}:refs/remotes/origin/${sourceBranch}"
                                 ]]
     ])
 }
