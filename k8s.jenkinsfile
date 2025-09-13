@@ -327,16 +327,45 @@ void checkoutRepo(String project, String branch) {
 //    ])
 //}
 
+//void checkout_pull_request(String project) {
+//    def prId = env.CHANGE_ID
+//    def targetBranch = env.CHANGE_TARGET ?: 'master'
+//
+//    println "Checkout PR #${prId}, merging into ${targetBranch}"
+//
+//    checkout([
+//            $class           : 'GitSCM',
+//            branches         : [[name: "*/${targetBranch}"]],
+//            extensions       : [
+//                    [$class: 'PreBuildMerge', options: [
+//                            mergeRemote: 'origin',
+//                            mergeTarget: targetBranch
+//                    ]],
+//                    [$class: 'CloneOption', noTags: true]
+//            ],
+//            userRemoteConfigs: [[
+//                                        url          : "https://github.com/AWieczorek00/${project}.git",
+//                                        credentialsId: 'Github',
+//                                        refspec      : "+refs/pull/${prId}/*:refs/remotes/origin/pr/${prId}/*"
+//                                ]]
+//    ])
+//}
 void checkout_pull_request(String project) {
+    // Sprawdź czy zmienne PR są ustawione
     def prId = env.CHANGE_ID
+    def sourceBranch = env.CHANGE_BRANCH
     def targetBranch = env.CHANGE_TARGET ?: 'master'
 
-    println "Checkout PR #${prId}, merging into ${targetBranch}"
+    if (!prId || !sourceBranch) {
+        error("This build is not triggered by a Pull Request. CHANGE_ID or CHANGE_BRANCH is missing.")
+    }
+
+    println "Checkout PR #${prId} from branch ${sourceBranch}, merging into ${targetBranch}"
 
     checkout([
-            $class           : 'GitSCM',
-            branches         : [[name: "*/${targetBranch}"]],
-            extensions       : [
+            $class: 'GitSCM',
+            branches: [[name: "refs/remotes/origin/${sourceBranch}"]],
+            extensions: [
                     [$class: 'PreBuildMerge', options: [
                             mergeRemote: 'origin',
                             mergeTarget: targetBranch
@@ -344,9 +373,8 @@ void checkout_pull_request(String project) {
                     [$class: 'CloneOption', noTags: true]
             ],
             userRemoteConfigs: [[
-                                        url          : "https://github.com/AWieczorek00/${project}.git",
-                                        credentialsId: 'Github',
-                                        refspec      : "+refs/pull/${prId}/*:refs/remotes/origin/pr/${prId}/*"
+                                        url: "https://github.com/AWieczorek00/${project}.git",
+                                        credentialsId: 'Github'
                                 ]]
     ])
 }
