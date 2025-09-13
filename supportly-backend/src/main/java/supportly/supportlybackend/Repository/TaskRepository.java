@@ -27,7 +27,7 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     List<Task> findAll(Specification<Task> spec);
 
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Query("UPDATE Task t SET t.done = :done WHERE t.id = :id")
     int updateDone(@Param("id") Long id, @Param("done") Boolean done);
 
