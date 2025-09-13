@@ -353,11 +353,13 @@ void checkoutRepo(String project, String branch) {
 void checkout_pull_request(String project) {
 
     def response = sh(script: "curl -s https://api.github.com/repos/AWieczorek00/Supportly/pulls", returnStdout: true)
-    def pulls = readJSON text: response
+    def jsonSlurper = new groovy.json.JsonSlurper()
+    def pulls = jsonSlurper.parseText(response)
     def pr = pulls[0]  // pobiera najnowszy PR
     def prId = pr.number
     def sourceBranch = pr.head.ref
     def targetBranch = pr.base.ref
+
 
     echo "PR ID: ${prId}, source: ${sourceBranch}, target: ${targetBranch}"
 
