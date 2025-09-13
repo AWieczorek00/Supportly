@@ -351,27 +351,28 @@ void checkoutRepo(String project, String branch) {
 //    ])
 //}
 void checkout_pull_request(String project) {
+    // Pobranie najnowszych PR jako String
+    def response = sh(script: "curl -s https://api.github.com/repos/AWieczorek00/${project}/pulls", returnStdout: true).trim()
 
-    def response = sh(script: "curl -s https://api.github.com/repos/AWieczorek00/Supportly/pulls", returnStdout: true)
+    // Parsowanie JSON w lokalnym bloku
     def jsonSlurper = new groovy.json.JsonSlurper()
     def pulls = jsonSlurper.parseText(response)
-    def pr = pulls[0]  // pobiera najnowszy PR
-    def prId = pr.number
-    def sourceBranch = pr.head.ref
-    def targetBranch = pr.base.ref
 
+    if (pulls.size() == 0) {
+        error("No Pull Requests found for project ${project}")
+    }
+
+    // Wyciągamy tylko potrzebne, serializowalne wartości
+    def prId = pulls[0].number
+    def sourceBranch = pulls[0].head.ref.toString()
+    def targetBranch = pulls[0].base.ref.toString()
 
     echo "PR ID: ${prId}, source: ${sourceBranch}, target: ${targetBranch}"
 
-    if (!prId || !sourceBranch) {
-        error("This build is not triggered by a Pull Request. CHANGE_ID or CHANGE_BRANCH is missing.")
-    }
-
-    println "Checkout PR #${prId} from branch ${sourceBranch}, merging into ${targetBranch}"
-
+    // Checkout PR
     checkout([
             $class: 'GitSCM',
-            branches: [[name: "refs/remotes/origin/${sourceBranch}"]],
+            branches: [[name: "*/${sourceBranch}"]],
             extensions: [
                     [$class: 'PreBuildMerge', options: [
                             mergeRemote: 'origin',
