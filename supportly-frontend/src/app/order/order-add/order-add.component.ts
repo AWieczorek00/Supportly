@@ -1,8 +1,6 @@
 import {Component} from '@angular/core';
 import {MatTab, MatTabGroup} from '@angular/material/tabs';
-import {MatGridList, MatGridTile} from '@angular/material/grid-list';
 import {FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import {EmployeeCriteria} from '../../employee/EmployeeCriteria';
 import {MatFormField, MatLabel, MatSuffix} from '@angular/material/form-field';
 import {MatInput} from '@angular/material/input';
 import {MatDatepicker, MatDatepickerInput, MatDatepickerToggle} from '@angular/material/datepicker';
@@ -16,7 +14,11 @@ import {
   MatHeaderCell,
   MatHeaderRow,
   MatHeaderRowDef,
-  MatRow, MatRowDef, MatTable, MatTableDataSource, MatTableModule
+  MatRow,
+  MatRowDef,
+  MatTable,
+  MatTableDataSource,
+  MatTableModule
 } from '@angular/material/table';
 import {Part} from '../Part';
 import {CommonModule} from '@angular/common';
@@ -29,8 +31,6 @@ import {PartQuantityDialogComponent} from '../../utils/part-quantity-dialog/part
   imports: [
     MatTabGroup,
     MatTab,
-    MatGridList,
-    MatGridTile,
     ReactiveFormsModule,
     MatFormField,
     MatInput,
@@ -53,19 +53,20 @@ import {PartQuantityDialogComponent} from '../../utils/part-quantity-dialog/part
     MatRowDef,
     MatTable, CommonModule, MatTableModule, MatButton, MatCardActions
   ],
-  providers: [  provideNativeDateAdapter(),],
+  providers: [provideNativeDateAdapter(),],
   templateUrl: './order-add.component.html',
   styleUrl: './order-add.component.scss'
 })
 export class OrderAddComponent {
 
-  constructor(private dialog: MatDialog) {}
+  constructor(private dialog: MatDialog) {
+  }
 
 
-  partColumns: string[] = ['name', 'price', 'tax', 'quantity','actions'];
+  partColumns: string[] = ['name', 'price', 'tax', 'quantity', 'actions'];
   partTable = new MatTableDataSource<Part>([
-    { name: 'Część A', price: 100, tax: 23, quantity: 2 , ean: '1234567890123' },
-    { name: 'Część B', price: 50, tax: 8, quantity: 5 , ean: '9876543210987' },
+    {name: 'Część A', price: 100, tax: 23, quantity: 2, ean: '1234567890123'},
+    {name: 'Część B', price: 50, tax: 8, quantity: 5, ean: '9876543210987'},
   ]);
   partTableLocal = new MatTableDataSource<Part>()
 
@@ -135,6 +136,7 @@ export class OrderAddComponent {
     console.log('Formularz:', formData);
 
     // Ewentualnie tylko części
-    console.log('Części (z partTableLocal):', localParts);  }
+    console.log('Części (z partTableLocal):', localParts);
+  }
 }
 

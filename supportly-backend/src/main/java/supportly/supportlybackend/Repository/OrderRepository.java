@@ -14,4 +14,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findAll(Specification<Order> spec);
 
     List<Order> findAllByClient_Company_NameContainingIgnoreCase(String companyName);
+
+    Order findOrderById(Long id);
 }

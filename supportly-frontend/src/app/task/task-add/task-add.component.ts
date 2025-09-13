@@ -16,6 +16,7 @@ import {MatCheckboxModule} from '@angular/material/checkbox';
 import {MatButtonModule} from '@angular/material/button';
 import {HttpEmployeeService} from '../../employee/service/http-employee.service';
 import {HttpOrderService} from '../../order/service/http-order.service';
+import {HttpTaskService} from '../service/http-task.service';
 
 @Component({
   selector: 'app-task-add',
@@ -57,7 +58,8 @@ export class TaskAddComponent implements OnInit {
   constructor(
     private dialogRef: MatDialogRef<TaskAddComponent>,
     private employeeService: HttpEmployeeService,
-    private orderService: HttpOrderService
+    private orderService: HttpOrderService,
+    private service: HttpTaskService
   ) {
   }
 
@@ -97,7 +99,7 @@ export class TaskAddComponent implements OnInit {
   // Wyświetlanie wybranego zamówienia w polu input
   displayOrder(order: Order | string | null): string {
     if (!order) return '';
-    return typeof order === 'string' ? order : order.client.company.name;
+    return typeof order === 'string' ? order : `${order.client.company.name} ${order.agreementNumber}`;
   }
 
   // Wybór zamówienia
@@ -137,7 +139,34 @@ export class TaskAddComponent implements OnInit {
   submit() {
     console.log(this.form.getRawValue())
     if (this.form.valid) {
-      this.dialogRef.close(this.form.value as Task);
+      const formValue = this.form.value as {
+        id: number|null
+        name: string;
+        employees: Employee[];
+        order: Order;
+        done: boolean;
+      };
+
+      const task: Partial<Task> = {
+        id: null,
+        name: formValue.name,
+        employees: formValue.employees,
+        order: formValue.order,
+        done: formValue.done
+      };
+
+      this.service.add(task).subscribe({
+        next: (response) => {
+          // np. zamknięcie dialogu z wynikiem
+          this.dialogRef.close(response);
+        },
+        error: (err) => {
+          console.error('Błąd przy dodawaniu pracownika', err);
+          // możesz tu dodać np. snackbar z błędem
+        }
+      });
+
+      this.dialogRef.close(this.form.value as unknown as Task);
     }
   }
 

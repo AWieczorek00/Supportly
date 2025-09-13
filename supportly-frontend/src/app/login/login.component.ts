@@ -1,13 +1,12 @@
 import {Component} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
-import {MatCard, MatCardContent, MatCardModule, MatCardTitle} from '@angular/material/card';
+import {MatCard, MatCardModule, MatCardTitle} from '@angular/material/card';
 import {MatFormField, MatFormFieldModule} from '@angular/material/form-field';
 import {MatInput, MatInputModule} from '@angular/material/input';
 import {MatButton, MatButtonModule} from '@angular/material/button';
-import {EmployeeCriteria} from '../employee/EmployeeCriteria';
 import {Login} from './Login';
 import {HttpLoginService} from './service/http-login.service';
-import {Router, RouterLink} from '@angular/router';
+import {Router} from '@angular/router';
 
 
 @Component({
@@ -15,7 +14,6 @@ import {Router, RouterLink} from '@angular/router';
   imports: [
     MatCard,
     MatCardTitle,
-    MatCardContent,
     ReactiveFormsModule,
     MatFormField,
     MatInput,
@@ -32,7 +30,7 @@ import {Router, RouterLink} from '@angular/router';
 })
 export class LoginComponent {
 
-  constructor(private http:HttpLoginService,private router: Router) {
+  constructor(private http: HttpLoginService, private router: Router) {
   }
 
   loginForm = new FormGroup({
@@ -57,7 +55,8 @@ export class LoginComponent {
     this.http.login(login).subscribe({
       next: res => {
         console.log("Zalogowano!");
-        localStorage.setItem('token',res.token)
+        localStorage.setItem('token', res.token)
+        debugger
         this.router.navigate([''
         ])
       },

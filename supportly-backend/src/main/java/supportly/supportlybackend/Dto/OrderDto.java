@@ -8,10 +8,12 @@ import java.util.List;
 @Data
 public class OrderDto {
 
+    private Long id;
     private ClientDto client;
     private List<EmployeeDto> employees;
     private LocalDate dateOfAdmission;
     private LocalDate dateOfExecution;
+    private String agreementNumber;
     private float manHour;
     private float distance;
     private String priority;

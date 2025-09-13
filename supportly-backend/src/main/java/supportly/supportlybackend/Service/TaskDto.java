@@ -2,6 +2,7 @@ package supportly.supportlybackend.Service;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import supportly.supportlybackend.Dto.EmployeeDto;
 import supportly.supportlybackend.Dto.OrderDto;
 import supportly.supportlybackend.Model.Employee;
 
@@ -23,7 +24,7 @@ public class TaskDto {
 
     private OrderDto order;
 
-    private List<Employee> employees;
+    private List<EmployeeDto> employees;
 
 }
 

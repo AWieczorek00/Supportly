@@ -21,7 +21,7 @@
           <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayClient"
                             (optionSelected)="onClientSelected($event.option.value)">
             <mat-option *ngFor="let client of filteredClients$ | async" [value]="client">
-              {{ client.company?.name }}
+              {{ client.company.name }}
             </mat-option>
           </mat-autocomplete>
         </mat-form-field>

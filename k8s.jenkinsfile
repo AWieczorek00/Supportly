@@ -327,29 +327,73 @@ void checkoutRepo(String project, String branch) {
 //    ])
 //}
 
-void checkout_pull_request(String project) {
-    def prId = env.CHANGE_ID
-    def targetBranch = env.CHANGE_TARGET ?: 'master'
+//void checkout_pull_request(String project) {
+//    def prId = env.CHANGE_ID
+//    def targetBranch = env.CHANGE_TARGET ?: 'master'
+//
+//    println "Checkout PR #${prId}, merging into ${targetBranch}"
+//
+//    checkout([
+//            $class           : 'GitSCM',
+//            branches         : [[name: "*/${targetBranch}"]],
+//            extensions       : [
+//                    [$class: 'PreBuildMerge', options: [
+//                            mergeRemote: 'origin',
+//                            mergeTarget: targetBranch
+//                    ]],
+//                    [$class: 'CloneOption', noTags: true]
+//            ],
+//            userRemoteConfigs: [[
+//                                        url          : "https://github.com/AWieczorek00/${project}.git",
+//                                        credentialsId: 'Github',
+//                                        refspec      : "+refs/pull/${prId}/*:refs/remotes/origin/pr/${prId}/*"
+//                                ]]
+//    ])
+//}
 
-    println "Checkout PR #${prId}, merging into ${targetBranch}"
+def checkout_pull_request(String project) {
+    echo "Pobieranie najnowszego PR z repozytorium ${project}"
 
+    // Pobranie ostatniego otwartego PR z GitHub API
+    def response = httpRequest(
+            url: "https://api.github.com/repos/AWieczorek00/${project}/pulls?state=open&sort=updated&direction=desc&per_page=1",
+            httpMode: 'GET',
+            acceptType: 'APPLICATION_JSON'
+    )
+
+    def prs = readJSON text: response.content
+    if (prs.size() == 0) {
+        error "Nie znaleziono żadnych otwartych PR w repozytorium ${project}"
+    }
+
+    def pr = prs[0]
+    def prId = pr.number.toString()
+    def sourceBranch = pr.head.ref
+    def targetBranch = pr.base.ref
+
+    echo "Checkout latest PR #${prId}: ${sourceBranch} -> ${targetBranch}"
+
+    // Fetch i checkout brancha PR
     checkout([
-            $class           : 'GitSCM',
-            branches         : [[name: "*/${targetBranch}"]],
-            extensions       : [
-                    [$class: 'PreBuildMerge', options: [
-                            mergeRemote: 'origin',
-                            mergeTarget: targetBranch
-                    ]],
+            $class: 'GitSCM',
+            branches: [[name: "refs/remotes/origin/${sourceBranch}"]],
+            extensions: [
                     [$class: 'CloneOption', noTags: true]
             ],
             userRemoteConfigs: [[
-                                        url          : "https://github.com/AWieczorek00/${project}.git",
+                                        url: "https://github.com/AWieczorek00/${project}.git",
                                         credentialsId: 'Github',
-                                        refspec      : "+refs/pull/${prId}/*:refs/remotes/origin/pr/${prId}/*"
+                                        refspec: "+refs/heads/${sourceBranch}:refs/remotes/origin/${sourceBranch}"
                                 ]]
     ])
+
+    // Merge do branch docelowego
+    sh """
+        git fetch origin ${targetBranch}:${targetBranch}
+        git merge ${targetBranch} --no-ff -m "Merge ${targetBranch} into ${sourceBranch}"
+    """
 }
+
 
 String get_branch_name(List<String> branches) {
     for (branch in branches) {

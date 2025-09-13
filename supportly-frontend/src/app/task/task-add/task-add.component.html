@@ -14,7 +14,7 @@
                       [displayWith]="displayOrder"
                       (optionSelected)="onOrderSelected($event.option.value)">
       <mat-option *ngFor="let o of filteredOrders$ | async" [value]="o">
-        {{ o.client?.company?.name }}
+        {{ o.client.company.name}} {{o.agreementNumber}}
       </mat-option>
     </mat-autocomplete>
   </mat-form-field>

@@ -51,7 +51,7 @@ public class UserService {
     }
 
     public Optional<User> getUserByEmployee(Employee employee) {
-        return userRepository.findByEmployeeId(employee.getIndividualId());
+        return userRepository.findByEmployeeIndividualId(employee.getIndividualId());
     }
 
 }

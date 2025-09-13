@@ -6,7 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
+import supportly.supportlybackend.Dto.AgreementDto;
+import supportly.supportlybackend.Dto.CompanyDto;
 import supportly.supportlybackend.Enum.Period;
+import supportly.supportlybackend.Mapper.Mapper;
 import supportly.supportlybackend.Model.Agreement;
 import supportly.supportlybackend.Model.Company;
 import supportly.supportlybackend.Repository.AgreementRepository;
@@ -44,14 +47,14 @@ class AgreementServiceTest {
 
         companyService.add(company); // add company to repository
 
-        Agreement agreement = new Agreement();
-        agreement.setCompany(company);
+        AgreementDto agreement = new AgreementDto();
+        agreement.setCompany(Mapper.toDto(company));
         agreement.setAgreementNumber("AG123");
         agreement.setSignedDate(LocalDate.of(2023, 1, 1));
         agreement.setPeriod(Period.MONTHLY);
 
         // when
-//        agreementService.add(agreement);
+        agreementService.add(agreement);
 
         // then
         List<Agreement> agreements = agreementRepository.findAll();

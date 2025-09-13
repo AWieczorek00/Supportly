@@ -9,6 +9,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class EmployeeDto {
 
+    private String individualId;
     private String firstName;
     private String secondName;
     private String lastName;

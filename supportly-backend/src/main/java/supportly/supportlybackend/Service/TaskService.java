@@ -3,6 +3,7 @@ package supportly.supportlybackend.Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import supportly.supportlybackend.Criteria.GenericSpecificationBuilder;
 import supportly.supportlybackend.Criteria.TaskSC;
 import supportly.supportlybackend.Mapper.Mapper;
@@ -17,8 +18,9 @@ import java.util.stream.Collectors;
 public class TaskService {
 
     private final TaskRepository taskRepository;
-    private final UserService userService;
-    private final MailService mailService;
+//    private final OrderService orderService;
+//    private final UserService userService;
+//    private final MailService mailService;
 
     public List<TaskDto> search(TaskSC criteria) {
         GenericSpecificationBuilder<Task> builder = new GenericSpecificationBuilder<>();
@@ -28,6 +30,21 @@ public class TaskService {
 
 
     public void createTask(TaskDto task) {
-        taskRepository.saveAndFlush(Mapper.toEntity(task));
+        Task taskEntity = Mapper.toEntity(task);
+        taskRepository.save(taskEntity);
+    }
+
+    @Transactional
+    public TaskDto daneTask(TaskDto task) {
+        int updated = taskRepository.updateDone(task.getId(), task.getDone());
+        if (updated != 1) {
+            throw new IllegalStateException("Nie udało się zaktualizować taska id=" + task.getId());
+        }
+        return Mapper.toDto(taskRepository.findById(task.getId()).orElseThrow());
+    }
+
+    public List<TaskDto> getTasksForEmployee(Long individualId) {
+        List<Task> allByEmployeesIndividualId = taskRepository.findAllByEmployees_IndividualIdAndDone(individualId, false);
+        return allByEmployeesIndividualId.stream().map(Mapper::toDto).collect(Collectors.toList());
     }
 }

@@ -49,6 +49,9 @@ public class Order {
     @Column(name = "DATE_OF_EXECUTION")
     private LocalDate dateOfExecution;
 
+    @Column(name = "AGREEMENT_NUMBER", nullable = false)
+    private String agreementNumber;
+
     @Column(name="MAN_HOUR")
     private float manHour;
 
