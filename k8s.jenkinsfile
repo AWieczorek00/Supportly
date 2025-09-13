@@ -363,8 +363,9 @@ def checkout_pull_request(String project) {
     def prs = readJSON text: response.content
 
     if (prs.size() == 0) {
-        error "Nie znaleziono żadnych otwartych PR w repozytorium ${project}"
+        error "Nie znaleziono żadnych otwartych PR w repozytorium test ${project}"
     }
+
 
     def pr = prs[0]
     def prId = pr.number.toString()
