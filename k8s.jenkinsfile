@@ -352,37 +352,32 @@ void checkoutRepo(String project, String branch) {
 //}
 
 def checkout_pull_request(String project) {
-    // Pobranie listy otwartych PR z GitHub API
+    echo "Pobieranie najnowszego PR z repozytorium ${project}"
+
+    // Pobranie ostatniego otwartego PR z GitHub API
     def response = httpRequest(
             url: "https://api.github.com/repos/AWieczorek00/${project}/pulls?state=open&sort=updated&direction=desc&per_page=1",
-            credentialsId: 'Github', // credentialsId w Jenkins
             httpMode: 'GET',
             acceptType: 'APPLICATION_JSON'
     )
 
     def prs = readJSON text: response.content
-
     if (prs.size() == 0) {
-        error "Nie znaleziono żadnych otwartych PR w repozytorium test ${project}"
+        error "Nie znaleziono żadnych otwartych PR w repozytorium ${project}"
     }
-
 
     def pr = prs[0]
     def prId = pr.number.toString()
     def sourceBranch = pr.head.ref
     def targetBranch = pr.base.ref
 
-    println "Checkout latest PR #${prId}: ${sourceBranch} -> ${targetBranch}"
+    echo "Checkout latest PR #${prId}: ${sourceBranch} -> ${targetBranch}"
 
-    // Checkout PR i merge z target branch
+    // Fetch i checkout brancha PR
     checkout([
             $class: 'GitSCM',
-            branches: [[name: "*/${targetBranch}"]],
+            branches: [[name: "refs/remotes/origin/${sourceBranch}"]],
             extensions: [
-                    [$class: 'PreBuildMerge', options: [
-                            mergeRemote: 'origin',
-                            mergeTarget: targetBranch
-                    ]],
                     [$class: 'CloneOption', noTags: true]
             ],
             userRemoteConfigs: [[
@@ -391,6 +386,12 @@ def checkout_pull_request(String project) {
                                         refspec: "+refs/heads/${sourceBranch}:refs/remotes/origin/${sourceBranch}"
                                 ]]
     ])
+
+    // Merge do branch docelowego
+    sh """
+        git fetch origin ${targetBranch}:${targetBranch}
+        git merge ${targetBranch} --no-ff -m "Merge ${targetBranch} into ${sourceBranch}"
+    """
 }
 
 
