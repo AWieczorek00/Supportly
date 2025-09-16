@@ -78,7 +78,7 @@ export class OrderListComponent implements AfterViewInit {
   }
 
 
-  orderColumns: string[] = ['companyName', "clientName", 'phoneNumber', 'email', 'dateOfAdmission', 'dateOfExecution', 'status'];
+  orderColumns: string[] = ['companyName', "clientName", 'phoneNumber', 'email', 'dateOfAdmission', 'dateOfExecution', 'status','agreementNumber'];
   orderTable = new MatTableDataSource<Order>()
 
   criteriaForm = new FormGroup({
