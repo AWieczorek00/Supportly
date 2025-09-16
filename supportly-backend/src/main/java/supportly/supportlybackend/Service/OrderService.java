@@ -25,8 +25,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class OrderService {
     private final OrderRepository orderRepository;
-    private final ActivitiesService activitiesService;
-    private final PartService partService;
     private final AgreementService agreementService;
     private final ClientService clientService;
 
@@ -36,27 +34,6 @@ public class OrderService {
     @Transactional()
     public Order createNewOrder(OrderDto orderBody) {
         return orderRepository.saveAndFlush(Mapper.toEntity(orderBody));
-    }
-
-    @Transactional
-    public void deleteOrderById(Long id) {
-        orderRepository.deleteById(id);
-    }
-
-//    @Transactional
-//    public Order duplicateOrderById(Long id) {
-//        return orderRepository.findById(id)
-//                .map(order -> {
-//                    Order orderDuplicate = new Order(
-//                            0l, order.getClient(), null, null, null, LocalDate.now(), null,
-//                            0f, 0f, order.getPriority(), order.getStatus(), order.getPeriod(), order.getNote()
-//                    );
-//                    return orderRepository.save(orderDuplicate);
-//                }).orElseThrow(() -> new ResourceNotFoundException("Nie zaleziono takiego zelecenia do powielenia"));
-//    }
-
-    public Order findOrderById(Long id) {
-        return orderRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Nie znaleziono zlecenia o takim id: " + id));
     }
 
     @Transactional
@@ -89,7 +66,6 @@ public class OrderService {
 
     private List<Order> createOrderList(List<Agreement> agreements) {
         List<Order> orders = new ArrayList<>();
-
         for (Agreement agreement : agreements) {
             Client client = clientService.findClientByCompany(agreement.getCompany());
             Order order = new Order();
@@ -99,7 +75,6 @@ public class OrderService {
             order.setAgreementNumber(agreement.getAgreementNumber());
             orders.add(order);
         }
-
         return orders;
     }
 
