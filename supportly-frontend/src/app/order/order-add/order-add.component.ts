@@ -262,34 +262,6 @@ export class OrderAddComponent implements OnInit {
     console.log('Formularz:', formData);
 
     // Ewentualnie tylko części
-    console.log('Części (z partTableLocal):', localParts);
-  }
-
-
-  // submitForm() {
-  //   if (this.agreementForm.valid) {
-  //     const raw = this.agreementForm.value;
-  //
-  //     const agreement: Agreement = {
-  //       company: raw.client?.company!,   // zakładam, że w polu `client` masz obiekt typu Company
-  //       dateFrom: raw.dateFrom ? new Date(raw.dateFrom) : new Date(),
-  //       dateTo: raw.dateTo ? new Date(raw.dateTo) : new Date(),
-  //       period: raw.period ? Number(raw.period) : 0,
-  //       costForServicePerHour: raw.costForServicePerHour ? Number(raw.costForServicePerHour) : 0,
-  //       agreementNumber: raw.agreementNumber ?? '',
-  //       signedDate: new Date()  // możesz brać z formularza, jeśli dodasz pole signedDate
-  //     };
-  //
-  //     this.agreementService.add(agreement).subscribe({
-  //       next: (res) => {
-  //         console.log('Umowa dodana:', res);
-  //         this.agreementForm.reset();
-  //       },
-  //       error: (err) => {
-  //         console.error('Błąd przy dodawaniu umowy:', err);
-  //       }
-  //     });
-  //   }
-  // }
+    console.log('Części (z partTableLocal):', localParts);  }
 }
 
