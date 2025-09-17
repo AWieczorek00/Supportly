@@ -2,7 +2,7 @@ services:
   mssql:
     build:
       context: mssql
-      dockerfile: mssql/Dockerfile
+      dockerfile: Dockerfile
     image: localhost:32000/conf-mssql:latest
     privileged: true
     ports:
