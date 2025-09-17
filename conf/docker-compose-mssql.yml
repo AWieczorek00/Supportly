@@ -14,10 +14,10 @@ services:
       MSSQL_SA_PASSWORD: Qwerty.1
       MSSQL_PID: Express
     healthcheck:
-      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P Qwerty.1 -Q \"SELECT 1\""]
-      interval: 5s
+      test: [ "CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost,1433 -U sa -P Qwerty.1 -d master -Q \"SELECT 1\" || exit 1" ]
+      interval: 10s
       timeout: 5s
-      retries: 3
+      retries: 10
       start_period: 30s
 
   backend:
