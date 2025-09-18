@@ -12,16 +12,16 @@ SLEEP_SECONDS=5
 RETRY_COUNT=0
 
 # Czekaj aż SQL Server odpowie
-until $SQLCMD_BIN -S "$SERVER" -U "$USER" -P "$PASS" -d "$DB" -Q "SELECT 1" >/dev/null 2>&1
-do
-    RETRY_COUNT=$((RETRY_COUNT+1))
-    if [ "$RETRY_COUNT" -ge "$MAX_RETRIES" ]; then
-        echo "SQL Server is not responding after $((MAX_RETRIES*SLEEP_SECONDS)) seconds"
-        exit 1
-    fi
-    echo "SQL Server not ready yet, retry $RETRY_COUNT/$MAX_RETRIES..."
-    sleep $SLEEP_SECONDS
-done
+#until $SQLCMD_BIN -S "$SERVER" -U "$USER" -P "$PASS" -d "$DB" -Q "SELECT 1" >/dev/null 2>&1
+#do
+#    RETRY_COUNT=$((RETRY_COUNT+1))
+#    if [ "$RETRY_COUNT" -ge "$MAX_RETRIES" ]; then
+#        echo "SQL Server is not responding after $((MAX_RETRIES*SLEEP_SECONDS)) seconds"
+#        exit 1
+#    fi
+#    echo "SQL Server not ready yet, retry $RETRY_COUNT/$MAX_RETRIES..."
+#    sleep $SLEEP_SECONDS
+#done
 
 # Sprawdź, czy baza 'supportly' jest ONLINE
 STATUS=$($SQLCMD_BIN -S "$SERVER" -U "$USER" -P "$PASS" -d "$DB" -h -1 -t 1 -Q \
