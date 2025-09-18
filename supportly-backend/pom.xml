@@ -231,7 +231,7 @@
                     <groupId>com.microsoft.sqlserver</groupId>
                     <artifactId>mssql-jdbc</artifactId>
                     <version>12.10.0.jre11</version>
-                    <scope>compile</scope>
+                    <scope>runtime</scope>
                 </dependency>
                 <!-- https://mvnrepository.com/artifact/org.flywaydb/flyway-core -->
                 <dependency>
