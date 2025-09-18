@@ -15,5 +15,6 @@ COPY ./config /usr/config
 # Grant permissions for our scripts to be executable
 RUN chmod +x /usr/config/entrypoint.sh
 RUN chmod +x /usr/config/configure-db.sh
+RUN chmod +x /usr/config/healthcheck.sh
 
 ENTRYPOINT ["./entrypoint.sh"]
