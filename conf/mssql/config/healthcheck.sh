@@ -26,7 +26,7 @@ done
 
 echo ">>> Checking database 'supportly' state..."
 STATUS=$($SQLCMD_BIN -S "$SERVER" -U "$USER" -P "$PASS" -d "$DB" -C -h -1 -W -s "" -Q \
-    "SELECT state_desc FROM sys.databases WHERE name='supportly'" 2>/dev/null)
+    "SELECT state_desc FROM sys.databases WHERE name='supportly'" 2>/dev/null | grep -Eo "ONLINE|OFFLINE|RESTORING|RECOVERY_PENDING|SUSPECT")
 
 if [ "$STATUS" != "ONLINE" ]; then
     echo "Database 'supportly' is not ONLINE, current state: '$STATUS'"
@@ -35,7 +35,7 @@ fi
 
 echo ">>> Checking if user 'supportly' exists..."
 USER_EXISTS=$($SQLCMD_BIN -S "$SERVER" -U "$USER" -P "$PASS" -d "$DB" -C -h -1 -W -s "" -Q \
-    "SELECT COUNT(*) FROM sys.database_principals WHERE name='supportly'" 2>/dev/null)
+    "SELECT COUNT(*) FROM sys.database_principals WHERE name='supportly'" 2>/dev/null | tr -d '[:space:]')
 
 if [ "$USER_EXISTS" = "0" ]; then
     echo "User 'supportly' does not exist"
