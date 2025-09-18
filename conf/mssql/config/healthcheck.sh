@@ -1,7 +1,7 @@
 #!/bin/sh
 # healthcheck.sh
 
-SERVER="192.168.0.81"
+SERVER="localhost"
 USER="sa"
 PASS="${SA_PASSWORD}"
 DB="master"
