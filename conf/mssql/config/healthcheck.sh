@@ -26,6 +26,8 @@ RETRY_COUNT=0
 # Sprawdź, czy baza 'supportly' jest ONLINE
 STATUS=$($SQLCMD_BIN -S "$SERVER" -U "$USER" -P "$PASS" -d "$DB" -h -1 -t 1 -Q \
     "SELECT state_desc FROM sys.databases WHERE name='supportly'" 2>/dev/null | tr -d '[:space:]')
+    echo "Checking database state..."
+    $SQLCMD_BIN -S "$SERVER" -U "$USER" -P "$PASS" -d "$DB" -Q "SELECT state_desc FROM sys.databases WHERE name='supportly'"
 
 if [ "$STATUS" != "ONLINE" ]; then
     echo "Database 'supportly' is not ONLINE, current state: '$STATUS'"
