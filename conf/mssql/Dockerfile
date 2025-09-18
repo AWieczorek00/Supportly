@@ -11,9 +11,10 @@ RUN apt-get update && \
     curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
     curl https://packages.microsoft.com/config/debian/11/prod.list > /etc/apt/sources.list.d/mssql-release.list && \
     apt-get update && \
-    ACCEPT_EULA=Y apt-get install -y mssql-tools18 unixodbc-dev && \
+    ACCEPT_EULA=Y apt-get install -y mssql-tools18 && \
     echo 'export PATH="$PATH:/opt/mssql-tools18/bin"' >> /etc/profile.d/mssql-tools.sh && \
     rm -rf /var/lib/apt/lists/*
+
 
 # Create a config directory
 RUN mkdir -p /usr/config
