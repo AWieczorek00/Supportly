@@ -3,6 +3,8 @@ services:
     build:
       context: mssql
       dockerfile: Dockerfile
+      tags:
+        - localhost:32000/conf-mssql:latest
     image: localhost:32000/conf-mssql:latest
     privileged: true
     ports:
@@ -24,6 +26,8 @@ services:
     build:
       context: backend
       dockerfile: Dockerfile
+      tags:
+        - localhost:32000/conf-backend:latest
     image: localhost:32000/conf-backend:latest
     container_name: spring-backend
     env_file:
