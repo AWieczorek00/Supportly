@@ -11,37 +11,36 @@ MAX_RETRIES=30
 SLEEP_SECONDS=5
 RETRY_COUNT=0
 
-# Czekaj aż SQL Server odpowie
-#until $SQLCMD_BIN -S "$SERVER" -U "$USER" -P "$PASS" -d "$DB" -Q "SELECT 1" >/dev/null 2>&1
-#do
-#    RETRY_COUNT=$((RETRY_COUNT+1))
-#    if [ "$RETRY_COUNT" -ge "$MAX_RETRIES" ]; then
-#        echo "SQL Server is not responding after $((MAX_RETRIES*SLEEP_SECONDS)) seconds"
-#        exit 1
-#    fi
-#    echo "SQL Server not ready yet, retry $RETRY_COUNT/$MAX_RETRIES..."
-#    sleep $SLEEP_SECONDS
-#done
+echo ">>> Waiting for SQL Server to start..."
 
-# Sprawdź, czy baza 'supportly' jest ONLINE
-STATUS=$($SQLCMD_BIN -S "$SERVER" -U "$USER" -P "$PASS" -d "$DB" -C -h -1 -t 1 -Q \
-    "SELECT state_desc FROM sys.databases WHERE name='supportly'" 2>/dev/null | tr -d '[:space:]')
-    echo "Checking database state..."
-    $SQLCMD_BIN -S "$SERVER" -U "$USER" -P "$PASS" -d "$DB" -C -Q "SELECT state_desc FROM sys.databases WHERE name='supportly'"
+until $SQLCMD_BIN -S "$SERVER" -U "$USER" -P "$PASS" -d "$DB" -C -Q "SELECT 1" >/dev/null 2>&1
+do
+    RETRY_COUNT=$((RETRY_COUNT+1))
+    if [ "$RETRY_COUNT" -ge "$MAX_RETRIES" ]; then
+        echo "SQL Server is not responding after $((MAX_RETRIES*SLEEP_SECONDS)) seconds"
+        exit 1
+    fi
+    echo "SQL Server not ready yet, retry $RETRY_COUNT/$MAX_RETRIES..."
+    sleep $SLEEP_SECONDS
+done
+
+echo ">>> Checking database 'supportly' state..."
+STATUS=$($SQLCMD_BIN -S "$SERVER" -U "$USER" -P "$PASS" -d "$DB" -C -h -1 -W -s "" -Q \
+    "SELECT state_desc FROM sys.databases WHERE name='supportly'" 2>/dev/null)
 
 if [ "$STATUS" != "ONLINE" ]; then
     echo "Database 'supportly' is not ONLINE, current state: '$STATUS'"
     exit 1
 fi
 
-# Sprawdź, czy użytkownik 'supportly' istnieje
-USER_EXISTS=$($SQLCMD_BIN -S "$SERVER" -U "$USER" -P "$PASS" -d "$DB" -C -h -1 -t 1 -Q \
-    "SELECT COUNT(*) FROM sys.database_principals WHERE name='supportly'" 2>/dev/null | tr -d '[:space:]')
+echo ">>> Checking if user 'supportly' exists..."
+USER_EXISTS=$($SQLCMD_BIN -S "$SERVER" -U "$USER" -P "$PASS" -d "$DB" -C -h -1 -W -s "" -Q \
+    "SELECT COUNT(*) FROM sys.database_principals WHERE name='supportly'" 2>/dev/null)
 
 if [ "$USER_EXISTS" = "0" ]; then
     echo "User 'supportly' does not exist"
     exit 1
 fi
 
-echo "SQL Server i baza 'supportly' są gotowe"
+echo ">>> SQL Server and database 'supportly' are ready."
 exit 0
