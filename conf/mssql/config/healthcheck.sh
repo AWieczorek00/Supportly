@@ -24,10 +24,10 @@ RETRY_COUNT=0
 #done
 
 # Sprawdź, czy baza 'supportly' jest ONLINE
-STATUS=$($SQLCMD_BIN -S "$SERVER" -U "$USER" -P "$PASS" -d "$DB" -h -1 -t 1 -Q \
+STATUS=$($SQLCMD_BIN -S "$SERVER" -U "$USER" -P "$PASS" -d "$DB" -C -h -1 -t 1 -Q \
     "SELECT state_desc FROM sys.databases WHERE name='supportly'" 2>/dev/null | tr -d '[:space:]')
     echo "Checking database state..."
-    $SQLCMD_BIN -S "$SERVER" -U "$USER" -P "$PASS" -d "$DB" -Q "SELECT state_desc FROM sys.databases WHERE name='supportly'"
+    $SQLCMD_BIN -S "$SERVER" -U "$USER" -P "$PASS" -d "$DB" -C -Q "SELECT state_desc FROM sys.databases WHERE name='supportly'"
 
 if [ "$STATUS" != "ONLINE" ]; then
     echo "Database 'supportly' is not ONLINE, current state: '$STATUS'"
@@ -35,7 +35,7 @@ if [ "$STATUS" != "ONLINE" ]; then
 fi
 
 # Sprawdź, czy użytkownik 'supportly' istnieje
-USER_EXISTS=$($SQLCMD_BIN -S "$SERVER" -U "$USER" -P "$PASS" -d "$DB" -h -1 -t 1 -Q \
+USER_EXISTS=$($SQLCMD_BIN -S "$SERVER" -U "$USER" -P "$PASS" -d "$DB" -C -h -1 -t 1 -Q \
     "SELECT COUNT(*) FROM sys.database_principals WHERE name='supportly'" 2>/dev/null | tr -d '[:space:]')
 
 if [ "$USER_EXISTS" = "0" ]; then
