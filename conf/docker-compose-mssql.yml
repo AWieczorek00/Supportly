@@ -14,7 +14,7 @@ services:
       MSSQL_SA_PASSWORD: Qwerty.1
       MSSQL_PID: Express
     healthcheck:
-      test: [ "CMD-SHELL", "/usr/config/healthcheck.sh" ]
+      test: [ "CMD-SHELL", "/mssql/config/healthcheck.sh" ]
       interval: 10s
       timeout: 5s
       retries: 20
