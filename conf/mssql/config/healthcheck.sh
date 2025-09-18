@@ -1,20 +1,27 @@
 #!/bin/sh
 # healthcheck.sh
 
-# Domyślne ustawienia
 SERVER="localhost"
 USER="sa"
 PASS="${SA_PASSWORD}"
 DB="master"
-
 SQLCMD_BIN="/opt/mssql-tools18/bin/sqlcmd"
 
-# Sprawdź czy SQL Server odpowiada
-$SQLCMD_BIN -S "$SERVER" -U "$USER" -P "$PASS" -d "$DB" -Q "SELECT 1" >/dev/null 2>&1
-if [ $? -ne 0 ]; then
-    echo "SQL Server is not responding"
-    exit 1
-fi
+MAX_RETRIES=30
+SLEEP_SECONDS=5
+RETRY_COUNT=0
+
+# Czekaj aż SQL Server odpowie
+until $SQLCMD_BIN -S "$SERVER" -U "$USER" -P "$PASS" -d "$DB" -Q "SELECT 1" >/dev/null 2>&1
+do
+    RETRY_COUNT=$((RETRY_COUNT+1))
+    if [ "$RETRY_COUNT" -ge "$MAX_RETRIES" ]; then
+        echo "SQL Server is not responding after $((MAX_RETRIES*SLEEP_SECONDS)) seconds"
+        exit 1
+    fi
+    echo "SQL Server not ready yet, retry $RETRY_COUNT/$MAX_RETRIES..."
+    sleep $SLEEP_SECONDS
+done
 
 # Sprawdź, czy baza 'supportly' jest ONLINE
 STATUS=$($SQLCMD_BIN -S "$SERVER" -U "$USER" -P "$PASS" -d "$DB" -h -1 -t 1 -Q \
@@ -34,5 +41,5 @@ if [ "$USER_EXISTS" = "0" ]; then
     exit 1
 fi
 
-# Wszystko OK
+echo "SQL Server i baza 'supportly' są gotowe"
 exit 0
