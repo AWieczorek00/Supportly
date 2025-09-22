@@ -1,5 +1,5 @@
 services:
-  mssql:
+  database-mssql:
     build:
       context: mssql
       dockerfile: Dockerfile
@@ -22,14 +22,13 @@ services:
       retries: 20
       start_period: 30s
 
-  backend:
+  backend-mssql:
     build:
       context: backend
       dockerfile: Dockerfile
       tags:
         - localhost:32000/conf-backend:latest
     image: localhost:32000/conf-backend:latest
-    container_name: spring-backend
     env_file:
       - ./backend/backend.env
     depends_on:
