@@ -177,12 +177,12 @@
 
     <profiles>
         <profile>
-            <id>dev</id>
+            <id>postgres</id>
             <properties>
-                <spring.profiles.active>dev</spring.profiles.active>
+                <spring.profiles.active>postgres</spring.profiles.active>
                 <flyway.baselineOnMigrate>true</flyway.baselineOnMigrate>
                 <flyway.baselineVersion>0.0.1</flyway.baselineVersion>
-                <flyway.locations>classpath:db/migration/dev</flyway.locations>
+                <flyway.locations>classpath:db/migration/postgres</flyway.locations>
             </properties>
             <dependencies>
                 <dependency>
