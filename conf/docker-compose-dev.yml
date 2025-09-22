@@ -1,10 +1,9 @@
 services:
-  postgres:
+  database-postgres:
     build:
       context: postgres
       dockerfile: Dockerfile
     image: localhost:32000/conf-postgres:latest
-    container_name: supportly-database
     privileged: true
     ports:
       - PORT_DB:5432
@@ -17,16 +16,15 @@ services:
       retries: 3
       start_period: 30s
 
-  backend:
+  backend-postgres:
     build:
       context: backend
       dockerfile: Dockerfile
     image: localhost:32000/conf-backend:latest
-    container_name: supportly-backend
     env_file:
       - ./backend/backend.env
     depends_on:
-      postgres:
+      database-postgres:
         condition: service_healthy
     ports:
       - PORT_BACKEND:8080
