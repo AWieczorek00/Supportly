@@ -1,7 +1,14 @@
 WHENEVER SQLERROR EXIT SQL.SQLCODE;
 
--- Nie ma potrzeby CONNECT, bo uruchamiasz z sysdba
+-- Połącz z CDB jako sysdba (to wykonuje Docker)
+-- Najpierw otwieramy PDB i zapisujemy jej stan
+ALTER PLUGGABLE DATABASE ORCLPDB1 OPEN;
+ALTER PLUGGABLE DATABASE ORCLPDB1 SAVE STATE;
 
+-- Teraz przełączamy się na PDB
+ALTER SESSION SET CONTAINER = ORCLPDB1;
+
+-- Tworzymy tablespace i użytkownika w PDB
 CREATE TABLESPACE SUPPORTLY_TS
     DATAFILE '/opt/oracle/oradata/ORCLCDB/supportly.dbf'
     SIZE 100M
@@ -15,8 +22,7 @@ CREATE USER supportly IDENTIFIED BY "Qwerty_1"
     PROFILE DEFAULT
     ACCOUNT UNLOCK;
 
-GRANT CONNECT TO supportly;
-GRANT RESOURCE TO supportly;
+GRANT CONNECT, RESOURCE TO supportly;
 GRANT UNLIMITED TABLESPACE TO supportly;
 GRANT ALTER ANY TABLE TO supportly;
 GRANT DELETE ANY TABLE TO supportly;
