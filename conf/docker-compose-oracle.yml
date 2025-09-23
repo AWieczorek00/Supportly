@@ -7,9 +7,13 @@ services:
         - localhost:32000/conf-oracle:latest
     image: localhost:32000/conf-oracle:latest
     ports:
-      - "1210:1521"   # dopasuj port do swojej konfiguracji
+      - PORT_DB:1521   # dopasuj port do swojej konfiguracji
     volumes:
       - ./init-script:/opt/oracle/scripts/setup
+    deploy:
+      resources:
+        limits:
+          memory: 4g
     healthcheck:
       test: >
         bash -c "
