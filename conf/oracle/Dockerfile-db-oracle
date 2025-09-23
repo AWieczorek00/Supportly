@@ -1,0 +1,7 @@
+FROM doctorkirk/oracle-19c
+
+
+# Konfiguracja bazy danych
+ENV ORACLE_CHARACTERSET AL32UTF8
+ENV ORACLE_PWD Qwerty_1
+COPY SUPPORTLY /opt/oracle/scripts/E2E/SUPPORTLY

@@ -27,8 +27,8 @@ services:
       context: backend
       dockerfile: Dockerfile
       tags:
-        - localhost:32000/conf-backend:latest
-    image: localhost:32000/conf-backend:latest
+        - localhost:32000/conf-backend-mssql:latest
+    image: localhost:32000/conf-backend-mssql:latest
     env_file:
       - ./backend/backend.env
     depends_on:

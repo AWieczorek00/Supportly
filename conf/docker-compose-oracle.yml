@@ -1,0 +1,40 @@
+services:
+  database-oracle:
+    build:
+      context: oracle
+      dockerfile: Dockerfile-db-oracle
+      tags:
+        - localhost:32000/conf-oracle:latest
+    image: localhost:32000/conf-oracle:latest
+    ports:
+      - "1199:1521"
+    volumes:
+      - ./init-script:/opt/oracle/scripts/setup
+
+  backend-oracle:
+    build:
+      context: backend
+      dockerfile: Dockerfile
+      tags:
+        - localhost:32000/conf-backend-oracle:latest
+    image: localhost:32000/conf-backend-oracle:latest
+    env_file:
+      - ./backend/backend.env
+    depends_on:
+      database-oracle:
+        condition: service_healthy
+    ports:
+      - PORT_BACKEND:8080
+
+  # frontend:
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile
+  #   image: localhost:32000/conf-frontend:latest
+  #   container_name: angular-frontend
+  #   environment:
+  #     BACKEND_URL: http://spring-backend:8080
+  #   depends_on:
+  #     - backend
+  #   ports:
+  #     - "4200:80"
