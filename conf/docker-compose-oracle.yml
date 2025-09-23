@@ -9,6 +9,7 @@ services:
     ports:
       - PORT_DB:1521   # dopasuj port do swojej konfiguracji
     volumes:
+      - ./oradata_new:/opt/oracle/oradata   # <- nowy wolumen na dane
       - ./init-script:/opt/oracle/scripts/setup
     deploy:
       resources:
