@@ -7,9 +7,19 @@ services:
         - localhost:32000/conf-oracle:latest
     image: localhost:32000/conf-oracle:latest
     ports:
-      - "PORT_DB:1521"
+      - "1210:1521"   # dopasuj port do swojej konfiguracji
     volumes:
       - ./init-script:/opt/oracle/scripts/setup
+    healthcheck:
+      test: >
+        bash -c "
+        export ORACLE_SID=ORCLCDB &&
+        echo 'SELECT NAME, OPEN_MODE FROM v$pdbs;' | sqlplus -s / as sysdba | grep ORCLPDB1 | grep OPEN
+        "
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
 
   backend-oracle:
     build:
