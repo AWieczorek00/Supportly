@@ -7,7 +7,7 @@ services:
         - localhost:32000/conf-oracle:latest
     image: localhost:32000/conf-oracle:latest
     ports:
-      - "1199:1521"
+      - "PORT_DB:1521"
     volumes:
       - ./init-script:/opt/oracle/scripts/setup
 

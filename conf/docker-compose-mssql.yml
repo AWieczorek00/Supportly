@@ -8,7 +8,7 @@ services:
     image: localhost:32000/conf-mssql:latest
     privileged: true
     ports:
-      - 1433:1433
+      - PORT_DB:1433
     volumes:
       - mssql-data:/var/opt/mssql
     environment:
