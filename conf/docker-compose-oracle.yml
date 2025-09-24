@@ -9,7 +9,6 @@ services:
     ports:
       - PORT_DB:1521
     volumes:
-#      - oracle-data:/opt/oracle/oradata   # <- named volume
       - ./init-script:/opt/oracle/scripts/setup
     deploy:
       resources:
@@ -17,17 +16,15 @@ services:
           memory: 4g
     healthcheck:
       test: >
-        bash -c "
-          export ORACLE_SID=ORCLCDB &&
-          echo 'SET PAGESIZE 0 FEEDBACK OFF VERIFY OFF HEADING OFF ECHO OFF
-          SELECT open_mode FROM v\$database;
-          ' | sqlplus -s / as sysdba | grep -iq 'READ[[:space:]]*WRITE'
-        "
+        bash -c "export ORACLE_SID=ORCLCDB &&
+                 set -o pipefail &&
+                 sqlplus -s / as sysdba <<< 'SET PAGESIZE 0 FEEDBACK OFF VERIFY OFF HEADING OFF ECHO OFF
+                 SELECT open_mode FROM v\$database;
+                 EXIT;' | grep -iq 'READ[[:space:]]*WRITE'"
       interval: 30s
       timeout: 10s
       retries: 30
-      start_period: 1200s   # daje Oracle dużo czasu na inicjalizację
-
+      start_period: 1200s
 
   backend-oracle:
     build:
