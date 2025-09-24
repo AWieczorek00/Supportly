@@ -15,7 +15,7 @@ services:
         limits:
           memory: 4g
     healthcheck:
-      test: ["CMD-SHELL", "echo \"WHENEVER SQLERROR EXIT SQL.SQLCODE; SELECT 1 FROM DUAL;\" | sqlplus -s supportly/Qwerty_1@//localhost:1521/ORCLCDB | grep -q 1"]
+      test: ["CMD-SHELL", "tnsping ORCLCDB || exit 1"]
       interval: 30s
       timeout: 10s
       start_period: 700s
