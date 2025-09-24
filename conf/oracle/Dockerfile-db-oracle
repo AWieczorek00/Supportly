@@ -5,5 +5,5 @@ FROM doctorkirk/oracle-19c
 ENV ORACLE_CHARACTERSET AL32UTF8
 ENV ORACLE_PWD Qwerty_1
 COPY SUPPORTLY /opt/oracle/scripts/E2E/SUPPORTLY
-COPY init-script/init_supportly.sql /opt/oracle/scripts/setup/
+COPY init-script/init_supportly.sql /opt/oracle/scripts/startup
 
