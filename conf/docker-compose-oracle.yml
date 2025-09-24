@@ -7,8 +7,9 @@ services:
         - localhost:32000/conf-oracle:latest
     image: localhost:32000/conf-oracle:latest
     ports:
-      - PORT_DB:1521   # dopasuj port do swojej konfiguracji
+      - PORT_DB:1521
     volumes:
+      - oracle-data:/opt/oracle/oradata   # <- named volume
       - ./init-script:/opt/oracle/scripts/setup
     deploy:
       resources:
@@ -52,3 +53,6 @@ services:
   #     - backend
   #   ports:
   #     - "4200:80"
+
+volumes:
+  oracle-data:
