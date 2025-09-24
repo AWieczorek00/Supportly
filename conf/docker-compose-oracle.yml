@@ -10,7 +10,7 @@ services:
       - PORT_DB:1521
     volumes:
       - oracle-data:/opt/oracle/oradata   # <- named volume
-      - ./init-script:/opt/oracle/scripts/setup
+#      - ./init-script:/opt/oracle/scripts/setup
     deploy:
       resources:
         limits:
