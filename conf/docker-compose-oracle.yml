@@ -18,13 +18,13 @@ services:
     healthcheck:
       test: >
         bash -c "
-        export ORACLE_SID=ORCLCDB &&
-        echo 'SELECT NAME, OPEN_MODE FROM v$pdbs;' | sqlplus -s / as sysdba | grep ORCLPDB1 | grep OPEN
+          export ORACLE_SID=ORCLCDB &&
+          echo 'SELECT status FROM v$instance;' | sqlplus -s / as sysdba | grep -iq OPEN
         "
       interval: 30s
       timeout: 10s
       retries: 30
-      start_period: 1200s
+      start_period: 120s
 
   backend-oracle:
     build:
