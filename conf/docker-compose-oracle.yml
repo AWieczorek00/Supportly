@@ -15,7 +15,7 @@ services:
         limits:
           memory: 4g
     healthcheck:
-      test: ["CMD-SHELL", "echo 'SELECT 1 FROM DUAL;' | sqlplus -s SYSTEM/$ORACLE_PWD@localhost:1521/ORCLCDB || exit 1"]
+      test: ["CMD-SHELL", "echo 'SELECT 1 FROM DUAL;' | sqlplus -s supportly/Qwerty_1@//localhost:1521/ORCLCDB || exit 1"]
       interval: 30s
       timeout: 10s
       start_period: 700s
