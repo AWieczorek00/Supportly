@@ -19,14 +19,14 @@ services:
       test: >
         bash -c "
           export ORACLE_SID=ORCLCDB &&
-          echo 'SET PAGESIZE 0 FEEDBACK OFF VERIFY OFF HEADING OFF ECHO OFF
-          SELECT OPEN_MODE FROM v$pdbs WHERE name = ''ORCLPDB1'';
-          ' | sqlplus -s / as sysdba | grep -iq 'READ WRITE'
+          echo \"SET PAGESIZE 0 FEEDBACK OFF VERIFY OFF HEADING OFF ECHO OFF
+          SELECT open_mode FROM v\$database;
+          \" | sqlplus -s / as sysdba | grep -iq 'READ WRITE'
         "
       interval: 30s
       timeout: 10s
       retries: 30
-      start_period: 120s
+  start_period: 120s
 
   backend-oracle:
     build:
