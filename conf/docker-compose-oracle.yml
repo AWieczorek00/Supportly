@@ -19,17 +19,15 @@ services:
       test: >
         bash -c "
           export ORACLE_SID=ORCLCDB &&
-          result=$(echo 'SET PAGESIZE 0 FEEDBACK OFF VERIFY OFF HEADING OFF ECHO OFF
-          SELECT open_mode FROM v$database;
-          ' | sqlplus -s / as sysdba | grep -i 'READ WRITE');
-          if [ -z \"$result\" ]; then
-            exit 1;
-          fi
+          echo 'SET PAGESIZE 0 FEEDBACK OFF VERIFY OFF HEADING OFF ECHO OFF
+          SELECT open_mode FROM v\$database;
+          ' | sqlplus -s / as sysdba | grep -iq 'READ[[:space:]]*WRITE'
         "
       interval: 30s
       timeout: 10s
       retries: 30
-      start_period: 1200s   # <-- zwiększ start_period
+      start_period: 1200s   # daje Oracle dużo czasu na inicjalizację
+
 
   backend-oracle:
     build:
