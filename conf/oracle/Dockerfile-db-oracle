@@ -7,3 +7,6 @@ ENV ORACLE_PWD Qwerty_1
 COPY SUPPORTLY /opt/oracle/scripts/E2E/SUPPORTLY
 COPY init-script/init_supportly.sql /opt/oracle/scripts/startup
 
+RUN chmod +x /opt/oracle/scripts/E2E/SUPPORTLY/check_supportly.sh
+
+
