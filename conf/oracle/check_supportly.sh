@@ -1,0 +1,7 @@
+#!/bin/bash
+sqlplus -s supportly/Qwerty_1@//localhost:1521/ORCLCDB <<EOF
+SET PAGESIZE 0 FEEDBACK OFF VERIFY OFF HEADING OFF ECHO OFF
+WHENEVER SQLERROR EXIT SQL.SQLCODE
+SELECT username FROM dba_users WHERE username='SUPPORTLY';
+EXIT;
+EOF

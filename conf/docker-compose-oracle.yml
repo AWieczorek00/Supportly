@@ -15,11 +15,7 @@ services:
         limits:
           memory: 4g
     healthcheck:
-      test: >
-        bash -c "echo \"SET PAGESIZE 0 FEEDBACK OFF VERIFY OFF HEADING OFF ECHO OFF;
-        WHENEVER SQLERROR EXIT SQL.SQLCODE;
-        SELECT username FROM dba_users WHERE username='SUPPORTLY';
-        EXIT;\" | sqlplus -s supportly/Qwerty_1@//localhost:1521/ORCLCDB | grep -iq '^SUPPORTLY$'"
+      test: ["bash", "-c", "/opt/oracle/scripts/setup/check_supportly.sh | grep -iq '^SUPPORTLY$'"]
       interval: 30s
       timeout: 10s
       retries: 30
