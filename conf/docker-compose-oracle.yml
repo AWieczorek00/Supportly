@@ -15,11 +15,11 @@ services:
         limits:
           memory: 4g
     healthcheck:
-      test: ["CMD-SHELL", "/opt/oracle/scripts/E2E/SUPPORTLY/check_supportly.sh | grep -iq '^SUPPORTLY$'"]
-      interval: 30s
-      timeout: 10s
-      retries: 30
-      start_period: 1200s
+      test: ["CMD-SHELL", "ls /opt/oracle/oradata/ORCLCDB/supportly.dbf"]
+      interval: 10s
+      timeout: 5s
+      retries: 60
+      start_period: 20m
 
 
 
