@@ -20,7 +20,7 @@ services:
           echo \"WHENEVER SQLERROR EXIT SQL.SQLCODE;
           SET PAGESIZE 0 FEEDBACK OFF VERIFY OFF HEADING OFF ECHO OFF;
           SELECT username FROM dba_users WHERE username = 'SUPPORTLY'; EXIT;\" \
-          | sqlplus -s supportly/Qwerty_1@//localhost:1521/ORCLPDB1 \
+          | sqlplus -s supportly/Qwerty_1@//localhost:1521/ORCLCDB \
           | grep -iq 'SUPPORTLY'
         "
       interval: 30s
