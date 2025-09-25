@@ -16,18 +16,19 @@ services:
           memory: 4g
     healthcheck:
       test: >
-        bash -c "
-          export ORACLE_SID=ORCLCDB
-          output=$(echo \"WHENEVER SQLERROR EXIT SQL.SQLCODE;
-          SET PAGESIZE 0 FEEDBACK OFF VERIFY OFF HEADING OFF ECHO OFF;
-          SELECT username FROM dba_users WHERE username = 'SUPPORTLY';
-          EXIT;\" | sqlplus -s supportly/Qwerty_1@//localhost:1521/ORCLCDB)
-          echo \"$output\" | grep -iq '^SUPPORTLY$'
-        "
+        bash -c "sqlplus -s supportly/Qwerty_1@//localhost:1521/ORCLCDB <<EOF
+        SET PAGESIZE 0 FEEDBACK OFF VERIFY OFF HEADING OFF ECHO OFF
+        WHENEVER SQLERROR EXIT SQL.SQLCODE
+        SELECT username FROM dba_users WHERE username='SUPPORTLY';
+        EXIT;
+        EOF
+        " | grep -iq '^SUPPORTLY$'"
       interval: 30s
       timeout: 10s
       retries: 30
       start_period: 1200s
+
+
 
   backend-oracle:
     build:
