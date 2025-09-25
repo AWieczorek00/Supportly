@@ -17,10 +17,11 @@ services:
     healthcheck:
       test: >
         bash -c "
-          export ORACLE_SID=ORCLCDB &&
-          sqlplus -s / as sysdba <<< \"SET PAGESIZE 0 FEEDBACK OFF VERIFY OFF HEADING OFF ECHO OFF
-          SELECT username FROM dba_users WHERE username = 'SUPPORTLY';
-          EXIT;\" | grep -iq 'SUPPORTLY'
+          echo \"WHENEVER SQLERROR EXIT SQL.SQLCODE;
+          SET PAGESIZE 0 FEEDBACK OFF VERIFY OFF HEADING OFF ECHO OFF;
+          SELECT username FROM dba_users WHERE username = 'SUPPORTLY'; EXIT;\" \
+          | sqlplus -s supportly/Qwerty_1@//localhost:1521/ORCLPDB1 \
+          | grep -iq 'SUPPORTLY'
         "
       interval: 30s
       timeout: 10s
