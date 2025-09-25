@@ -15,7 +15,7 @@ services:
         limits:
           memory: 4g
     healthcheck:
-      test: ["CMD-SHELL", "/opt/oracle/scripts/setup/check_supportly.sh | grep -iq '^SUPPORTLY$'"]
+      test: ["CMD-SHELL", "/opt/oracle/scripts/E2E/SUPPORTLY/check_supportly.sh | grep -iq '^SUPPORTLY$'"]
       interval: 30s
       timeout: 10s
       retries: 30
