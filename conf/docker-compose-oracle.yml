@@ -15,11 +15,17 @@ services:
         limits:
           memory: 4g
     healthcheck:
-      test: ["CMD-SHELL", "tnsping ORCLCDB || exit 1"]
+      test: >
+        bash -c "
+          export ORACLE_SID=ORCLCDB &&
+          sqlplus -s / as sysdba <<< \"SET PAGESIZE 0 FEEDBACK OFF VERIFY OFF HEADING OFF ECHO OFF
+          SELECT username FROM dba_users WHERE username = 'SUPPORTLY';
+          EXIT;\" | grep -iq 'SUPPORTLY'
+        "
       interval: 30s
       timeout: 10s
-      start_period: 700s
-      retries: 50
+      retries: 30
+      start_period: 1200s
 
   backend-oracle:
     build:
