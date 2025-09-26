@@ -35,13 +35,19 @@ services:
 
 
 
-  #  frontend: ten działa
-  #    build:
-  #      context: ..
-  #      dockerfile: conf/frontend/Dockerfile
-  #    container_name: supportly-frontend
-  #    ports:
-  #      - "4200:80"
+  frontend-postgres:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      tags:
+        - localhost:32000/conf-frontend-postgres:latest
+    image: localhost:32000/conf-frontend-postgres:latest
+    environment:
+      BACKEND_URL: URL_BACKEND
+    depends_on:
+      - backend-oracle
+    ports:
+      - PORT_FRONTEND:4200
 
 
   # frontend:
