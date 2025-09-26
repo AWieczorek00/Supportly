@@ -42,12 +42,10 @@ services:
       tags:
         - localhost:32000/conf-frontend-postgres:latest
     image: localhost:32000/conf-frontend-postgres:latest
-    environment:
-      BACKEND_URL: URL_BACKEND
     depends_on:
       - backend-postgres
     ports:
-      - PORT_FRONTEND:4200
+      - PORT_FRONTEND:80
 
 
   # frontend:
