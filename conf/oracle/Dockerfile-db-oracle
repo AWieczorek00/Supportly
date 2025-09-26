@@ -1,4 +1,4 @@
-FROM doctorkirk/oracle-19c
+FROM doctorkirk/oracle-19c:latest
 
 
 # Konfiguracja bazy danych
