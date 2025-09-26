@@ -45,7 +45,7 @@ services:
     environment:
       BACKEND_URL: URL_BACKEND
     depends_on:
-      - backend-oracle
+      - backend-postgres
     ports:
       - PORT_FRONTEND:4200
 
