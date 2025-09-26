@@ -10,7 +10,7 @@ RUN npm install && npm run build -- --output-path=dist/supportly-frontend --base
 FROM nginx:stable-alpine
 
 # ⬇️ KLUCZOWA POPRAWKA TUTAJ: Kopiujemy zawartość katalogu 'browser'
-COPY --from=builder conf/supportly-frontend/browser/ /usr/share/nginx/html
+COPY --from=builder conf/frontend/supportly-frontend/browser/ /usr/share/nginx/html
 #COPY src/assets/nginx.conf /etc/nginx/conf.d/default.conf
 COPY conf/frontend/nginx.conf /etc/nginx/conf.d/default.conf
 
