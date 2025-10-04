@@ -125,7 +125,7 @@ public class BaseE2ETest {
     }
 
     protected void loginAs(String email, String password) {
-        openApp("/login");
+        openApp("/login/");
         type(By.id("email"), email);
         type(By.id("password"), password);
         click(By.cssSelector("button[type='submit']"));

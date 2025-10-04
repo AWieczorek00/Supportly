@@ -20,7 +20,7 @@ public class EmployeeTest extends TestDatabaseSetup {
         loginAs("super.admin@gmail.com", "123456");
         Thread.sleep(500); // czekaj 0.5 sekundy
 
-        openApp("/employee/list");
+        openApp("/employee/list/");
         Thread.sleep(500); // czekaj 0.5 sekundy// true = headless
     }
 
