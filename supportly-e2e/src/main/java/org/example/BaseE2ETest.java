@@ -12,13 +12,14 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.io.File;
 import java.net.URL;
+import java.nio.file.Files;
 import java.time.Duration;
 
 public class BaseE2ETest {
 
-    protected WebDriver driver;
+    protected RemoteWebDriver driver;
     protected WebDriverWait wait;
-
+    private File tempUserDataDir;
     // URL aplikacji, można pobrać z env
     protected final String BASE_URL = System.getenv().getOrDefault("BASE_URL", "http://localhost:4200");
 
@@ -50,30 +51,49 @@ public class BaseE2ETest {
 
     protected void initDriver(boolean headless) throws Exception {
         // Konfiguracja EdgeOptions
+
         EdgeOptions options = new EdgeOptions();
         if (headless) {
-            options.addArguments("--headless=new");  // nowy tryb headless
+            options.addArguments("--headless=new");
             options.addArguments("--disable-gpu");
             options.addArguments("--no-sandbox");
             options.addArguments("--disable-dev-shm-usage");
             options.addArguments("--window-size=1920,1080");
         }
 
-        String userDataDir = "/tmp/edge-profile-" + System.currentTimeMillis();
-        options.addArguments("--user-data-dir=" + userDataDir);
+        // Tworzymy unikalny katalog profilu dla każdej sesji
+        tempUserDataDir = Files.createTempDirectory("edge-profile-").toFile();
+        tempUserDataDir.deleteOnExit();
+        options.addArguments("--user-data-dir=" + tempUserDataDir.getAbsolutePath());
 
         // Adres hosta, na którym działa EdgeDriver (zmień na swój IP / hostname)
         String remoteUrl = "http://192.168.0.81:9515";
 
         // Tworzymy RemoteWebDriver zamiast lokalnego EdgeDriver
-        driver = new RemoteWebDriver(new URL(remoteUrl), options);
 
-        // Ustawienie WebDriverWait
+        driver = new RemoteWebDriver(new URL(remoteUrl), options);
         wait = new WebDriverWait(driver, Duration.ofSeconds(10));
     }
 
     protected void quitDriver() {
-        if (driver != null) driver.quit();
+        if (driver != null) {
+            driver.quit();
+            driver = null;
+        }
+        if (tempUserDataDir != null && tempUserDataDir.exists()) {
+            try {
+                deleteDirectoryRecursively(tempUserDataDir);
+            } catch (Exception ignored) {}
+        }
+    }
+
+    private void deleteDirectoryRecursively(File dir) throws Exception {
+        if (dir.isDirectory()) {
+            for (File file : dir.listFiles()) {
+                deleteDirectoryRecursively(file);
+            }
+        }
+        dir.delete();
     }
 
     /**
