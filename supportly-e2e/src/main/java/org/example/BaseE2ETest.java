@@ -100,7 +100,7 @@ public class BaseE2ETest {
      * Otwiera stronę względem BASE_URL
      */
     protected void openApp(String path) {
-        driver.get(BASE_URL + path);
+        driver.get(BASE_URL + path + "/");
     }
 
     /**
@@ -125,7 +125,7 @@ public class BaseE2ETest {
     }
 
     protected void loginAs(String email, String password) {
-        openApp("/login/");
+        openApp("/login");
         type(By.id("email"), email);
         type(By.id("password"), password);
         click(By.cssSelector("button[type='submit']"));
