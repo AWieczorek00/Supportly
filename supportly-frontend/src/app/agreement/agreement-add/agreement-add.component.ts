@@ -15,6 +15,7 @@ import {HttpClientService} from '../../client/service/http-client.service';
 import {Client} from '../../order/Client';
 import {HttpAgreementService} from '../service/http-agreement.service';
 import {Agreement} from '../agreement';
+import {Router} from '@angular/router';
 
 export const MY_DATE_FORMATS = {
   parse: {
@@ -60,7 +61,7 @@ export const MY_DATE_FORMATS = {
 export class AgreementAddComponent implements OnInit {
 
 
-  constructor(private service: HttpClientService,private cd: ChangeDetectorRef, private agreementService:HttpAgreementService) {}
+  constructor(private service: HttpClientService,private cd: ChangeDetectorRef, private agreementService:HttpAgreementService,private router: Router) {}
 
   agreementForm = new FormGroup({
     name: new FormControl(''),
@@ -102,7 +103,7 @@ export class AgreementAddComponent implements OnInit {
       this.agreementService.add(agreement).subscribe({
         next: (res) => {
           console.log('Umowa dodana:', res);
-          this.agreementForm.reset();
+          this.router.navigate(['/agreement/list']);
         },
         error: (err) => {
           console.error('Błąd przy dodawaniu umowy:', err);
