@@ -6,6 +6,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.edge.EdgeOptions;
+import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -26,14 +27,29 @@ public class BaseE2ETest {
      *
      * @param headless true = w tle, false = normalny tryb
      */
+//    protected void initDriver(boolean headless) throws Exception {
+//        URL driverUrl = getClass().getClassLoader().getResource("msedgedriver");
+//        if (driverUrl == null) throw new RuntimeException("Nie znaleziono msedgedriver.exe w resources!");
+//
+//        File driverFile = new File(driverUrl.toURI());
+//        driverFile.setExecutable(true);
+//        System.setProperty("webdriver.edge.driver", driverFile.getAbsolutePath());
+//
+//        EdgeOptions options = new EdgeOptions();
+//        if (headless) {
+//            options.addArguments("--headless=new");  // nowy tryb headless
+//            options.addArguments("--disable-gpu");
+//            options.addArguments("--no-sandbox");
+//            options.addArguments("--disable-dev-shm-usage");
+//            options.addArguments("--window-size=1920,1080");
+//        }
+//
+//        driver = new EdgeDriver(options);
+//        wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+//    }
+
     protected void initDriver(boolean headless) throws Exception {
-        URL driverUrl = getClass().getClassLoader().getResource("msedgedriver");
-        if (driverUrl == null) throw new RuntimeException("Nie znaleziono msedgedriver.exe w resources!");
-
-        File driverFile = new File(driverUrl.toURI());
-        driverFile.setExecutable(true);
-        System.setProperty("webdriver.edge.driver", driverFile.getAbsolutePath());
-
+        // Konfiguracja EdgeOptions
         EdgeOptions options = new EdgeOptions();
         if (headless) {
             options.addArguments("--headless=new");  // nowy tryb headless
@@ -43,7 +59,13 @@ public class BaseE2ETest {
             options.addArguments("--window-size=1920,1080");
         }
 
-        driver = new EdgeDriver(options);
+        // Adres hosta, na którym działa EdgeDriver (zmień na swój IP / hostname)
+        String remoteUrl = "http://192.168.0.81:9515";
+
+        // Tworzymy RemoteWebDriver zamiast lokalnego EdgeDriver
+        driver = new RemoteWebDriver(new URL(remoteUrl), options);
+
+        // Ustawienie WebDriverWait
         wait = new WebDriverWait(driver, Duration.ofSeconds(10));
     }
 
