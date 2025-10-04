@@ -27,7 +27,7 @@ public class BaseE2ETest {
      * @param headless true = w tle, false = normalny tryb
      */
     protected void initDriver(boolean headless) throws Exception {
-        URL driverUrl = getClass().getClassLoader().getResource("msedgedriver.exe");
+        URL driverUrl = getClass().getClassLoader().getResource("msedgedriver");
         if (driverUrl == null) throw new RuntimeException("Nie znaleziono msedgedriver.exe w resources!");
 
         File driverFile = new File(driverUrl.toURI());
