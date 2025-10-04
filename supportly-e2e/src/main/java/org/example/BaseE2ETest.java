@@ -31,6 +31,7 @@ public class BaseE2ETest {
         if (driverUrl == null) throw new RuntimeException("Nie znaleziono msedgedriver.exe w resources!");
 
         File driverFile = new File(driverUrl.toURI());
+        driverFile.setExecutable(true);
         System.setProperty("webdriver.edge.driver", driverFile.getAbsolutePath());
 
         EdgeOptions options = new EdgeOptions();
