@@ -59,6 +59,9 @@ public class BaseE2ETest {
             options.addArguments("--window-size=1920,1080");
         }
 
+        String userDataDir = "/tmp/edge-profile-" + System.currentTimeMillis();
+        options.addArguments("--user-data-dir=" + userDataDir);
+
         // Adres hosta, na którym działa EdgeDriver (zmień na swój IP / hostname)
         String remoteUrl = "http://192.168.0.81:9515";
 
