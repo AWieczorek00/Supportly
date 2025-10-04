@@ -19,7 +19,7 @@ public class TaskTest extends TestDatabaseSetup {
         loginAs("super.admin@gmail.com", "123456");
         Thread.sleep(500); // czekaj 0.5 sekundy
 
-        openApp("/task/list");
+        openApp("/task/list/");
         Thread.sleep(500); // czekaj 0.5 sekundy// true = headless
     }
 
