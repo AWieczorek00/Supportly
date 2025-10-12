@@ -2,7 +2,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -16,7 +15,7 @@ public class EmployeeTest extends TestDatabaseSetup {
 
     @BeforeEach
     void setup() throws Exception {
-        initDriver(true);
+        initDriver(false);
         loginAs("super.admin@gmail.com", "123456");
         Thread.sleep(500); // czekaj 0.5 sekundy
 
@@ -138,7 +137,8 @@ public class EmployeeTest extends TestDatabaseSetup {
 
 
         WebElement saveButton = dialog.findElement(By.cssSelector("button.mat-mdc-unelevated-button.mat-primary"));
-        saveButton.click();;
+        saveButton.click();
+        ;
 
         Thread.sleep(500);
 
@@ -150,16 +150,18 @@ public class EmployeeTest extends TestDatabaseSetup {
         nameInput.sendKeys("Nita");
 
 
-        // Klikamy przycisk Szukaj
         WebElement searchButton = wait.until(
                 ExpectedConditions.elementToBeClickable(By.cssSelector("button[type='submit']"))
         );
+
+        wait.until(ExpectedConditions.invisibilityOfElementLocated(
+                By.cssSelector(".cdk-overlay-backdrop.cdk-overlay-backdrop-showing")
+        ));
+
         searchButton.click();
 
-        // Czekamy aż tabela się pojawi
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("table.mat-mdc-table tr[mat-row]")));
 
-        // Pobieramy wiersze tabeli
         List<WebElement> rows = driver.findElements(By.cssSelector("table.mat-mdc-table tr[mat-row]"));
 
         boolean found = rows.stream()
