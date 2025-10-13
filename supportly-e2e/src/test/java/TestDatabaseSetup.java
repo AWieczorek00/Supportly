@@ -14,12 +14,13 @@ public class TestDatabaseSetup extends BaseE2ETest {
 
     @BeforeAll
     static void setupDatabase() {
+        if(PROFILE.toLowerCase().equals("mssql")) {
+            URL=URL+";databaseName=supportly;encrypt=false";
+        }
         System.out.println("Url= "+URL);
         System.out.println("Profil= "+PROFILE);
 
-        if(PROFILE.toLowerCase().equals("postgres")) {
-            URL=URL+";databaseName=supportly;encrypt=false";
-        }
+
         try (Connection conn = DriverManager.getConnection(URL, USER, PASS);
              Statement stmt = conn.createStatement()) {
 
