@@ -6,7 +6,7 @@ import java.time.LocalDate;
 
 public class TestDatabaseSetup extends BaseE2ETest {
 
-    protected static final String URL = System.getenv().getOrDefault("BASE_URL_DATABASE", "jdbc:sqlserver://192.168.0.81:1110;databaseName=supportly;encrypt=false");
+    protected static  String URL = System.getenv().getOrDefault("BASE_URL_DATABASE", "jdbc:sqlserver://192.168.0.81:1110;databaseName=supportly;encrypt=false");
     protected static final String PROFILE = System.getenv().getOrDefault("PROFILE","mssql"); // "postgres", "mssql", "oracle"
 
     private static final String USER = "supportly";
@@ -15,7 +15,11 @@ public class TestDatabaseSetup extends BaseE2ETest {
     @BeforeAll
     static void setupDatabase() {
         System.out.println("Url= "+URL);
-        System.out.println("Profil= "+URL);
+        System.out.println("Profil= "+PROFILE);
+
+        if(PROFILE.toLowerCase().equals("postgres")) {
+            URL=URL+";databaseName=supportly;encrypt=false";
+        }
         try (Connection conn = DriverManager.getConnection(URL, USER, PASS);
              Statement stmt = conn.createStatement()) {
 
@@ -125,8 +129,7 @@ public class TestDatabaseSetup extends BaseE2ETest {
 
         } catch (SQLException e) {
             e.printStackTrace();
-            System.out.println("Url= "+URL);
-            System.out.println("Profil= "+URL);
+
             throw new RuntimeException("❌ Błąd przy przygotowaniu bazy danych.");
         }
     }
