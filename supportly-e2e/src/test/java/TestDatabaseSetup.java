@@ -14,6 +14,8 @@ public class TestDatabaseSetup extends BaseE2ETest {
 
     @BeforeAll
     static void setupDatabase() {
+        System.out.println("Url= "+URL);
+        System.out.println("Profil= "+URL);
         try (Connection conn = DriverManager.getConnection(URL, USER, PASS);
              Statement stmt = conn.createStatement()) {
 
@@ -123,6 +125,8 @@ public class TestDatabaseSetup extends BaseE2ETest {
 
         } catch (SQLException e) {
             e.printStackTrace();
+            System.out.println("Url= "+URL);
+            System.out.println("Profil= "+URL);
             throw new RuntimeException("❌ Błąd przy przygotowaniu bazy danych.");
         }
     }
