@@ -42,10 +42,10 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       tags:
-        - localhost:32000/conf-frontend-postgres:latest
-    image: localhost:32000/conf-frontend-postgres:latest
+        - localhost:32000/conf-frontend-mssql:latest
+    image: localhost:32000/conf-frontend-mssql:latest
     depends_on:
-      - backend-postgres
+      - backend-mssql
     ports:
       - PORT_FRONTEND:80
 
