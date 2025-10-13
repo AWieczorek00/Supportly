@@ -8,6 +8,8 @@ public class TestDatabaseSetup extends BaseE2ETest {
 
     protected static  String URL = System.getenv().getOrDefault("BASE_URL_DATABASE", "jdbc:sqlserver://192.168.0.81:1110;databaseName=supportly;encrypt=false");
     protected static final String PROFILE = System.getenv().getOrDefault("PROFILE","mssql"); // "postgres", "mssql", "oracle"
+    protected static final String BASE_URL = System.getenv().getOrDefault("BASE_URL", "http://localhost:4200");
+
 
     private static final String USER = "supportly";
     private static final String PASS = "Qwerty.1";
@@ -19,6 +21,7 @@ public class TestDatabaseSetup extends BaseE2ETest {
         }
         System.out.println("Url= "+URL);
         System.out.println("Profil= "+PROFILE);
+        System.out.println("Front_url= "+BASE_URL);
 
 
         try (Connection conn = DriverManager.getConnection(URL, USER, PASS);
