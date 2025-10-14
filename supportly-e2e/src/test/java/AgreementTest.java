@@ -15,7 +15,7 @@ public class AgreementTest extends TestDatabaseSetup {
 
     @BeforeEach
     void setup() throws Exception {
-        initDriver(true);
+        initDriver(false);
         loginAs("super.admin@gmail.com", "123456");
         Thread.sleep(500); // czekaj 0.5 sekundy
 
@@ -194,6 +194,8 @@ public class AgreementTest extends TestDatabaseSetup {
 
         // Pobieramy wiersze tabeli
         List<WebElement> rows = driver.findElements(By.cssSelector("table.mat-mdc-table tr[mat-row]"));
+
+        Thread.sleep(500);
 
         boolean found = rows.stream()
                 .anyMatch(row -> row.getText().contains("GreenData Sp. z o.o."));

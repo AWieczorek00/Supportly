@@ -73,27 +73,81 @@ public class TestDatabaseSetup extends BaseE2ETest {
                 case "oracle" -> {
                     stmt.executeUpdate("INSERT INTO company (id, name, nip, address_id, phone_number, email, regon) VALUES (company_seq.NEXTVAL, 'Tech Solutions Sp. z o.o.', '1234567890', 1, '123456789', 'kontakt@techsolutions.pl', '987654321')");
                     stmt.executeUpdate("INSERT INTO company (id, name, nip, address_id, phone_number, email, regon) VALUES (company_seq.NEXTVAL, 'InnovaTech S.A.', '9876543210', 2, '987654321', 'biuro@innovatech.pl', '123456789')");
+                    stmt.executeUpdate("INSERT INTO company (id, name, nip, address_id, phone_number, email, regon) VALUES (company_seq.NEXTVAL, 'SoftCom S.C.', '1112223334', 3, '222333444', 'kontakt@softcom.pl', '567890123')");
+                    stmt.executeUpdate("INSERT INTO company (id, name, nip, address_id, phone_number, email, regon) VALUES (company_seq.NEXTVAL, 'NextGen IT Sp. z o.o.', '5556667778', 4, '333444555', 'info@nextgenit.pl', '345678901')");
+                    stmt.executeUpdate("INSERT INTO company (id, name, nip, address_id, phone_number, email, regon) VALUES (company_seq.NEXTVAL, 'GreenData Sp. z o.o.', '4445556667', 5, '444555666', 'kontakt@greendata.pl', '789012345')");
+
+
+
                 }
                 case "postgres" -> {
                     stmt.executeUpdate("INSERT INTO company (id, name, nip, address_id, phone_number, email, regon) VALUES (1, 'Tech Solutions Sp. z o.o.', '1234567890', 1, '123456789', 'kontakt@techsolutions.pl', '987654321')");
                     stmt.executeUpdate("INSERT INTO company (id, name, nip, address_id, phone_number, email, regon) VALUES (2, 'InnovaTech S.A.', '9876543210', 2, '987654321', 'biuro@innovatech.pl', '123456789')");
+                    stmt.executeUpdate("INSERT INTO company (id, name, nip, address_id, phone_number, email, regon) VALUES (3, 'SoftCom S.C.', '1112223334', 3, '222333444', 'kontakt@softcom.pl', '567890123')");
+                    stmt.executeUpdate("INSERT INTO company (id, name, nip, address_id, phone_number, email, regon) VALUES (4, 'NextGen IT Sp. z o.o.', '5556667778', 4, '333444555', 'info@nextgenit.pl', '345678901')");
+                    stmt.executeUpdate("INSERT INTO company (id, name, nip, address_id, phone_number, email, regon) VALUES (5, 'GreenData Sp. z o.o.', '4445556667', 5, '444555666', 'kontakt@greendata.pl', '789012345')");
+
                 }
                 case "mssql" -> {
                     stmt.executeUpdate("SET IDENTITY_INSERT company ON");
                     stmt.executeUpdate("INSERT INTO company (id, name, nip, address_id, phone_number, email, regon) VALUES (1, 'Tech Solutions Sp. z o.o.', '1234567890', 1, '123456789', 'kontakt@techsolutions.pl', '987654321')");
                     stmt.executeUpdate("INSERT INTO company (id, name, nip, address_id, phone_number, email, regon) VALUES (2, 'InnovaTech S.A.', '9876543210', 2, '987654321', 'biuro@innovatech.pl', '123456789')");
+                    stmt.executeUpdate("INSERT INTO company (id, name, nip, address_id, phone_number, email, regon) VALUES (3, 'SoftCom S.C.', '1112223334', 3, '222333444', 'kontakt@softcom.pl', '567890123')");
+                    stmt.executeUpdate("INSERT INTO company (id, name, nip, address_id, phone_number, email, regon) VALUES (4, 'NextGen IT Sp. z o.o.', '5556667778', 4, '333444555', 'info@nextgenit.pl', '345678901')");
+                    stmt.executeUpdate("INSERT INTO company (id, name, nip, address_id, phone_number, email, regon) VALUES (5, 'GreenData Sp. z o.o.', '4445556667', 5, '444555666', 'kontakt@greendata.pl', '789012345')");
                     stmt.executeUpdate("SET IDENTITY_INSERT company OFF");
                 }
             }
 
             // --- insert client ---
             switch (PROFILE.toLowerCase()) {
-                case "oracle" -> stmt.executeUpdate("INSERT INTO client (id, first_name, second_name, phone_number, email, company_id, type) VALUES (client_seq.NEXTVAL, 'Jan', 'Kowalski', '501234567', 'jan.kowalski@example.com', 1, 'B2B')");
-                case "postgres" -> stmt.executeUpdate("INSERT INTO client (id, first_name, second_name, phone_number, email, company_id, type) VALUES (1, 'Jan', 'Kowalski', '501234567', 'jan.kowalski@example.com', 1, 'B2B')");
+                case "oracle" -> {
+                    stmt.executeUpdate("INSERT INTO client (id, first_name, second_name, phone_number, email, company_id, type) VALUES (company_seq.NEXTVAL, 'Jan', 'Kowalski', '501234567', 'jan.kowalski@example.com', 1, 'B2B')");
+                    stmt.executeUpdate("INSERT INTO client (id, first_name, second_name, phone_number, email, company_id, type) VALUES (company_seq.NEXTVAL, 'Anna', 'Nowak', '502345678', 'anna.nowak@example.com', 2, 'B2C')");
+                    stmt.executeUpdate("INSERT INTO client (id, first_name, second_name, phone_number, email, company_id, type) VALUES (company_seq.NEXTVAL, 'Piotr', 'Wiśniewski', '503456789', 'piotr.wisniewski@example.com', 3, 'B2B')");
+                    stmt.executeUpdate("INSERT INTO client (id, first_name, second_name, phone_number, email, company_id, type) VALUES (company_seq.NEXTVAL, 'Katarzyna', 'Mazur', '504567890', 'katarzyna.mazur@example.com', 4, 'B2C')");
+                    stmt.executeUpdate("INSERT INTO client (id, first_name, second_name, phone_number, email, company_id, type) VALUES (company_seq.NEXTVAL, 'Marek', 'Wójcik', '505678901', 'marek.wojcik@example.com', 5, 'B2B')");
+                }
+                case "postgres" -> {
+                    stmt.executeUpdate("INSERT INTO client (id, first_name, second_name, phone_number, email, company_id, type) VALUES (1, 'Jan', 'Kowalski', '501234567', 'jan.kowalski@example.com', 1, 'B2B')");
+                    stmt.executeUpdate("INSERT INTO client (id, first_name, second_name, phone_number, email, company_id, type) VALUES (2, 'Anna', 'Nowak', '502345678', 'anna.nowak@example.com', 2, 'B2C')");
+                    stmt.executeUpdate("INSERT INTO client (id, first_name, second_name, phone_number, email, company_id, type) VALUES (3, 'Piotr', 'Wiśniewski', '503456789', 'piotr.wisniewski@example.com', 3, 'B2B')");
+                    stmt.executeUpdate("INSERT INTO client (id, first_name, second_name, phone_number, email, company_id, type) VALUES (4, 'Katarzyna', 'Mazur', '504567890', 'katarzyna.mazur@example.com', 4, 'B2C')");
+                    stmt.executeUpdate("INSERT INTO client (id, first_name, second_name, phone_number, email, company_id, type) VALUES (5, 'Marek', 'Wójcik', '505678901', 'marek.wojcik@example.com', 5, 'B2B')");
+                }
                 case "mssql" -> {
                     stmt.executeUpdate("SET IDENTITY_INSERT client ON");
                     stmt.executeUpdate("INSERT INTO client (id, first_name, second_name, phone_number, email, company_id, type) VALUES (1, 'Jan', 'Kowalski', '501234567', 'jan.kowalski@example.com', 1, 'B2B')");
+                    stmt.executeUpdate("INSERT INTO client (id, first_name, second_name, phone_number, email, company_id, type) VALUES (2, 'Anna', 'Nowak', '502345678', 'anna.nowak@example.com', 2, 'B2C')");
+                    stmt.executeUpdate("INSERT INTO client (id, first_name, second_name, phone_number, email, company_id, type) VALUES (3, 'Piotr', 'Wiśniewski', '503456789', 'piotr.wisniewski@example.com', 3, 'B2B')");
+                    stmt.executeUpdate("INSERT INTO client (id, first_name, second_name, phone_number, email, company_id, type) VALUES (4, 'Katarzyna', 'Mazur', '504567890', 'katarzyna.mazur@example.com', 4, 'B2C')");
+                    stmt.executeUpdate("INSERT INTO client (id, first_name, second_name, phone_number, email, company_id, type) VALUES (5, 'Marek', 'Wójcik', '505678901', 'marek.wojcik@example.com', 5, 'B2B')");
                     stmt.executeUpdate("SET IDENTITY_INSERT client OFF");
+                }
+            }
+
+            switch (PROFILE.toLowerCase()) {
+                case "oracle" -> {
+                    stmt.executeUpdate("INSERT INTO agreement (id, company_id, agreement_number, period, signed_date, next_service_date, last_service_date) VALUES (3, 1, '321312/3232', 'MONTHLY', '2025-09-06', '2025-10-06', null)");
+                    stmt.executeUpdate("INSERT INTO agreement (id, company_id, agreement_number, period, signed_date, next_service_date, last_service_date) VALUES (5, 2, 'AGR-2025/004', 'YEARLY', '2025-04-05', '2026-04-05', null)");
+                    stmt.executeUpdate("INSERT INTO agreement (id, company_id, agreement_number, period, signed_date, next_service_date, last_service_date) VALUES (6, 3, 'AGR-2025/005', 'QUARTERLY', '2025-05-20', '2025-08-20', null)");
+                    stmt.executeUpdate("INSERT INTO agreement (id, company_id, agreement_number, period, signed_date, next_service_date, last_service_date) VALUES (7, 4, 'AGR-2025/006', 'MONTHLY', '2025-06-01', '2025-07-01', '2025-06-30')");
+
+                }
+                case "postgres" -> {
+                    stmt.executeUpdate("INSERT INTO agreement (id, company_id, agreement_number, period, signed_date, next_service_date, last_service_date) VALUES (3, 1, '321312/3232', 'MONTHLY', '2025-09-06', '2025-10-06', null)");
+                    stmt.executeUpdate("INSERT INTO agreement (id, company_id, agreement_number, period, signed_date, next_service_date, last_service_date) VALUES (5, 2, 'AGR-2025/004', 'YEARLY', '2025-04-05', '2026-04-05', null)");
+                    stmt.executeUpdate("INSERT INTO agreement (id, company_id, agreement_number, period, signed_date, next_service_date, last_service_date) VALUES (6, 3, 'AGR-2025/005', 'QUARTERLY', '2025-05-20', '2025-08-20', null)");
+                    stmt.executeUpdate("INSERT INTO agreement (id, company_id, agreement_number, period, signed_date, next_service_date, last_service_date) VALUES (7, 4, 'AGR-2025/006', 'MONTHLY', '2025-06-01', '2025-07-01', '2025-06-30')");
+
+                }
+                case "mssql" -> {
+                    stmt.executeUpdate("SET IDENTITY_INSERT agreement ON");
+                    stmt.executeUpdate("INSERT INTO agreement (id, company_id, agreement_number, period, signed_date, next_service_date, last_service_date) VALUES (3, 1, '321312/3232', 'MONTHLY', '2025-09-06', '2025-10-06', null)");
+                    stmt.executeUpdate("INSERT INTO agreement (id, company_id, agreement_number, period, signed_date, next_service_date, last_service_date) VALUES (5, 2, 'AGR-2025/004', 'YEARLY', '2025-04-05', '2026-04-05', null)");
+                    stmt.executeUpdate("INSERT INTO agreement (id, company_id, agreement_number, period, signed_date, next_service_date, last_service_date) VALUES (6, 3, 'AGR-2025/005', 'QUARTERLY', '2025-05-20', '2025-08-20', null)");
+                    stmt.executeUpdate("INSERT INTO agreement (id, company_id, agreement_number, period, signed_date, next_service_date, last_service_date) VALUES (7, 4, 'AGR-2025/006', 'MONTHLY', '2025-06-01', '2025-07-01', '2025-06-30')");
+                    stmt.executeUpdate("SET IDENTITY_INSERT agreement OFF");
                 }
             }
 
