@@ -1,3 +1,28 @@
+import groovy.transform.Field
+
+@Field
+final String pipelineConfig = '''
+{
+    "ports":{
+        "app":{
+            "postgres-master":1000,            
+            "mssql-master":1100,           
+            "oracle-master":1200            
+        },
+        "db":{
+            "postgres-master":1010,            
+            "mssql-master":1110,           
+            "oracle-master":1210
+        },
+        "front":{
+            "postgres-master":1020,            
+            "mssql-master":1120,           
+            "oracle-master":1220
+        }
+    }
+}
+'''
+
 pipeline {
     agent { label 'built-in' }
 
@@ -8,9 +33,10 @@ pipeline {
     }
 
     environment {
-        PROFILE = 'production'
         REGISTRY = '192.168.0.81:32000'
         GIT_PROJECT_NAME = 'Supportly'
+        E2E_DOCKER_HOST = '192.168.0.81'
+        E2E_DOCKER_HOST_URL = 'http://192.168.0.81:'
     }
 
     parameters {
@@ -37,35 +63,43 @@ pipeline {
         stage('Build & Test') {
             steps {
                 script {
-                    parallel(
-                            'Build & Test Backend': {
-                                dir('supportly-backend') {
-                                    echo ">>>[BUDOWANIE BACKENDU]<<<"
-                                    sh 'mvn clean package -DskipTests'
-                                    echo ">>>[TESTY BACKENDU]<<<"
-                                    sh "mvn verify -Dspring.profiles.active=test -Dmaven.test.failure.ignore=true"
-                                    junit 'target/surefire-reports/*.xml'
-                                }
-                            },
+
+                    parallel('Build & Test Backend': {
+                        dir('supportly-backend') {
+                            echo ">>>[TESTY BACKENDU]<<<"
+                            sh "mvn verify -Dspring.profiles.active=${env.PROFILE} -Dmaven.test.failure.ignore=true"
+                            junit 'target/surefire-reports/*.xml'
+                            echo ">>>[BUDOWANIE BACKENDU]<<<"
+                            sh "mvn clean package spring-boot:repackage -P${env.PROFILE} -Dspring.profiles.active=${env.PROFILE}  -DskipTests"
+                        }
+                    },
                             'Build & Test Frontend': {
                                 dir('supportly-frontend') {
+//                                    replaceInFile('http://localhost:8080', "http://${env.PROJECT_NAME}-backend-${env.PROFILE}-1:${env.PORT_BACKEND}", "src/assets/config.json")
                                     echo ">>>[BUDOWANIE FRONTENDU]<<<"
                                     sh "yes | ng version"
                                     sh script: "npm install --force", label: "npm install"
-                                    sh script: "ng build", label: "ng build"
+                                    sh script: "ng build --output-path=../conf/frontend/supportly-frontend", label: "ng build"
                                 }
-                            }
-                    )
+                            })
 
-                    replaceInFile('localhost', '192.168.0.81', 'conf/docker-compose.yml')
-                    replaceInFile('PORT_DB', '1000', 'conf/docker-compose.yml')
-                    replaceInFile('PORT_BACKEND', '8082', 'conf/docker-compose.yml')
-                    replaceInFile('1009', '1000', 'conf/backend/backend.env')
+                    replaceInFile('localhost', '192.168.0.81', "conf/docker-compose-${env.PROFILE}.yml")
+                    replaceInFile('PORT_DB', env.PORT_DB, "conf/docker-compose-${env.PROFILE}.yml")
+                    replaceInFile('PORT_BACKEND', env.PORT_BACKEND, "conf/docker-compose-${env.PROFILE}.yml")
+                    replaceInFile('latest', env.BUILDTAG, "conf/docker-compose-${env.PROFILE}.yml")
+                    replaceInFile('PORT_FRONTEND', env.PORT_FRONT, "conf/docker-compose-${env.PROFILE}.yml")
+//                    replaceInFile('URL_BACKEND', "${env.PROJECT_NAME}-backend-${env.PROFILE}-1/${env.PORT_BACKEND}/", "src/assets/nginx.conf")
+                    replaceInFile('http://localhost:8080', "http://${env.E2E_DOCKER_HOST}:${env.PORT_BACKEND}", "conf/frontend/supportly-frontend/browser/assets/config.json")
+                    replaceInFile('1009', env.PORT_DB, 'conf/backend/backend.env')
                     replaceInFile('localhost', '192.168.0.81', 'conf/backend/backend.env')
+                    replaceInFile('API', "http://192.168.0.81:${env.PORT_FRONT}", 'conf/backend/backend.env')
+                    replaceInFile('default', "${env.PROFILE}", 'conf/backend/Dockerfile')
 
-                    sh 'cat conf/docker-compose.yml'
+                    sh "cat conf/docker-compose-${env.PROFILE}.yml"
                     sh 'cat conf/backend/backend.env'
+
                     stash name: 'supportly', includes: 'conf/**', useDefaultExcludes: false
+                    stash name: 'supportly-e2e', includes: 'supportly-e2e/**', useDefaultExcludes: false
 
                 }
             }
@@ -79,11 +113,12 @@ pipeline {
                     echo ">>> Building and pushing Docker images to local registry..."
                     dir('conf') {
 
-                        sh 'cat docker-compose.yml'
+                        sh "cat docker-compose-${env.PROFILE}.yml"
                         sh 'cat backend/backend.env'
-
+                        sh 'ls frontend'
+                        sh 'ls frontend/supportly-frontend/browser/assets'
                         // Buduj obrazy z tagami do rejestru
-                        sh 'docker compose build --no-cache'
+                        sh "docker compose -f docker-compose-${env.PROFILE}.yml build --no-cache"
 
                     }
                 }
@@ -103,18 +138,24 @@ pipeline {
                     unstash 'supportly'
 
                     dir('conf') {
-                        // Zamiana 'latest' na '1' w docker-compose.yml
-                        replaceInFile('latest', '1', 'docker-compose.yml')
 
+                        echo ">>> Używam taga obrazu: ${buildTag}"
+
+                        echo ">>> Project name dla Compose: ${env.PROJECT_NAME}"
+
+                        echo ">>> Usuwam istniejące kontenery i sieci..."
+                        sh """
+                    docker compose -f docker-compose-${env.PROFILE}.yml -p ${env.PROJECT_NAME} down --remove-orphans -v || true
+                """
 
                         echo ">>> Uruchamiam docker-compose lokalnie (na agencie)..."
-
-                        sh 'docker compose -f docker-compose.yml up -d'
+                        sh """
+                    docker compose -f docker-compose-${env.PROFILE}.yml -p ${env.PROJECT_NAME} up -d
+                """
 
                         echo ">>> Sprawdzam, czy kontenery działają poprawnie..."
-
-                        waitForContainers(['supportly-backend', 'supportly-database'] as List<String>)
-
+                        waitForContainers(["${env.PROJECT_NAME}-backend-${env.PROFILE}-1",
+                                           "${env.PROJECT_NAME}-database-${env.PROFILE}-1"] as List<String>)
                     }
                 }
             }
@@ -127,9 +168,40 @@ pipeline {
             }
             steps {
                 script {
-                    echo ">>> Testing E2E with Cypress ..."
+                    echo ">>> Running Selenium E2E tests..."
+
+                    unstash 'supportly-e2e'
+
+                    def databaseUrl = ""
+
+                    if(env.PROFILE=="postgres"){
+                        databaseUrl = "jdbc:postgresql://192.168.0.81:${env.PORT_DB}/postgres"
+                    }
+
+                    if(env.PROFILE=="mssql"){
+                        databaseUrl = """jdbc:sqlserver://192.168.0.81:${env.PORT_DB};databaseName=supportly;encrypt=false"""
+                    }
+
+                    if(env.PROFILE=="oracle"){
+                        databaseUrl = "jdbc:postgresql://192.168.0.81:${env.PORT_DB}/postgres"
+                    }
+
+                    echo "${env.E2E_DOCKER_HOST_URL}${env.PORT_FRONT}"
+                    echo "${databaseUrl}"
 
 
+                    dir('supportly-e2e') {
+                        // Jeśli testy się nie powiodą, stage będzie czerwony,
+                        // ale pipeline pójdzie dalej i raporty się opublikują.
+                        catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+                            sh """
+                        export BASE_URL=${env.E2E_DOCKER_HOST_URL}${env.PORT_FRONT}
+                        export BASE_URL_DATABASE=${databaseUrl}
+                        export PROFILE=${env.PROFILE}
+                        mvn clean test
+                    """
+                        }
+                    }
                 }
             }
         }
@@ -139,16 +211,23 @@ pipeline {
             }
             agent { label 'docker-agent' }
 
-
             steps {
                 script {
                     echo ">>> Cleanup docker containers, images and volumes"
+
                     unstash 'supportly'
-                    sh '''
-                docker compose -f conf/docker-compose.yml down --volumes --remove-orphans
+
+
+                    echo ">>> Using project name: ${env.PROJECT_NAME} for cleanup"
+
+                    sh """
+                # Usuwamy tylko kontenery i sieci dla tego project name
+                docker compose -f conf/docker-compose-${env.PROFILE}.yml -p ${env.PROJECT_NAME} down --volumes --remove-orphans
+                
+                # Opcjonalnie czyszczenie nieużywanych obrazów i wolumenów
                 docker image prune -f
                 docker volume prune -f
-            '''
+            """
                 }
             }
         }
@@ -211,6 +290,7 @@ pipeline {
     post {
         always {
             echo "Finished"
+            junit 'supportly-e2e/target/surefire-reports/*.xml'
             echo "Build duration: ${currentBuild.durationString}"
         }
         success {
@@ -281,7 +361,7 @@ void checkoutSources() {
 
     // Rozpoznawanie gałęzi i profilu
     env.PIPELINE_TYPE = get_branch_name(['master', 'develop', 'PullRequest'])
-    env.PROFILE = get_branch_name(['BOS', 'MBANK', 'PEKAO', 'TRIGON'])
+    env.PROFILE = getProfile(env.JOB_NAME)
 
     println("Build profile: ${env.PROFILE}, branch: ${env.PIPELINE_TYPE}")
     println("JOB_NAME: ${JOB_NAME}")
@@ -292,74 +372,59 @@ void checkoutSources() {
     } else {
         checkoutRepo(env.GIT_PROJECT_NAME, env.PIPELINE_TYPE)
     }
+
+    env.BUILDTAG = sh(script: "date +%Y%m%d-%H%M", returnStdout: true).trim()
+
+    prepareNames(env.PIPELINE_TYPE)
 }
 
 void checkoutRepo(String project, String branch) {
     println("[checkout] ${project} -> ${branch}")
 
-    def scmVars = checkout([
-            $class                           : 'GitSCM',
-            branches                         : [[name: "${branch}"]],
-            doGenerateSubmoduleConfigurations: false,
-            extensions                       : [[$class: 'CloneOption', noTags: true]],
-            userRemoteConfigs                : [[
-                                                        credentialsId: 'Github',
-                                                        url          : "https://github.com/AWieczorek00/${project}.git"
+    def scmVars = checkout([$class                           : 'GitSCM',
+                            branches                         : [[name: "${branch}"]],
+                            doGenerateSubmoduleConfigurations: false,
+                            extensions                       : [[$class: 'CloneOption', noTags: true]],
+                            userRemoteConfigs                : [[credentialsId: 'Github',
+                                                                 url          : "https://github.com/AWieczorek00/${project}.git"
 
-                                                ]]
-    ])
+                                                                ]]])
 
     env.GIT_COMMIT = scmVars.GIT_COMMIT
 }
 
-//void checkout_pull_request(String project) {
-//    checkout([
-//            $class: 'GitSCM',
-//            branches: [[name: "refs/heads/master"]],
-//            extensions: [
-//                    [$class: 'PreBuildMerge', options: [mergeRemote: 'origin', mergeTarget: 'master']],
-//                    [$class: 'CloneOption', noTags: true]
-//            ],
-//            userRemoteConfigs: [[
-//                                        url: "https://github.com/AWieczorek00/${project}.git",
-//                                        credentialsId: 'Github'
-//                                ]]
-//    ])
-//}
+void prepareNames(String branch) {
 
-//void checkout_pull_request(String project) {
-//    def prId = env.CHANGE_ID
-//    def targetBranch = env.CHANGE_TARGET ?: 'master'
-//
-//    println "Checkout PR #${prId}, merging into ${targetBranch}"
-//
-//    checkout([
-//            $class           : 'GitSCM',
-//            branches         : [[name: "*/${targetBranch}"]],
-//            extensions       : [
-//                    [$class: 'PreBuildMerge', options: [
-//                            mergeRemote: 'origin',
-//                            mergeTarget: targetBranch
-//                    ]],
-//                    [$class: 'CloneOption', noTags: true]
-//            ],
-//            userRemoteConfigs: [[
-//                                        url          : "https://github.com/AWieczorek00/${project}.git",
-//                                        credentialsId: 'Github',
-//                                        refspec      : "+refs/pull/${prId}/*:refs/remotes/origin/pr/${prId}/*"
-//                                ]]
-//    ])
-//}
+    echo "Prepare environment variables | branch: ${branch}"
+
+
+    def props = readJSON text: pipelineConfig
+    def name = "${env.PROFILE}-${branch}"
+
+    def wsSuffix = getWorkspaceSuffix()
+    env.PROJECT_NAME = "supportly-${wsSuffix}"
+    def projectName = "supportly-${wsSuffix}"
+
+
+    env.PORT_BACKEND = props.ports.app[name]
+    env.PORT_DB = props.ports.db[name]
+    env.PORT_FRONT = props.ports.front[name]
+
+    echo "PORT_BACKEND: ${env.PORT_BACKEND}"
+    echo "PORT_DB: ${env.PORT_DB}"
+    echo "PORT_FRONT: ${env.PORT_FRONT}"
+
+
+}
+
 
 def checkout_pull_request(String project) {
     echo "Pobieranie najnowszego PR z repozytorium ${project}"
 
     // Pobranie ostatniego otwartego PR z GitHub API
-    def response = httpRequest(
-            url: "https://api.github.com/repos/AWieczorek00/${project}/pulls?state=open&sort=updated&direction=desc&per_page=1",
+    def response = httpRequest(url: "https://api.github.com/repos/AWieczorek00/${project}/pulls?state=open&sort=updated&direction=desc&per_page=1",
             httpMode: 'GET',
-            acceptType: 'APPLICATION_JSON'
-    )
+            acceptType: 'APPLICATION_JSON')
 
     def prs = readJSON text: response.content
     if (prs.size() == 0) {
@@ -374,18 +439,12 @@ def checkout_pull_request(String project) {
     echo "Checkout latest PR #${prId}: ${sourceBranch} -> ${targetBranch}"
 
     // Fetch i checkout brancha PR
-    checkout([
-            $class: 'GitSCM',
-            branches: [[name: "refs/remotes/origin/${sourceBranch}"]],
-            extensions: [
-                    [$class: 'CloneOption', noTags: true]
-            ],
-            userRemoteConfigs: [[
-                                        url: "https://github.com/AWieczorek00/${project}.git",
-                                        credentialsId: 'Github',
-                                        refspec: "+refs/heads/${sourceBranch}:refs/remotes/origin/${sourceBranch}"
-                                ]]
-    ])
+    checkout([$class           : 'GitSCM',
+              branches         : [[name: "refs/remotes/origin/${sourceBranch}"]],
+              extensions       : [[$class: 'CloneOption', noTags: true]],
+              userRemoteConfigs: [[url          : "https://github.com/AWieczorek00/${project}.git",
+                                   credentialsId: 'Github',
+                                   refspec      : "+refs/heads/${sourceBranch}:refs/remotes/origin/${sourceBranch}"]]])
 
     // Merge do branch docelowego
     sh """
@@ -402,4 +461,15 @@ String get_branch_name(List<String> branches) {
         }
     }
     return 'develop' // domyślna wartość
+}
+
+def getProfile(String jobName) {
+    return jobName.substring(jobName.lastIndexOf("-") + 1)
+}
+
+def getWorkspaceSuffix() {
+    // env.WORKSPACE jest automatycznie ustawione przez Jenkinsa
+    def ws = env.WORKSPACE
+    def matcher = ws =~ /@(\d+)$/
+    return matcher ? matcher[0][1] : "1"  // jeśli brak @, zwraca "1"
 }

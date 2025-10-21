@@ -1,15 +1,16 @@
-import {Component} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {MatDialogActions, MatDialogContent, MatDialogRef, MatDialogTitle} from '@angular/material/dialog';
 import {MatFormField, MatLabel} from '@angular/material/form-field';
 import {MatInput} from '@angular/material/input';
-import {FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {MatButton} from '@angular/material/button';
 import {MatOption} from '@angular/material/core';
 import {MatSelect} from '@angular/material/select';
 import {Employee} from '../Employee';
 import {HttpEmployeeService} from '../service/http-employee.service';
-import {EmployeeCriteria} from '../EmployeeCriteria';
 import {Role} from '../Role';
+import {NgForOf} from '@angular/common';
+import {HttpRoleService} from '../../role/service/http-role.service';
 
 @Component({
   selector: 'app-employee-add',
@@ -23,24 +24,32 @@ import {Role} from '../Role';
     MatButton,
     MatLabel,
     MatOption,
-    MatSelect
+    MatSelect,
+    NgForOf
   ],
   templateUrl: './employee-add.component.html',
   styleUrl: './employee-add.component.scss',
 })
-export class EmployeeAddComponent {
+export class EmployeeAddComponent implements OnInit {
+
+  ngOnInit(): void {
+    this.loadRoles();
+  }
 
   constructor(
     public dialogRef: MatDialogRef<EmployeeAddComponent>,
-    private service: HttpEmployeeService
+    private service: HttpEmployeeService,
+    private roleHttp: HttpRoleService,
   ) {
   }
 
+  roles: Role[] = [];
+
   create = new FormGroup({
     firstName: new FormControl('', Validators.required),
-    lastName: new FormControl('',Validators.required),
-    phoneNumber: new FormControl('',Validators.required),
-    role: new FormControl('',Validators.required),
+    lastName: new FormControl('', Validators.required),
+    phoneNumber: new FormControl('', Validators.required),
+    role: new FormControl('', Validators.required),
   });
 
   submit(): void {
@@ -69,10 +78,22 @@ export class EmployeeAddComponent {
           // możesz tu dodać np. snackbar z błędem
         }
       });
+      
     }
   }
 
   cancel(): void {
     this.dialogRef.close();
+  }
+
+  loadRoles(): void {
+    this.roleHttp.allRole().subscribe({
+      next: (data: Role[]) => {
+        this.roles = data; // Przypisanie listy ról do zmiennej
+      },
+      error: (err) => {
+        console.error('Nie udało się załadować ról:', err);
+      }
+    });
   }
 }

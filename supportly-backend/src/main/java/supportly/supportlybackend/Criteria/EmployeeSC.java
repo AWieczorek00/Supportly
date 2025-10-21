@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import supportly.supportlybackend.Annotation.SpecField;
 import supportly.supportlybackend.Enum.ERole;
+import supportly.supportlybackend.Model.Role;
 
 import static supportly.supportlybackend.Annotation.OperatorSql.LIKE;
 
@@ -17,5 +18,4 @@ public class EmployeeSC {
     private String lastName;
     @SpecField(path = "phoneNumber", operator = LIKE)
     private String phoneNumber;
-    private ERole role;
 }
