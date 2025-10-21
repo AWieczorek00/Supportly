@@ -87,13 +87,28 @@ public class BaseE2ETest {
         }
     }
 
-    private void deleteDirectoryRecursively(File dir) throws Exception {
-        if (dir.isDirectory()) {
-            for (File file : dir.listFiles()) {
+    private void deleteDirectoryRecursively(File dir) {
+        if (dir == null || !dir.exists()) return;
+
+        File[] files = dir.listFiles();
+        if (files != null) {
+            for (File file : files) {
                 deleteDirectoryRecursively(file);
             }
         }
-        dir.delete();
+
+        for (int i = 0; i < 3; i++) { // 3 próby usunięcia
+            if (dir.delete()) {
+                return;
+            }
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException ignored) {}
+        }
+
+        if (dir.exists()) {
+            System.err.println("⚠️ Nie udało się usunąć katalogu: " + dir.getAbsolutePath());
+        }
     }
 
     /**

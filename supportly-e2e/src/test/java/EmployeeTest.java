@@ -125,14 +125,6 @@ public class EmployeeTest extends TestDatabaseSetup {
         phoneInput.clear();
         phoneInput.sendKeys("502254567");
 
-        WebElement roleSelect = dialog.findElement(By.cssSelector("mat-select[formControlName='role']"));
-        roleSelect.click();
-
-        WebElement roleOption = wait.until(ExpectedConditions.elementToBeClickable(
-                By.xpath("//mat-option[@value='admin']")
-        ));
-        roleOption.click();
-
         Thread.sleep(500);
 
 

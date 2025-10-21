@@ -1,4 +1,4 @@
-import {AfterViewInit, Component} from '@angular/core';
+import {AfterViewInit, Component, OnInit} from '@angular/core';
 import {
   MatCell,
   MatCellDef,
@@ -24,7 +24,9 @@ import {EmployeeCriteria} from '../EmployeeCriteria';
 import {MatDialog} from '@angular/material/dialog';
 import {EmployeeAddComponent} from '../employee-add/employee-add.component';
 import {HttpEmployeeService} from '../service/http-employee.service';
-import {AgreementCriteria} from '../../agreement/agreement-criteria';
+import {MatOption, MatSelect} from '@angular/material/select';
+import {HttpRoleService} from '../../role/service/http-role.service';
+import {Role} from '../Role';
 
 @Component({
   selector: 'app-employee-list',
@@ -50,16 +52,17 @@ import {AgreementCriteria} from '../../agreement/agreement-criteria';
     MatButton,
     MatDatepickerModule,
     MatDatepickerModule,
+    MatSelect,
+    MatOption,
   ],
   templateUrl: './employee-list.component.html',
   styleUrl: './employee-list.component.scss'
 })
-export class EmployeeListComponent implements AfterViewInit {
-
-  constructor(private service: HttpEmployeeService, private dialog: MatDialog, private http: HttpEmployeeService) {
-
+export class EmployeeListComponent implements AfterViewInit, OnInit {
+  constructor(private service: HttpEmployeeService, private dialog: MatDialog, private http: HttpEmployeeService, private roleHttp: HttpRoleService) {
   }
 
+  roles: Role[] = [];
   employeeColumns: string[] = ['firstName', 'lastName', 'phoneNumber', 'role'];
   employeeTable = new MatTableDataSource<Employee>()
 
@@ -70,6 +73,10 @@ export class EmployeeListComponent implements AfterViewInit {
       },
       error: (err) => console.error('Błąd przy pobieraniu danych:', err)
     });
+  }
+
+  ngOnInit(): void {
+    this.loadRoles();
   }
 
   criteriaForm = new FormGroup({
@@ -86,12 +93,13 @@ export class EmployeeListComponent implements AfterViewInit {
       firstName: formValue.firstName,
       lastName: formValue.lastName,
       phoneNumber: formValue.phoneNumber,
-      role: formValue.role
     };
 
     this.http.search(criteria).subscribe({
       next: data => {
         console.log('Otrzymane dane:', data);
+        this.employeeTable.data = data;
+
       },
       error: err => {
         console.error('Błąd podczas wyszukiwania:', err);
@@ -116,5 +124,17 @@ export class EmployeeListComponent implements AfterViewInit {
       }
     });
   }
+
+  loadRoles(): void {
+    this.roleHttp.allRole().subscribe({
+      next: (data: Role[]) => {
+        this.roles = data; // Przypisanie listy ról do zmiennej
+      },
+      error: (err) => {
+        console.error('Nie udało się załadować ról:', err);
+      }
+    });
+  }
+
 
 }
