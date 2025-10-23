@@ -52,6 +52,8 @@ import {Role} from '../Role';
     MatButton,
     MatDatepickerModule,
     MatDatepickerModule,
+    MatSelect,
+    MatOption,
   ],
   templateUrl: './employee-list.component.html',
   styleUrl: './employee-list.component.scss'
