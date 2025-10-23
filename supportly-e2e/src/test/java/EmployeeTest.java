@@ -2,6 +2,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -39,13 +40,13 @@ public class EmployeeTest extends TestDatabaseSetup {
         boolean found = false;
         for (WebElement row : rows) {
             System.out.println(row.getText());
-            if (row.getText().contains("Kowalski")) {
+            if (row.getText().contains("SuperAdmin")) {
                 found = true;
                 break;
             }
         }
 
-        assertTrue(found, "Znaleziono firmy 'Kowalski' w tabeli!");
+        assertTrue(found, "Nie znaleziono pracownika 'SuperAdmin' w tabeli!");
     }
 
     @Test
@@ -59,7 +60,7 @@ public class EmployeeTest extends TestDatabaseSetup {
         WebElement nameInput = wait.until(
                 ExpectedConditions.visibilityOfElementLocated(By.cssSelector("input[formcontrolname='lastName']"))
         );
-        nameInput.sendKeys("Nowak");
+        nameInput.sendKeys("SuperAdmin");
 
 
         // Klikamy przycisk Szukaj
@@ -75,13 +76,13 @@ public class EmployeeTest extends TestDatabaseSetup {
         List<WebElement> rows = driver.findElements(By.cssSelector("table.mat-mdc-table tr[mat-row]"));
 
         boolean found = rows.stream()
-                .anyMatch(row -> row.getText().contains("Kowalski"));
+                .anyMatch(row -> row.getText().contains("SuperAdmin"));
 
         if (rows.size() > 1) {
 //            throw new AssertionError("More than one row found!");
             found = false;
         }
-        assertTrue(found, "Nie znaleziono praocwnika 'Kowalski' w tabeli!");
+        assertTrue(found, "Nie znaleziono praocwnika 'SuperAdmin' w tabeli!");
     }
 
     @Test
@@ -125,8 +126,33 @@ public class EmployeeTest extends TestDatabaseSetup {
         phoneInput.clear();
         phoneInput.sendKeys("502254567");
 
-        Thread.sleep(500);
 
+        // Kliknij select, żeby otworzyć overlay
+        WebElement roleSelect = driver.findElement(By.cssSelector("mat-select[formcontrolname='role']"));
+        roleSelect.click();
+
+// Poczekaj aż pojawi się overlay z opcjami
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div.cdk-overlay-pane")));
+
+// Poczekaj aż opcje będą widoczne
+        List<WebElement> options = wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(
+                By.cssSelector("mat-option .mdc-list-item__primary-text")
+        ));
+
+// Dla debugowania: wypisz dostępne role
+        for (WebElement opt : options) {
+            System.out.println("Option: " + opt.getText());
+        }
+
+// Znajdź opcję z tekstem ADMIN i kliknij (przez JS, bo zwykły click może być zignorowany)
+        for (WebElement opt : options) {
+            if (opt.getText().trim().equals("ADMIN")) {
+                ((JavascriptExecutor) driver).executeScript("arguments[0].click();", opt);
+                break;
+            }
+        }
+
+        Thread.sleep(500);
 
         WebElement saveButton = dialog.findElement(By.cssSelector("button.mat-mdc-unelevated-button.mat-primary"));
         saveButton.click();
@@ -157,12 +183,12 @@ public class EmployeeTest extends TestDatabaseSetup {
         List<WebElement> rows = driver.findElements(By.cssSelector("table.mat-mdc-table tr[mat-row]"));
 
         boolean found = rows.stream()
-                .anyMatch(row -> row.getText().contains("Nowak"));
+                .anyMatch(row -> row.getText().contains("Nita"));
 
         if (rows.size() > 1) {
             throw new AssertionError("More than one row found!");
         }
-        assertTrue(found, "Znaleziono firmy 'Nowak' w tabeli!");
+        assertTrue(found, "Nie znaleziono nowego pracownika 'Nita' w tabeli!");
 
     }
 }
