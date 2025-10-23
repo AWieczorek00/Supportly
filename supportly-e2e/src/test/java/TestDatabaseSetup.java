@@ -153,18 +153,36 @@ public class TestDatabaseSetup extends BaseE2ETest {
 
             // --- insert order ---
             switch (PROFILE.toLowerCase()) {
-                case "oracle" -> stmt.executeUpdate("""
-                INSERT INTO "ORDER" (ID, CLIENT_ID, DATE_OF_ADMISSION, DATE_OF_EXECUTION, AGREEMENT_NUMBER, MAN_HOUR, DISTANCE, PRIORITY, STATUS, PERIOD, NOTE)
-                VALUES (order_seq.NEXTVAL, 1, SYSDATE, SYSDATE+7, 'AGR-2025/001', 8.5, 42.0, 'HIGH', 'IN_PROGRESS', 'MONTHLY', 'Zamówienie testowe dla klienta firmowego.')
-            """);
-                case "postgres" -> stmt.executeUpdate("""
-                INSERT INTO "order" (CLIENT_ID, DATE_OF_ADMISSION, DATE_OF_EXECUTION, AGREEMENT_NUMBER, MAN_HOUR, DISTANCE, PRIORITY, STATUS, PERIOD, NOTE)
-                VALUES (1, CURRENT_DATE, CURRENT_DATE + INTERVAL '7 day', 'AGR-2025/001', 8.5, 42.0, 'HIGH', 'IN_PROGRESS', 'MONTHLY', 'Zamówienie testowe dla klienta firmowego.')
-            """);
-                case "mssql" -> stmt.executeUpdate("""
-                INSERT INTO [order] (CLIENT_ID, DATE_OF_ADMISSION, DATE_OF_EXECUTION, AGREEMENT_NUMBER, MAN_HOUR, DISTANCE, PRIORITY, STATUS, PERIOD, NOTE)
-                VALUES (1, GETDATE(), DATEADD(day,7,GETDATE()), 'AGR-2025/001', 8.5, 42.0, 'HIGH', 'IN_PROGRESS', 'MONTHLY', 'Zamówienie testowe dla klienta firmowego.')
-            """);
+                case "oracle" -> {
+                    stmt.executeUpdate("""
+            INSERT INTO "ORDER" (ID, CLIENT_ID, DATE_OF_ADMISSION, DATE_OF_EXECUTION, AGREEMENT_NUMBER, MAN_HOUR, DISTANCE, PRIORITY, STATUS, PERIOD, NOTE)
+            VALUES (order_seq.NEXTVAL, 1, SYSDATE, SYSDATE+7, 'AGR-2025/001', 8.5, 42.0, 'HIGH', 'IN_PROGRESS', 'MONTHLY', 'Zamówienie testowe dla klienta firmowego.')
+        """);
+                    stmt.executeUpdate("""
+            INSERT INTO "ORDER" (ID, CLIENT_ID, DATE_OF_ADMISSION, DATE_OF_EXECUTION, AGREEMENT_NUMBER, MAN_HOUR, DISTANCE, PRIORITY, STATUS, PERIOD, NOTE)
+            VALUES (order_seq.NEXTVAL, 2, SYSDATE, SYSDATE+10, 'AGR-2025/002', 5.0, 25.0, 'NORMAL', 'PENDING', 'YEARLY', 'Drugie zamówienie testowe dla innego klienta.')
+        """);
+                }
+                case "postgres" -> {
+                    stmt.executeUpdate("""
+            INSERT INTO "order" (CLIENT_ID, DATE_OF_ADMISSION, DATE_OF_EXECUTION, AGREEMENT_NUMBER, MAN_HOUR, DISTANCE, PRIORITY, STATUS, PERIOD, NOTE)
+            VALUES (1, CURRENT_DATE, CURRENT_DATE + INTERVAL '7 day', 'AGR-2025/001', 8.5, 42.0, 'HIGH', 'IN_PROGRESS', 'MONTHLY', 'Zamówienie testowe dla klienta firmowego.')
+        """);
+                    stmt.executeUpdate("""
+            INSERT INTO "order" (CLIENT_ID, DATE_OF_ADMISSION, DATE_OF_EXECUTION, AGREEMENT_NUMBER, MAN_HOUR, DISTANCE, PRIORITY, STATUS, PERIOD, NOTE)
+            VALUES (2, CURRENT_DATE, CURRENT_DATE + INTERVAL '10 day', 'AGR-2025/002', 5.0, 25.0, 'NORMAL', 'PENDING', 'YEARLY', 'Drugie zamówienie testowe dla innego klienta.')
+        """);
+                }
+                case "mssql" -> {
+                    stmt.executeUpdate("""
+            INSERT INTO [order] (CLIENT_ID, DATE_OF_ADMISSION, DATE_OF_EXECUTION, AGREEMENT_NUMBER, MAN_HOUR, DISTANCE, PRIORITY, STATUS, PERIOD, NOTE)
+            VALUES (1, GETDATE(), DATEADD(day,7,GETDATE()), 'AGR-2025/001', 8.5, 42.0, 'HIGH', 'IN_PROGRESS', 'MONTHLY', 'Zamówienie testowe dla klienta firmowego.')
+        """);
+                    stmt.executeUpdate("""
+            INSERT INTO [order] (CLIENT_ID, DATE_OF_ADMISSION, DATE_OF_EXECUTION, AGREEMENT_NUMBER, MAN_HOUR, DISTANCE, PRIORITY, STATUS, PERIOD, NOTE)
+            VALUES (2, GETDATE(), DATEADD(day,10,GETDATE()), 'AGR-2025/002', 5.0, 25.0, 'NORMAL', 'PENDING', 'YEARLY', 'Drugie zamówienie testowe dla innego klienta.')
+        """);
+                }
             }
 
             // --- insert task ---
