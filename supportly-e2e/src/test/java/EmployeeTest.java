@@ -150,27 +150,26 @@ public class EmployeeTest extends TestDatabaseSetup {
                 break;
             }
         }
+// Kliknij przycisk "Zapisz" w dialogu (JS click, ignorując overlay)
+        WebElement saveButton = dialog.findElement(By.cssSelector("button.mat-mdc-unelevated-button.mat-primary"));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", saveButton);
 
-        // 7️⃣ Kliknij przycisk "Zapisz" w dialogu
-        WebElement saveButton = wait.until(ExpectedConditions.elementToBeClickable(
-                dialog.findElement(By.cssSelector("button.mat-mdc-unelevated-button.mat-primary"))
-        ));
-        saveButton.click();
+// Poczekaj, aż tabela pracowników się pojawi
+        WebDriverWait tableWait = new WebDriverWait(driver, Duration.ofSeconds(30));
+        tableWait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("table.mat-mdc-table tr[mat-row]")));
 
-// 8️⃣ Poczekaj, aż overlay zniknie
-        wait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector("div.cdk-overlay-backdrop.cdk-overlay-backdrop-showing")));
-
-// 9️⃣ Teraz można bezpiecznie wprowadzać nazwisko w polu wyszukiwania
-        WebElement nameInput = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("input[formcontrolname='lastName']")));
-        nameInput.clear();
-        nameInput.sendKeys("Nita");
-
-// 10️⃣ Kliknij przycisk wyszukiwania bez ryzyka overlay
-        WebElement searchButton = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("button[type='submit']")));
-
-// Jeśli nadal pojawiają się problemy w CI (overlay czasem nie zniknie w 20s):
-// użyj JS click jako ostateczność:
-        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", searchButton);
+// Poczekaj, aż tabela się ustabilizuje (ilość wierszy nie zmienia się)
+        tableWait.until(d -> {
+            List<WebElement> rowsBefore = d.findElements(By.cssSelector("table.mat-mdc-table tr[mat-row]"));
+            int countBefore = rowsBefore.size();
+            try {
+                Thread.sleep(300);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            int countAfter = d.findElements(By.cssSelector("table.mat-mdc-table tr[mat-row]")).size();
+            return countBefore == countAfter && countAfter > 0;
+        });
 
         // 10️⃣ Poczekaj aż wiersz z nowym pracownikiem się pojawi
         boolean found = new WebDriverWait(driver, Duration.ofSeconds(20))
