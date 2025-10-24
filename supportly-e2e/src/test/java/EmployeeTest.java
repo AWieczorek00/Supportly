@@ -266,6 +266,8 @@ public class EmployeeTest extends TestDatabaseSetup {
                 ExpectedConditions.elementToBeClickable(By.cssSelector("button[type='submit']"))
         );
 
+        Thread.sleep(1000);
+
         searchButton.click();
 
 // Poczekaj aż tabela się ustabilizuje (ilość wierszy się nie zmienia)
