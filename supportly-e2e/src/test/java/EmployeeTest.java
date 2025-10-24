@@ -9,6 +9,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.function.BiConsumer;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -16,7 +17,7 @@ public class EmployeeTest extends TestDatabaseSetup {
 
     @BeforeEach
     void setup() throws Exception {
-        initDriver(true);
+        initDriver(false);
         loginAs("super.admin@gmail.com", "123456");
         Thread.sleep(500); // czekaj 0.5 sekundy
         wait = new WebDriverWait(driver, Duration.ofSeconds(15));
@@ -106,40 +107,40 @@ public class EmployeeTest extends TestDatabaseSetup {
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
         // Otwórz panel z pracownikami
-        WebElement panelHeader = wait.until(
-                ExpectedConditions.elementToBeClickable(By.cssSelector("mat-expansion-panel-header"))
-        );
+        WebElement panelHeader = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("mat-expansion-panel-header")));
         panelHeader.click();
 
         // Kliknij przycisk "Dodaj nowego pracownika"
-        WebElement addButton = wait.until(
-                ExpectedConditions.elementToBeClickable(By.xpath("//button[contains(., 'Dodaj nowego pracownika')]"))
-        );
+        WebElement addButton = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[contains(., 'Dodaj nowego pracownika')]")));
         addButton.click();
 
         // Poczekaj aż otworzy się dialog
-        WebElement dialog = wait.until(
-                ExpectedConditions.visibilityOfElementLocated(By.cssSelector("mat-dialog-container"))
-        );
+        WebElement dialog = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("mat-dialog-container")));
+
+        // ---- Funkcja pomocnicza do bezpiecznego wpisywania tekstu ----
+        BiConsumer<WebElement, String> safeType = (element, text) -> {
+            wait.until(ExpectedConditions.elementToBeClickable(element));
+            element.click();
+            element.clear();
+            element.sendKeys(text);
+
+            // Poczekaj aż pole faktycznie zawiera wpisany tekst
+            wait.until(d -> element.getAttribute("value").equals(text));
+        };
 
         // Wypełnij pola formularza
-        WebElement firstNameInput = wait.until(
-                ExpectedConditions.elementToBeClickable(dialog.findElement(By.cssSelector("input[formControlName='firstName']")))
-        );
-        firstNameInput.clear();
-        firstNameInput.sendKeys("Justyna");
+        WebElement firstNameInput = dialog.findElement(By.cssSelector("input[formControlName='firstName']"));
+        safeType.accept(firstNameInput, "Justyna");
 
         WebElement lastNameInput = dialog.findElement(By.cssSelector("input[formControlName='lastName']"));
-        lastNameInput.clear();
-        lastNameInput.sendKeys("Nita");
+        safeType.accept(lastNameInput, "Nita");
 
         WebElement phoneInput = dialog.findElement(By.cssSelector("input[formControlName='phoneNumber']"));
-        phoneInput.clear();
-        phoneInput.sendKeys("502254567");
+        safeType.accept(phoneInput, "502254567");
 
         // Otwórz select roli
         WebElement roleSelect = dialog.findElement(By.cssSelector("mat-select[formcontrolname='role']"));
-        roleSelect.click();
+        wait.until(ExpectedConditions.elementToBeClickable(roleSelect)).click();
 
         // Poczekaj aż pojawi się overlay z opcjami
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div.cdk-overlay-pane")));
@@ -148,7 +149,6 @@ public class EmployeeTest extends TestDatabaseSetup {
         List<WebElement> options = wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(
                 By.cssSelector("mat-option .mdc-list-item__primary-text")
         ));
-
         for (WebElement opt : options) {
             if (opt.getText().trim().equals("ADMIN")) {
                 ((JavascriptExecutor) driver).executeScript("arguments[0].click();", opt);
@@ -157,25 +157,20 @@ public class EmployeeTest extends TestDatabaseSetup {
         }
 
         // Kliknij przycisk "Zapisz"
-        WebElement saveButton = wait.until(
-                ExpectedConditions.elementToBeClickable(dialog.findElement(By.cssSelector("button.mat-mdc-unelevated-button.mat-primary")))
-        );
+        WebElement saveButton = wait.until(ExpectedConditions.elementToBeClickable(
+                dialog.findElement(By.cssSelector("button.mat-mdc-unelevated-button.mat-primary"))
+        ));
         saveButton.click();
 
         // Poczekaj aż dialog się zamknie
         wait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector("mat-dialog-container")));
 
         // Wprowadź nazwisko do pola wyszukiwania
-        WebElement nameInput = wait.until(
-                ExpectedConditions.visibilityOfElementLocated(By.cssSelector("input[formcontrolname='lastName']"))
-        );
-        nameInput.clear();
-        nameInput.sendKeys("Nita");
+        WebElement nameInput = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("input[formcontrolname='lastName']")));
+        safeType.accept(nameInput, "Nita");
 
         // Kliknij przycisk wyszukiwania
-        WebElement searchButton = wait.until(
-                ExpectedConditions.elementToBeClickable(By.cssSelector("button[type='submit']"))
-        );
+        WebElement searchButton = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("button[type='submit']")));
         searchButton.click();
 
         // Poczekaj aż tabela się pojawi
@@ -202,5 +197,6 @@ public class EmployeeTest extends TestDatabaseSetup {
 
         assertTrue(found, "Nie znaleziono nowego pracownika 'Nita' w tabeli!");
     }
+
 
 }
