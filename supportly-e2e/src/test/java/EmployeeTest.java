@@ -73,13 +73,26 @@ public class EmployeeTest extends TestDatabaseSetup {
         // Czekamy aż tabela się pojawi
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("table.mat-mdc-table tr[mat-row]")));
 
-        // Pobieramy wiersze tabeli
+// Poczekaj dodatkowo aż tabela przestanie się zmieniać
+        wait.until(driver1 -> {
+            List<WebElement> rowsBefore = driver1.findElements(By.cssSelector("table.mat-mdc-table tr[mat-row]"));
+            int sizeBefore = rowsBefore.size();
+            try {
+                Thread.sleep(500); // krótka pauza, żeby Angular zdążył dorysować
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            int sizeAfter = driver1.findElements(By.cssSelector("table.mat-mdc-table tr[mat-row]")).size();
+            return sizeBefore == sizeAfter && sizeAfter > 0;
+        });
+
+// Teraz pobieramy aktualne wiersze (świeże referencje)
         List<WebElement> rows = driver.findElements(By.cssSelector("table.mat-mdc-table tr[mat-row]"));
 
-        Thread.sleep(500);
-
+// Sprawdzamy, czy zawierają "SuperAdmin"
         boolean found = rows.stream()
-                .anyMatch(row -> row.getText().contains("SuperAdmin"));
+                .map(WebElement::getText)
+                .anyMatch(text -> text.contains("SuperAdmin"));
 
         if (rows.size() > 1) {
 //            throw new AssertionError("More than one row found!");

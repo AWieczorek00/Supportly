@@ -54,6 +54,8 @@ public class AgreementTest extends TestDatabaseSetup {
         // Czekamy aż tabela się pojawi
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("table.mat-mdc-table tr[mat-row]")));
 
+        Thread.sleep(500); // czekaj 0.5 sekundy
+
         // Pobieramy wiersze tabeli
         List<WebElement> rows = driver.findElements(By.cssSelector("table.mat-mdc-table tr[mat-row]"));
 

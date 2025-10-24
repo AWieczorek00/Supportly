@@ -131,17 +131,26 @@ public class TaskTest extends TestDatabaseSetup {
                 ExpectedConditions.elementToBeClickable(By.cssSelector("button[type='submit']"))
         );
         searchButton.click();
-
-        // Czekamy aż tabela się pojawi
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("table.mat-mdc-table tr[mat-row]")));
 
-        // Pobieramy wiersze tabeli
-        List<WebElement> rows = driver.findElements(By.cssSelector("table.mat-mdc-table tr[mat-row]"));
+// Poczekaj aż tabela się ustabilizuje (ilość wierszy się nie zmienia)
+        wait.until(driver1 -> {
+            List<WebElement> rowsBefore = driver1.findElements(By.cssSelector("table.mat-mdc-table tr[mat-row]"));
+            int countBefore = rowsBefore.size();
+            try {
+                Thread.sleep(300); // mała pauza - Angular potrzebuje chwili
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            int countAfter = driver1.findElements(By.cssSelector("table.mat-mdc-table tr[mat-row]")).size();
+            return countBefore == countAfter && countAfter > 0;
+        });
 
-        Thread.sleep(500);
-
-        boolean found = rows.stream()
-                .anyMatch(row -> row.getText().contains("Tech Solutions Sp. z o.o."));
+// Teraz bezpośrednio czekaj, aż któryś wiersz zawiera poszukiwany tekst
+        boolean found = new WebDriverWait(driver, Duration.ofSeconds(10))
+                .until(d -> d.findElements(By.cssSelector("table.mat-mdc-table tr[mat-row]"))
+                        .stream()
+                        .anyMatch(e -> e.getText().contains("Tech Solutions Sp. z o.o.")));
 
         assertTrue(found, "Nie znaleziono firmy 'Tech Solutions Sp. z o.o.' w tabeli!");
     }
