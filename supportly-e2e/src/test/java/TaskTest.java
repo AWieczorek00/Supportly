@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class TaskTest extends TestDatabaseSetup {
     @BeforeEach
     void setup() throws Exception {
-        initDriver(true);
+        initDriver(false);
         loginAs("super.admin@gmail.com", "123456");
         Thread.sleep(500); // czekaj 0.5 sekundy
         wait = new WebDriverWait(driver, Duration.ofSeconds(15));
@@ -123,7 +123,7 @@ public class TaskTest extends TestDatabaseSetup {
         WebElement nameInput = wait.until(
                 ExpectedConditions.visibilityOfElementLocated(By.cssSelector("input[formcontrolname='name']"))
         );
-        nameInput.sendKeys("Przygotowanie raportu miesięcznego");
+        nameInput.sendKeys("Przygotowanie raportu miesiecznego");
 
 
         // Klikamy przycisk Szukaj

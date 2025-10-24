@@ -6,8 +6,8 @@ import java.time.LocalDate;
 
 public class TestDatabaseSetup extends BaseE2ETest {
 
-    protected static  String URL = System.getenv().getOrDefault("BASE_URL_DATABASE", "jdbc:postgresql://192.168.0.81:1010/postgres");
-    protected static final String PROFILE = System.getenv().getOrDefault("PROFILE","postgres"); // "postgres", "mssql", "oracle"
+    protected static  String URL = System.getenv().getOrDefault("BASE_URL_DATABASE", "jdbc:sqlserver://192.168.0.81:1110;databaseName=supportly;encrypt=false");
+    protected static final String PROFILE = System.getenv().getOrDefault("PROFILE","mssql"); // "postgres", "mssql", "oracle"
     protected static final String BASE_URL = System.getenv().getOrDefault("BASE_URL", "http://localhost:4200");
 
 
@@ -190,15 +190,15 @@ public class TestDatabaseSetup extends BaseE2ETest {
             switch (PROFILE.toLowerCase()) {
                 case "oracle" -> stmt.executeUpdate("""
                 INSERT INTO TASK (ID, NAME, EXECUTION_TIME, ORDER_ID, DONE)
-                VALUES (task_seq.NEXTVAL, 'Przygotowanie raportu miesięcznego', SYSDATE+2, (SELECT ID FROM "ORDER" WHERE AGREEMENT_NUMBER='AGR-2025/001'), 0)
+                VALUES (task_seq.NEXTVAL, 'Przygotowanie raportu miesiecznego', SYSDATE+2, (SELECT ID FROM "ORDER" WHERE AGREEMENT_NUMBER='AGR-2025/001'), 0)
             """);
                 case "postgres" -> stmt.executeUpdate("""
                 INSERT INTO TASK (NAME, EXECUTION_TIME, ORDER_ID, DONE)
-                VALUES ('Przygotowanie raportu miesięcznego', CURRENT_DATE + INTERVAL '2 day', (SELECT id FROM "order" WHERE AGREEMENT_NUMBER='AGR-2025/001'), false)
+                VALUES ('Przygotowanie raportu miesiecznego', CURRENT_DATE + INTERVAL '2 day', (SELECT id FROM "order" WHERE AGREEMENT_NUMBER='AGR-2025/001'), false)
             """);
                 case "mssql" -> stmt.executeUpdate("""
                 INSERT INTO TASK (NAME, EXECUTION_TIME, ORDER_ID, DONE)
-                VALUES ('Przygotowanie raportu miesięcznego', DATEADD(day,2,GETDATE()), (SELECT id FROM [order] WHERE AGREEMENT_NUMBER='AGR-2025/001'), 0)
+                VALUES ('Przygotowanie raportu miesiecznego', DATEADD(day,2,GETDATE()), (SELECT id FROM [order] WHERE AGREEMENT_NUMBER='AGR-2025/001'), 0)
             """);
             }
 
