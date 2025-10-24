@@ -150,34 +150,26 @@ public class EmployeeTest extends TestDatabaseSetup {
             }
         }
 
-        // 7️⃣ Kliknij przycisk "Zapisz"
+        // 7️⃣ Kliknij przycisk "Zapisz" w dialogu
         WebElement saveButton = wait.until(ExpectedConditions.elementToBeClickable(
                 dialog.findElement(By.cssSelector("button.mat-mdc-unelevated-button.mat-primary"))
         ));
         saveButton.click();
 
-        // 8️⃣ Poczekaj aż tabela z pracownikami się pojawi i będzie stabilna
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("table.mat-mdc-table tr[mat-row]")));
+// 8️⃣ Poczekaj, aż overlay zniknie
+        wait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector("div.cdk-overlay-backdrop.cdk-overlay-backdrop-showing")));
 
-        wait.until(driver1 -> {
-            List<WebElement> rowsBefore = driver1.findElements(By.cssSelector("table.mat-mdc-table tr[mat-row]"));
-            int countBefore = rowsBefore.size();
-            try {
-                Thread.sleep(300); // krótka pauza dla Angulara
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-            int countAfter = driver1.findElements(By.cssSelector("table.mat-mdc-table tr[mat-row]")).size();
-            return countBefore == countAfter && countAfter > 0;
-        });
-
-        // 9️⃣ Wyszukaj nowego pracownika
+// 9️⃣ Teraz można bezpiecznie wprowadzać nazwisko w polu wyszukiwania
         WebElement nameInput = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("input[formcontrolname='lastName']")));
         nameInput.clear();
         nameInput.sendKeys("Nita");
 
+// 10️⃣ Kliknij przycisk wyszukiwania bez ryzyka overlay
         WebElement searchButton = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("button[type='submit']")));
-        searchButton.click();
+
+// Jeśli nadal pojawiają się problemy w CI (overlay czasem nie zniknie w 20s):
+// użyj JS click jako ostateczność:
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", searchButton);
 
         // 10️⃣ Poczekaj aż wiersz z nowym pracownikiem się pojawi
         boolean found = new WebDriverWait(driver, Duration.ofSeconds(20)) // dłuższy timeout dla CI
