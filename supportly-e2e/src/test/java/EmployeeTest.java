@@ -102,65 +102,53 @@ public class EmployeeTest extends TestDatabaseSetup {
     }
 
     @Test
-    public void createEmployee() throws InterruptedException {
+    public void createEmployee() {
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+
+        // Otwórz panel z pracownikami
         WebElement panelHeader = wait.until(
                 ExpectedConditions.elementToBeClickable(By.cssSelector("mat-expansion-panel-header"))
         );
         panelHeader.click();
-        Thread.sleep(500);
 
-        List<WebElement> buttons = driver.findElements(By.cssSelector("button.mat-stroked-button"));
-        System.out.println("Liczba znalezionych przycisków: " + buttons.size());
+        // Kliknij przycisk "Dodaj nowego pracownika"
+        WebElement addButton = wait.until(
+                ExpectedConditions.elementToBeClickable(By.xpath("//button[contains(., 'Dodaj nowego pracownika')]"))
+        );
+        addButton.click();
 
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        // Poczekaj aż otworzy się dialog
+        WebElement dialog = wait.until(
+                ExpectedConditions.visibilityOfElementLocated(By.cssSelector("mat-dialog-container"))
+        );
 
-        WebElement button = wait.until(ExpectedConditions.presenceOfElementLocated(
-                By.xpath("//button[contains(., 'Dodaj nowego pracownika')]")
-        ));
-
-        button.click();
-
-        Thread.sleep(1000);
-
-        WebDriverWait wait2 = new WebDriverWait(driver, Duration.ofSeconds(10));
-
-        WebElement dialog = wait2.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("mat-dialog-container")));
-
-        WebElement firstNameInput = dialog.findElement(By.cssSelector("input[formControlName='firstName']"));
-        firstNameInput.click();
+        // Wypełnij pola formularza
+        WebElement firstNameInput = wait.until(
+                ExpectedConditions.elementToBeClickable(dialog.findElement(By.cssSelector("input[formControlName='firstName']")))
+        );
         firstNameInput.clear();
         firstNameInput.sendKeys("Justyna");
 
-
         WebElement lastNameInput = dialog.findElement(By.cssSelector("input[formControlName='lastName']"));
-        lastNameInput.click();
         lastNameInput.clear();
         lastNameInput.sendKeys("Nita");
 
         WebElement phoneInput = dialog.findElement(By.cssSelector("input[formControlName='phoneNumber']"));
-        phoneInput.click();
         phoneInput.clear();
         phoneInput.sendKeys("502254567");
 
-
-        // Kliknij select, żeby otworzyć overlay
-        WebElement roleSelect = driver.findElement(By.cssSelector("mat-select[formcontrolname='role']"));
+        // Otwórz select roli
+        WebElement roleSelect = dialog.findElement(By.cssSelector("mat-select[formcontrolname='role']"));
         roleSelect.click();
 
-// Poczekaj aż pojawi się overlay z opcjami
+        // Poczekaj aż pojawi się overlay z opcjami
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div.cdk-overlay-pane")));
 
-// Poczekaj aż opcje będą widoczne
+        // Pobierz opcje i wybierz "ADMIN"
         List<WebElement> options = wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(
                 By.cssSelector("mat-option .mdc-list-item__primary-text")
         ));
 
-// Dla debugowania: wypisz dostępne role
-        for (WebElement opt : options) {
-            System.out.println("Option: " + opt.getText());
-        }
-
-// Znajdź opcję z tekstem ADMIN i kliknij (przez JS, bo zwykły click może być zignorowany)
         for (WebElement opt : options) {
             if (opt.getText().trim().equals("ADMIN")) {
                 ((JavascriptExecutor) driver).executeScript("arguments[0].click();", opt);
@@ -168,34 +156,32 @@ public class EmployeeTest extends TestDatabaseSetup {
             }
         }
 
-        Thread.sleep(500);
-
-        WebElement saveButton = dialog.findElement(By.cssSelector("button.mat-mdc-unelevated-button.mat-primary"));
+        // Kliknij przycisk "Zapisz"
+        WebElement saveButton = wait.until(
+                ExpectedConditions.elementToBeClickable(dialog.findElement(By.cssSelector("button.mat-mdc-unelevated-button.mat-primary")))
+        );
         saveButton.click();
-        ;
 
-        Thread.sleep(500);
+        // Poczekaj aż dialog się zamknie
+        wait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector("mat-dialog-container")));
 
-
-        // Czekamy aż inputy staną się widoczne
+        // Wprowadź nazwisko do pola wyszukiwania
         WebElement nameInput = wait.until(
                 ExpectedConditions.visibilityOfElementLocated(By.cssSelector("input[formcontrolname='lastName']"))
         );
+        nameInput.clear();
         nameInput.sendKeys("Nita");
 
-
+        // Kliknij przycisk wyszukiwania
         WebElement searchButton = wait.until(
                 ExpectedConditions.elementToBeClickable(By.cssSelector("button[type='submit']"))
         );
-
-        wait.until(ExpectedConditions.invisibilityOfElementLocated(
-                By.cssSelector(".cdk-overlay-backdrop.cdk-overlay-backdrop-showing")
-        ));
-
         searchButton.click();
+
+        // Poczekaj aż tabela się pojawi
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("table.mat-mdc-table tr[mat-row]")));
 
-// Poczekaj aż tabela się ustabilizuje (ilość wierszy się nie zmienia)
+        // Poczekaj aż tabela się ustabilizuje (ilość wierszy się nie zmienia)
         wait.until(driver1 -> {
             List<WebElement> rowsBefore = driver1.findElements(By.cssSelector("table.mat-mdc-table tr[mat-row]"));
             int countBefore = rowsBefore.size();
@@ -208,13 +194,13 @@ public class EmployeeTest extends TestDatabaseSetup {
             return countBefore == countAfter && countAfter > 0;
         });
 
-// Teraz bezpośrednio czekaj, aż któryś wiersz zawiera poszukiwany tekst
+        // Poczekaj aż wiersz z nowym pracownikiem się pojawi
         boolean found = new WebDriverWait(driver, Duration.ofSeconds(10))
                 .until(d -> d.findElements(By.cssSelector("table.mat-mdc-table tr[mat-row]"))
                         .stream()
                         .anyMatch(e -> e.getText().contains("Nita")));
 
         assertTrue(found, "Nie znaleziono nowego pracownika 'Nita' w tabeli!");
-
     }
+
 }
