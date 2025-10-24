@@ -3,6 +3,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -172,10 +173,21 @@ public class EmployeeTest extends TestDatabaseSetup {
         ((JavascriptExecutor) driver).executeScript("arguments[0].click();", searchButton);
 
         // 10️⃣ Poczekaj aż wiersz z nowym pracownikiem się pojawi
-        boolean found = new WebDriverWait(driver, Duration.ofSeconds(20)) // dłuższy timeout dla CI
-                .until(d -> d.findElements(By.cssSelector("table.mat-mdc-table tr[mat-row]"))
-                        .stream()
-                        .anyMatch(e -> e.getText().contains("Nita")));
+        boolean found = new WebDriverWait(driver, Duration.ofSeconds(20))
+                .until(d -> {
+                    List<WebElement> rows = d.findElements(By.cssSelector("table.mat-mdc-table tr[mat-row]"));
+                    for (WebElement row : rows) {
+                        try {
+                            if (row.getText().contains("Nita")) {
+                                return true;
+                            }
+                        } catch (StaleElementReferenceException e) {
+                            // jeśli wiersz stał się stale, spróbuj w następnym cyklu
+                            return false;
+                        }
+                    }
+                    return false;
+                });
 
         assertTrue(found, "Nie znaleziono nowego pracownika 'Nita' w tabeli!");
     }
