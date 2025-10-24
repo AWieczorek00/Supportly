@@ -266,22 +266,33 @@ public class EmployeeTest extends TestDatabaseSetup {
                 ExpectedConditions.elementToBeClickable(By.cssSelector("button[type='submit']"))
         );
 
-        wait.until(ExpectedConditions.invisibilityOfElementLocated(
-                By.cssSelector(".cdk-overlay-backdrop.cdk-overlay-backdrop-showing")
-        ));
-
         searchButton.click();
 
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("table.mat-mdc-table tr[mat-row]")));
+// Poczekaj aż tabela się ustabilizuje (ilość wierszy się nie zmienia)
+        wait.until(driver1 -> {
+            List<WebElement> rowsBefore = driver1.findElements(By.cssSelector("table.mat-mdc-table tr[mat-row]"));
+            int countBefore = rowsBefore.size();
+            try {
+                Thread.sleep(300); // mała pauza - Angular potrzebuje chwili
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            int countAfter = driver1.findElements(By.cssSelector("table.mat-mdc-table tr[mat-row]")).size();
+            return countBefore == countAfter && countAfter > 0;
+        });
 
+// Teraz czekaj, aż któryś wiersz zawiera poszukiwany tekst
+        boolean found = new WebDriverWait(driver, Duration.ofSeconds(10))
+                .until(d -> d.findElements(By.cssSelector("table.mat-mdc-table tr[mat-row]"))
+                        .stream()
+                        .anyMatch(e -> e.getText().contains("Nita")));
+
+// Sprawdzenie, czy nie ma więcej niż jednego wiersza
         List<WebElement> rows = driver.findElements(By.cssSelector("table.mat-mdc-table tr[mat-row]"));
-
-        boolean found = rows.stream()
-                .anyMatch(row -> row.getText().contains("Nita"));
-
         if (rows.size() > 1) {
             throw new AssertionError("More than one row found!");
         }
+
         assertTrue(found, "Nie znaleziono nowego pracownika 'Nita' w tabeli!");
 
     }
