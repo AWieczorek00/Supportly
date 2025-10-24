@@ -131,8 +131,13 @@ public class TaskTest extends TestDatabaseSetup {
                 ExpectedConditions.elementToBeClickable(By.cssSelector("button[type='submit']"))
         );
         searchButton.click();
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("table.mat-mdc-table tr[mat-row]")));
-
+        wait.until(driver1 -> {
+            List<WebElement> rowsBefore = driver1.findElements(By.cssSelector("table.mat-mdc-table tr[mat-row]"));
+            int countBefore = rowsBefore.size();
+            try { Thread.sleep(300); } catch (InterruptedException ignored) {}
+            int countAfter = driver1.findElements(By.cssSelector("table.mat-mdc-table tr[mat-row]")).size();
+            return countBefore == countAfter && countAfter > 0;
+        });
 // Poczekaj aż tabela się ustabilizuje (ilość wierszy się nie zmienia)
         wait.until(driver1 -> {
             List<WebElement> rowsBefore = driver1.findElements(By.cssSelector("table.mat-mdc-table tr[mat-row]"));
