@@ -16,6 +16,7 @@ public class TestDatabaseSetup extends BaseE2ETest {
 
     @BeforeAll
     static void setupDatabase() {
+
         if(PROFILE.toLowerCase().equals("mssql")) {
             URL=URL+";databaseName=supportly;encrypt=false";
         }

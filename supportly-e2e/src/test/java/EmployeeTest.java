@@ -19,6 +19,7 @@ public class EmployeeTest extends TestDatabaseSetup {
         initDriver(true);
         loginAs("super.admin@gmail.com", "123456");
         Thread.sleep(500); // czekaj 0.5 sekundy
+        wait = new WebDriverWait(driver, Duration.ofSeconds(15));
 
         openApp("/employee/list");
         Thread.sleep(500); // czekaj 0.5 sekundy// true = headless
@@ -74,6 +75,8 @@ public class EmployeeTest extends TestDatabaseSetup {
 
         // Pobieramy wiersze tabeli
         List<WebElement> rows = driver.findElements(By.cssSelector("table.mat-mdc-table tr[mat-row]"));
+
+        Thread.sleep(500);
 
         boolean found = rows.stream()
                 .anyMatch(row -> row.getText().contains("SuperAdmin"));

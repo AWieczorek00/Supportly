@@ -18,6 +18,7 @@ public class TaskTest extends TestDatabaseSetup {
         initDriver(true);
         loginAs("super.admin@gmail.com", "123456");
         Thread.sleep(500); // czekaj 0.5 sekundy
+        wait = new WebDriverWait(driver, Duration.ofSeconds(15));
 
         openApp("/task/list");
         Thread.sleep(500); // czekaj 0.5 sekundy// true = headless
@@ -94,6 +95,8 @@ public class TaskTest extends TestDatabaseSetup {
 
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("table.mat-mdc-table tr[mat-row]")));
 
+        Thread.sleep(500);
+
         // Pobieramy wiersze tabeli
         List<WebElement> rows = driver.findElements(By.cssSelector("table.mat-mdc-table tr[mat-row]"));
 
@@ -134,6 +137,8 @@ public class TaskTest extends TestDatabaseSetup {
 
         // Pobieramy wiersze tabeli
         List<WebElement> rows = driver.findElements(By.cssSelector("table.mat-mdc-table tr[mat-row]"));
+
+        Thread.sleep(500);
 
         boolean found = rows.stream()
                 .anyMatch(row -> row.getText().contains("Tech Solutions Sp. z o.o."));

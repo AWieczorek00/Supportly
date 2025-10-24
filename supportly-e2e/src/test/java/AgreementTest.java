@@ -4,7 +4,9 @@ import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
 
@@ -18,6 +20,7 @@ public class AgreementTest extends TestDatabaseSetup {
         initDriver(true);
         loginAs("super.admin@gmail.com", "123456");
         Thread.sleep(500); // czekaj 0.5 sekundy
+        wait = new WebDriverWait(driver, Duration.ofSeconds(15));
 
         openApp("/agreement/list");
         Thread.sleep(500); // czekaj 0.5 sekundy// true = headless
