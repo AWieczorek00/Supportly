@@ -52,8 +52,6 @@ import {Role} from '../Role';
     MatButton,
     MatDatepickerModule,
     MatDatepickerModule,
-    MatSelect,
-    MatOption,
   ],
   templateUrl: './employee-list.component.html',
   styleUrl: './employee-list.component.scss'
@@ -71,6 +69,8 @@ export class EmployeeListComponent implements AfterViewInit, OnInit {
       next: (employees) => {
         this.employeeTable.data = employees;
       },
+
+
       error: (err) => console.error('Błąd przy pobieraniu danych:', err)
     });
   }
