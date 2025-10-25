@@ -464,9 +464,9 @@ String get_branch_name(List<String> branches) {
 }
 
 def getProfile(String jobName) {
-    if (jobName.contains("Supportly_PullRequest")) {
-        return "postgres"
-    }
+//    if (jobName.contains("Supportly_PullRequest")) {
+//        return "postgres"
+//    }
     return jobName.substring(jobName.lastIndexOf("-") + 1)
 }
 
