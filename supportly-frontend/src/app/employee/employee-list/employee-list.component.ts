@@ -70,6 +70,7 @@ export class EmployeeListComponent implements AfterViewInit, OnInit {
         this.employeeTable.data = employees;
       },
 
+
       error: (err) => console.error('Błąd przy pobieraniu danych:', err)
     });
   }
