@@ -15,7 +15,7 @@ services:
         limits:
           memory: 4g
     healthcheck:
-      test: ["CMD-SHELL", "ls /opt/oracle/oradata/ORCLCDB/supportly.dbf"]
+      test: [ "CMD-SHELL", "ls /opt/oracle/oradata/ORCLCDB/supportly.dbf" ]
       interval: 10s
       timeout: 5s
       retries: 120
@@ -38,18 +38,18 @@ services:
     ports:
       - PORT_BACKEND:8080
 
-  frontend:
+
+  frontend-oracle:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      tags:
+        - localhost:32000/conf-frontend-oracle:latest
     image: localhost:32000/conf-frontend-oracle:latest
-    container_name: angular-frontend
-    environment:
-      BACKEND_URL: http://backend-oracle:8080
     depends_on:
       - backend-oracle
     ports:
-      - PORT_FRONTEND:4200
+      - PORT_FRONTEND:80
 
 volumes:
   oracle-data:
