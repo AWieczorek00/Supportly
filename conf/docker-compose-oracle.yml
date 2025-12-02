@@ -18,7 +18,7 @@ services:
       test: ["CMD-SHELL", "ls /opt/oracle/oradata/ORCLCDB/supportly.dbf"]
       interval: 10s
       timeout: 5s
-      retries: 60
+      retries: 120
       start_period: 20m
 
 
@@ -38,18 +38,18 @@ services:
     ports:
       - PORT_BACKEND:8080
 
-  # frontend:
-  #   build:
-  #     context: ./frontend
-  #     dockerfile: Dockerfile
-  #   image: localhost:32000/conf-frontend:latest
-  #   container_name: angular-frontend
-  #   environment:
-  #     BACKEND_URL: http://spring-backend:8080
-  #   depends_on:
-  #     - backend
-  #   ports:
-  #     - "4200:80"
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: localhost:32000/conf-frontend-oracle:latest
+    container_name: angular-frontend
+    environment:
+      BACKEND_URL: http://backend-oracle:8080
+    depends_on:
+      - backend-oracle
+    ports:
+      - PORT_FRONTEND:4200
 
 volumes:
   oracle-data:
