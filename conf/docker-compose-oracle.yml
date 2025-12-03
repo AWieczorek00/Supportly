@@ -18,7 +18,7 @@ services:
       test: [ "CMD-SHELL", "ls /opt/oracle/oradata/ORCLCDB/supportly.dbf" ]
       interval: 10s
       timeout: 5s
-      retries: 120
+      retries: 360
       start_period: 20m
 
 
