@@ -1,0 +1,62 @@
+services:
+#  database-postgres:
+#    build:
+#      context: postgres
+#      dockerfile: Dockerfile
+#      tags:
+#        - localhost:32000/conf-postgres:latest
+#    image: localhost:32000/conf-postgres:latest
+#    privileged: true
+#    ports:
+#      - PORT_DB:5432
+#    volumes:
+#      - postgres-data:/var/lib/postgresql/data
+#    healthcheck:
+#      test: [ "CMD-SHELL", "pg_isready -d db_prod" ]
+#      interval: 5s
+#      timeout: 5s
+#      retries: 60
+#      start_period: 30s
+
+  backend-postgres:
+    build:
+      context: backend
+      dockerfile: Dockerfile
+      tags:
+        - localhost:32000/conf-backend-postgres:latest
+    image: localhost:32000/conf-backend-postgres:latest
+    env_file:
+      - ./backend/backend.env
+    ports:
+      - PORT_BACKEND:8080
+
+
+
+  frontend-postgres:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      tags:
+        - localhost:32000/conf-frontend-postgres:latest
+    image: localhost:32000/conf-frontend-postgres:latest
+    depends_on:
+      - backend-postgres
+    ports:
+      - PORT_FRONTEND:80
+
+
+  # frontend:
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile
+  #   image: localhost:32000/conf-frontend:latest
+  #   container_name: angular-frontend
+  #   environment:
+  #     BACKEND_URL: http://spring-backend:8080
+  #   depends_on:
+  #     - backend
+  #   ports:
+  #     - "4200:80"
+
+volumes:
+  postgres-data:
