@@ -9,7 +9,7 @@ services:
     env_file:
       - ./backend/backend.env
     environment:
-      - JAVA_TOOL_OPTIONS=-Doracle.jdbc.timezoneAsRegion=false -Djava.security.egd=file:/dev/./urandom
+      - JAVA_TOOL_OPTIONS=-Doracle.jdbc.timezoneAsRegion=false -Djava.security.egd=file:/dev/./urandom -Doracle.net.disableOob=true
     ports:
       - PORT_BACKEND:8080
 
