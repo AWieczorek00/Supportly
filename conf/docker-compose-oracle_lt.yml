@@ -8,6 +8,8 @@ services:
     image: localhost:32000/conf-backend-oracle:latest
     env_file:
       - ./backend/backend.env
+    environment:
+      - JAVA_TOOL_OPTIONS=-Doracle.jdbc.timezoneAsRegion=false -Djava.security.egd=file:/dev/./urandom
     ports:
       - PORT_BACKEND:8080
 
