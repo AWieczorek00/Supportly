@@ -20,6 +20,6 @@ services:
         - localhost:32000/conf-frontend-oracle:latest
     image: localhost:32000/conf-frontend-oracle:latest
     depends_on:
-      - backend-oracle
+      - backend-oracle_lt
     ports:
       - PORT_FRONTEND:80
