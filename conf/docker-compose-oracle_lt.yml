@@ -1,0 +1,25 @@
+services:
+  backend-oracle_lt:
+    build:
+      context: backend
+      dockerfile: Dockerfile
+      tags:
+        - localhost:32000/conf-backend-oracle:latest
+    image: localhost:32000/conf-backend-oracle:latest
+    env_file:
+      - ./backend/backend.env
+    ports:
+      - PORT_BACKEND:8080
+
+
+  frontend-oracle_lt:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      tags:
+        - localhost:32000/conf-frontend-oracle:latest
+    image: localhost:32000/conf-frontend-oracle:latest
+    depends_on:
+      - backend-oracle
+    ports:
+      - PORT_FRONTEND:80
