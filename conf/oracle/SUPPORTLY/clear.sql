@@ -1,23 +1,26 @@
--- 1. Ustawienie kontenera na ORCLCDB
+-- 1. Ustawienie kontenera
 ALTER SESSION SET CONTAINER = ORCLCDB;
-
--- 2. Ważne: Pozwala na operacje na użytkownikach bez "C##" w nazwie w głównym kontenerze
 ALTER SESSION SET "_ORACLE_SCRIPT"=TRUE;
 
--- 3. Ignoruj błędy (np. jeśli użytkownik nie istnieje)
-        WHENEVER SQLERROR CONTINUE;
-
--- 4. Zabij aktywne sesje użytkownika (aby zwolnić blokady)
+-- 2. Zabij sesje (w bloku PL/SQL, bezpiecznie)
 BEGIN
-            FOR s IN (SELECT sid, serial# FROM v$session WHERE username = 'SUPPORTLY') LOOP
-    EXECUTE IMMEDIATE 'ALTER SYSTEM KILL SESSION ''' || s.sid || ',' || s.serial# || ''' IMMEDIATE';
-END LOOP;
+    FOR s IN (SELECT sid, serial# FROM v$session WHERE username = 'SUPPORTLY') LOOP
+            EXECUTE IMMEDIATE 'ALTER SYSTEM KILL SESSION ''' || s.sid || ',' || s.serial# || ''' IMMEDIATE';
+        END LOOP;
+EXCEPTION
+    WHEN OTHERS THEN
+        NULL; -- Ignoruj błędy przy zabijaniu sesji
 END;
 /
 
--- 5. Usuń TYLKO użytkownika i jego obiekty (tabele itp.)
--- Tablespace SUPPORTLY_TS pozostaje nienaruszony.
-DROP USER supportly CASCADE;
-
--- 6. Przywróć normalne reagowanie na błędy
-        WHENEVER SQLERROR EXIT SQL.SQLCODE;
+-- 3. Usuń użytkownika (z obsługą błędu "nie istnieje")
+BEGIN
+    EXECUTE IMMEDIATE 'DROP USER supportly CASCADE';
+EXCEPTION
+    WHEN OTHERS THEN
+        -- Kod błędu ORA-01918 oznacza "user does not exist"
+        IF SQLCODE != -1918 THEN
+            RAISE; -- Jeśli to inny błąd, zgłoś go
+        END IF;
+END;
+/
