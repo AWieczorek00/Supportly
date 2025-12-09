@@ -1,0 +1,25 @@
+services:
+
+  backend-mssql_lt:
+    build:
+      context: backend
+      dockerfile: Dockerfile
+      tags:
+        - localhost:32000/conf-backend-mssql:latest
+    image: localhost:32000/conf-backend-mssql:latest
+    env_file:
+      - ./backend/backend.env
+    ports:
+      - PORT_BACKEND:8080
+
+  frontend-mssql_lt:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      tags:
+        - localhost:32000/conf-frontend-mssql:latest
+    image: localhost:32000/conf-frontend-mssql:latest
+    depends_on:
+      - backend-mssql_lt
+    ports:
+      - PORT_FRONTEND:80
