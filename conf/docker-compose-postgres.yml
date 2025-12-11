@@ -48,18 +48,6 @@ services:
       - PORT_FRONTEND:80
 
 
-  # frontend:
-  #   build:
-  #     context: ./frontend
-  #     dockerfile: Dockerfile
-  #   image: localhost:32000/conf-frontend:latest
-  #   container_name: angular-frontend
-  #   environment:
-  #     BACKEND_URL: http://spring-backend:8080
-  #   depends_on:
-  #     - backend
-  #   ports:
-  #     - "4200:80"
 
 volumes:
   postgres-data:
