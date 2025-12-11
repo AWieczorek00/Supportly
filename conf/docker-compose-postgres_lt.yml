@@ -1,0 +1,26 @@
+services:
+  backend-postgres_lt:
+    build:
+      context: backend
+      dockerfile: Dockerfile
+      tags:
+        - localhost:32000/conf-backend-postgres:latest
+    image: localhost:32000/conf-backend-postgres:latest
+    env_file:
+      - ./backend/backend.env
+    ports:
+      - PORT_BACKEND:8080
+
+
+
+  frontend-postgres_lt:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      tags:
+        - localhost:32000/conf-frontend-postgres:latest
+    image: localhost:32000/conf-frontend-postgres:latest
+    depends_on:
+      - backend-postgres-lt
+    ports:
+      - PORT_FRONTEND:80
