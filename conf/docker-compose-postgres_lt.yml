@@ -21,6 +21,6 @@ services:
         - localhost:32000/conf-frontend-postgres:latest
     image: localhost:32000/conf-frontend-postgres:latest
     depends_on:
-      - backend-postgres-lt
+      - backend-postgres_lt
     ports:
       - PORT_FRONTEND:80
