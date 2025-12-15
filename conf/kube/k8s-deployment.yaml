@@ -39,7 +39,7 @@ spec:
     spec:
       containers:
         - name: postgres-container
-          image: localhost:32000/conf-postgres:latest
+          image: 192.168.0.81:32000/conf-postgres:latest
           ports:
             - containerPort: 5432
           env:
@@ -76,7 +76,7 @@ spec:
     spec:
       containers:
         - name: backend-container
-          image: localhost:32000/conf-backend:latest
+          image: 192.168.0.81:32000/conf-backend-postgres:latest
           imagePullPolicy: Always
           env:
             - name: JAVA_TOOL_OPTIONS
@@ -114,3 +114,137 @@ spec:
       targetPort: 5005
       nodePort: 30505
   type: NodePort
+
+#apiVersion: v1
+#kind: Namespace
+#metadata:
+#  name: my-app
+#
+#---
+#
+## ===========================
+##  POSTGRES SERVICE (CLUSTERIP)
+## ===========================
+#apiVersion: v1
+#kind: Service
+#metadata:
+#  name: postgres-service
+#  namespace: my-app
+#spec:
+#  type: ClusterIP
+#  selector:
+#    app: postgres
+#  ports:
+#    - protocol: TCP
+#      port: 5432
+#      targetPort: 5432
+#
+#---
+#
+## ===========================
+##        POSTGRES DEPLOYMENT
+## ===========================
+#apiVersion: apps/v1
+#kind: Deployment
+#metadata:
+#  name: postgres-deployment
+#  namespace: my-app
+#spec:
+#  replicas: 1
+#  selector:
+#    matchLabels:
+#      app: postgres
+#  template:
+#    metadata:
+#      labels:
+#        app: postgres
+#    spec:
+#      containers:
+#        - name: postgres-container
+#          image: localhost:32000/conf-postgres:latest
+#          ports:
+#            - containerPort: 5432
+#          env:
+#            - name: POSTGRES_USER
+#              value: supportly
+#            - name: POSTGRES_PASSWORD
+#              value: Qwerty.1
+#            - name: POSTGRES_DB
+#              value: mydb
+#          volumeMounts:
+#            - mountPath: /var/lib/postgresql/data
+#              name: postgres-storage
+#      volumes:
+#        - name: postgres-storage
+#          hostPath:
+#            path: /var/snap/microk8s/common/postgres-data
+#            type: DirectoryOrCreate
+#
+#---
+#
+## ===========================
+##        BACKEND DEPLOYMENT
+## ===========================
+#apiVersion: apps/v1
+#kind: Deployment
+#metadata:
+#  name: backend-deployment
+#  namespace: my-app
+#spec:
+#  replicas: 1
+#  selector:
+#    matchLabels:
+#      app: backend
+#  template:
+#    metadata:
+#      labels:
+#        app: backend
+#        version: v1.0
+#    spec:
+#      containers:
+#        - name: backend-container
+#          image: localhost:32000/conf-backend:latest
+#          imagePullPolicy: Always
+#          ports:
+#            - containerPort: 8080
+#            - containerPort: 5005
+#          env:
+#            - name: JAVA_TOOL_OPTIONS
+#              value: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+#            - name: HOST
+#              value: postgres-service
+#            - name: PORT
+#              value: "5432"
+#            - name: DB_USER
+#              value: supportly
+#            - name: DB_PASS
+#              value: Qwerty.1
+#            - name: DB_NAME
+#              value: mydb
+#
+#---
+#
+## ===========================
+##     BACKEND SERVICE
+## ===========================
+#apiVersion: v1
+#kind: Service
+#metadata:
+#  name: backend-service
+#  namespace: my-app
+#spec:
+#  selector:
+#    app: backend
+#  type: NodePort
+#  ports:
+#    - name: http
+#      protocol: TCP
+#      port: 8080
+#      targetPort: 8080
+#      nodePort: 30080
+#    - name: debugger
+#      protocol: TCP
+#      port: 5005
+#      targetPort: 5005
+#      nodePort: 30505
+
