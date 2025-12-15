@@ -4,8 +4,8 @@ services:
       context: postgres
       dockerfile: Dockerfile
       tags:
-        - 192.168.0.81:32000/conf-postgres:latest
-    image: 192.168.0.81:32000/conf-postgres:latest
+        - localhost:32000/conf-postgres:latest
+    image: localhost:32000/conf-postgres:latest
     privileged: true
     ports:
       - PORT_DB:5432
@@ -23,8 +23,8 @@ services:
       context: backend
       dockerfile: Dockerfile
       tags:
-        - 192.168.0.81:32000/conf-backend-postgres:latest
-    image: 192.168.0.81:32000/conf-backend-postgres:latest
+        - localhost:32000/conf-backend-postgres:latest
+    image: localhost:32000/conf-backend-postgres:latest
     env_file:
       - ./backend/backend.env
     depends_on:
@@ -40,8 +40,8 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       tags:
-        - 192.168.0.81:32000/conf-frontend-postgres:latest
-    image: 192.168.0.81:32000/conf-frontend-postgres:latest
+        - localhost:32000/conf-frontend-postgres:latest
+    image: localhost:32000/conf-frontend-postgres:latest
     depends_on:
       - backend-postgres
     ports:
