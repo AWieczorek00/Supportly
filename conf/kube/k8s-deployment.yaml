@@ -79,6 +79,13 @@ spec:
           image: 192.168.0.81:32000/conf-backend-postgres:latest
           imagePullPolicy: Always
           env:
+            # --- ZMIANA TUTAJ ---
+            # Definiujemy zmienną, na którą czeka aplikacja
+            # To naprawi problem CORS, bo backend dowie się, skąd przychodzą zapytania
+            - name: FRONTEND_URL
+              value: "http://192.168.0.81:30081"
+
+            # Pozostałe zmienne bez zmian
             - name: JAVA_TOOL_OPTIONS
               value: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
             - name: HOST
