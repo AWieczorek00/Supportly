@@ -139,6 +139,18 @@ spec:
           imagePullPolicy: Always
           ports:
             - containerPort: 80
+          env:
+            - name: API_URL
+              value: "http://192.168.0.81:30080"
+          command: [ "/bin/sh", "-c" ]
+          args:
+              - >-
+                echo "Rozpoczynam podmianę adresu URL w config.json..." &&
+                
+                find /usr/share/nginx/html -name "config.json" -exec sed -i "s|http://192.168.0.81:3000|$(API_URL)|g" {} + &&
+                
+                echo "Podmiana zakończona. Uruchamiam Nginx..." &&
+                nginx -g 'daemon off;'
 
 ---
 
