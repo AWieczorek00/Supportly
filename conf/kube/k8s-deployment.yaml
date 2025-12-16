@@ -133,23 +133,12 @@ spec:
     spec:
       containers:
         - name: frontend-container
+          # Ważne: Adres Twojego lokalnego rejestru
           image: 192.168.0.81:32000/conf-frontend-postgres:latest
+          # Always wymusza sprawdzenie, czy w rejestrze jest nowsza wersja (przydatne przy tagu :latest)
           imagePullPolicy: Always
           ports:
             - containerPort: 80
-
-          # --- TO JEST TA MAGICZNA CZĘŚĆ ---
-          # Nadpisujemy domyślne uruchomienie Nginxa własnym skryptem
-          command: ["/bin/sh", "-c"]
-          args:
-            - >-
-              # 1. Znajdź pliki JS i zamień błędny adres na poprawny
-              # UWAGA: Ten "stary" adres musi być DOKŁADNIE taki, jaki jest teraz w kodzie
-              sed -i 's|http://192.168.0.81:1000|http://192.168.0.81:30080|g' /usr/share/nginx/html/*.js &&
-              
-              # 2. Po podmianie, uruchom Nginxa normalnie
-              nginx -g 'daemon off;'
-          # ---------------------------------
 
 ---
 
@@ -165,9 +154,9 @@ spec:
   ports:
     - name: http
       protocol: TCP
-      port: 80
-      targetPort: 80
-      nodePort: 30081
+      port: 80          # Port wewnątrz klastra
+      targetPort: 80    # Port, na którym nasłuchuje Nginx w kontenerze
+      nodePort: 30081   # Port, pod którym wejdziesz przez przeglądarkę
 
 
 #apiVersion: v1
