@@ -212,15 +212,15 @@ pipeline {
 
                     def databaseUrl = ""
 
-                    if ($ { env.PROFILE.replace('_lt', '') } == "postgres") {
+                    if( env.PROFILE.replace('_lt', '')  == "postgres") {
                         databaseUrl = "jdbc:postgresql://192.168.0.81:${env.PORT_DB}/postgres"
                     }
 
-                    if ($ { env.PROFILE.replace('_lt', '') } == "mssql") {
+                    if ( env.PROFILE.replace('_lt', '') == "mssql") {
                         databaseUrl = """jdbc:sqlserver://192.168.0.81:${env.PORT_DB};databaseName=supportly;encrypt=false"""
                     }
 
-                    if ($ { env.PROFILE.replace('_lt', '') } == "oracle") {
+                    if (env.PROFILE.replace('_lt', '')  == "oracle") {
                         databaseUrl = "jdbc:postgresql://192.168.0.81:${env.PORT_DB}/postgres"
                     }
 
