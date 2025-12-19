@@ -154,7 +154,7 @@ spec:
               - >-
                 echo "Rozpoczynam podmianę adresu URL w config.json..." &&
                 
-                find /usr/share/nginx/html -name "config.json" -exec sed -i "s|http://192.168.0.81:3000|$(API_URL)|g" {} + &&
+                find /usr/share/nginx/html -name "config.json" -exec sed -i "s|http://192.168.0.81:1000|$(API_URL)|g" {} + &&
                 
                 echo "Podmiana zakończona. Uruchamiam Nginx..." &&
                 nginx -g 'daemon off;'

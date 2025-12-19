@@ -6,18 +6,27 @@ final String pipelineConfig = '''
     "ports":{
         "app":{
             "postgres-master":1000,            
+            "postgres_lt-master":1001,            
             "mssql-master":1100,           
-            "oracle-master":1200            
+            "mssql_lt-master":1101,           
+            "oracle-master":1200,            
+            "oracle_lt-master":1201            
         },
         "db":{
             "postgres-master":1010,            
+            "postgres_lt-master":1011,            
             "mssql-master":1110,           
-            "oracle-master":1210
+            "mssql_lt-master":1111,           
+            "oracle-master":1210,
+            "oracle_lt-master":1211
         },
         "front":{
             "postgres-master":1020,            
+            "postgres_lt-master":1021,            
             "mssql-master":1120,           
-            "oracle-master":1220
+            "mssql_lt-master":1121,           
+            "oracle-master":1220,
+            "oracle_lt-master":1221
         }
     }
 }
@@ -40,15 +49,17 @@ pipeline {
     }
 
     parameters {
-        booleanParam(name: 'E2E_TESTS', defaultValue: true, description: 'Czy uruchomić testy E2E?')
+        booleanParam(name: 'E2E_TESTS', defaultValue: true, description: 'Czy stworzyć dockery?')
+        booleanParam(name: 'E2E_TESTS_RUN', defaultValue: false, description: 'Czy uruchomić testy E2E?')
         booleanParam(name: 'CLEANUP_DOCKER', defaultValue: true, description: 'Czy czyścić kontenery, obrazy i wolumeny Docker po testach E2E?')
         booleanParam(name: 'DEPLOY_TO_KUBE', defaultValue: false, description: 'Czy wdrożyć do MicroK8s?')
+        string(name: 'NUMER_PROBY', defaultValue: '1', description: 'Wpisz numer próby')
     }
 
     options {
         timestamps()
-        timeout(time: 1, unit: 'HOURS')
-        buildDiscarder(logRotator(numToKeepStr: '5'))
+        timeout(time: 5, unit: 'HOURS')
+        buildDiscarder(logRotator(numToKeepStr: '30'))
         disableConcurrentBuilds()
         skipDefaultCheckout()
     }
@@ -67,10 +78,10 @@ pipeline {
                     parallel('Build & Test Backend': {
                         dir('supportly-backend') {
                             echo ">>>[TESTY BACKENDU]<<<"
-                            sh "mvn verify -Dspring.profiles.active=${env.PROFILE} -Dmaven.test.failure.ignore=true"
+                            sh "mvn verify -Dspring.profiles.active=${env.PROFILE.replace('_lt', '')} -Dmaven.test.failure.ignore=true"
                             junit 'target/surefire-reports/*.xml'
                             echo ">>>[BUDOWANIE BACKENDU]<<<"
-                            sh "mvn clean package spring-boot:repackage -P${env.PROFILE} -Dspring.profiles.active=${env.PROFILE}  -DskipTests"
+                            sh "mvn clean package spring-boot:repackage -P${env.PROFILE.replace('_lt', '')} -Dspring.profiles.active=${env.PROFILE.replace('_lt', '')}  -DskipTests"
                         }
                     },
                             'Build & Test Frontend': {
@@ -83,17 +94,19 @@ pipeline {
                                 }
                             })
 
-                    replaceInFile('localhost', '192.168.0.81', "conf/docker-compose-${env.PROFILE}.yml")
+//                    replaceInFile('localhost', '192.168.0.81', "conf/docker-compose-${env.PROFILE}.yml")
+//                    replaceInFile('PORT_DB', env.PORT_DB, "conf/docker-compose-${env.PROFILE}.yml")
                     replaceInFile('PORT_DB', env.PORT_DB, "conf/docker-compose-${env.PROFILE}.yml")
                     replaceInFile('PORT_BACKEND', env.PORT_BACKEND, "conf/docker-compose-${env.PROFILE}.yml")
                     replaceInFile('latest', env.BUILDTAG, "conf/docker-compose-${env.PROFILE}.yml")
+                    replaceInFile('latest', env.BUILDTAG, "conf/kube/k8s-deployment.yaml")
                     replaceInFile('PORT_FRONTEND', env.PORT_FRONT, "conf/docker-compose-${env.PROFILE}.yml")
 //                    replaceInFile('URL_BACKEND', "${env.PROJECT_NAME}-backend-${env.PROFILE}-1/${env.PORT_BACKEND}/", "src/assets/nginx.conf")
                     replaceInFile('http://localhost:8080', "http://${env.E2E_DOCKER_HOST}:${env.PORT_BACKEND}", "conf/frontend/supportly-frontend/browser/assets/config.json")
                     replaceInFile('1009', env.PORT_DB, 'conf/backend/backend.env')
                     replaceInFile('localhost', '192.168.0.81', 'conf/backend/backend.env')
                     replaceInFile('API', "http://192.168.0.81:${env.PORT_FRONT}", 'conf/backend/backend.env')
-                    replaceInFile('default', "${env.PROFILE}", 'conf/backend/Dockerfile')
+                    replaceInFile('default', "${env.PROFILE.replace('_lt', '')}", 'conf/backend/Dockerfile')
 
                     sh "cat conf/docker-compose-${env.PROFILE}.yml"
                     sh 'cat conf/backend/backend.env'
@@ -105,7 +118,7 @@ pipeline {
             }
         }
         stage('Build & Push Images') {
-            agent { label 'docker-agent' } // <-- TO DODAJ
+            agent { label 'docker-agent' }
             steps {
                 script {
                     unstash 'supportly'
@@ -114,12 +127,13 @@ pipeline {
                     dir('conf') {
 
                         sh "cat docker-compose-${env.PROFILE}.yml"
-                        sh 'cat backend/backend.env'
-                        sh 'ls frontend'
-                        sh 'ls frontend/supportly-frontend/browser/assets'
-                        // Buduj obrazy z tagami do rejestru
+                        // ... (reszta Twoich debugów) ...
+
+                        // 1. ZBUDUJ (To masz) - tworzy "ciasto" na dysku
                         sh "docker compose -f docker-compose-${env.PROFILE}.yml build --no-cache"
 
+                        // 2. WYŚLIJ (Tego brakowało!) - wysyła "ciasto" do sklepu (Rejestru 192.168.0.81)
+                        sh "docker compose -f docker-compose-${env.PROFILE}.yml push"
                     }
                 }
             }
@@ -136,6 +150,27 @@ pipeline {
                     echo ">>> Deploying docker-compose on remote host ..."
 
                     unstash 'supportly'
+                    if (containsSubstring(env.PROFILE, "_lt")) {
+                        dockerStop("${env.PROJECT_NAME}-database-${env.PROFILE}-1")
+
+                        startContainerSafely("${env.PROJECT_NAME}-database-${env.PROFILE}-1")
+                        if (env.PROFILE == "postgres_lt") {
+                            runSql()
+                        }
+
+                        if (env.PROFILE == "mssql_lt") {
+                            runSqlMssql()
+                        }
+
+                        if (env.PROFILE == "oracle_lt") {
+                            waitForOracle("${env.PROJECT_NAME}-database-${env.PROFILE}-1")
+
+                            runClearScriptOracle("${env.PROJECT_NAME}-database-${env.PROFILE}-1")
+
+                        }
+
+//                        waitForOracle("${env.PROJECT_NAME}-database-${env.PROFILE}-1")
+                    }
 
                     dir('conf') {
 
@@ -145,17 +180,19 @@ pipeline {
 
                         echo ">>> Usuwam istniejące kontenery i sieci..."
                         sh """
-                    docker compose -f docker-compose-${env.PROFILE}.yml -p ${env.PROJECT_NAME} down --remove-orphans -v || true
-                """
+                        docker compose -f docker-compose-${env.PROFILE}.yml -p ${env.PROJECT_NAME} down --remove-orphans  -v || true
+                        """
+//                        docker compose -f docker-compose-${env.PROFILE}.yml -p ${env.PROJECT_NAME} down --remove-orphans -v || true
 
                         echo ">>> Uruchamiam docker-compose lokalnie (na agencie)..."
                         sh """
-                    docker compose -f docker-compose-${env.PROFILE}.yml -p ${env.PROJECT_NAME} up -d
-                """
+                        docker compose -f docker-compose-${env.PROFILE}.yml -p ${env.PROJECT_NAME} up -d
+                            """
 
                         echo ">>> Sprawdzam, czy kontenery działają poprawnie..."
                         waitForContainers(["${env.PROJECT_NAME}-backend-${env.PROFILE}-1",
                                            "${env.PROJECT_NAME}-database-${env.PROFILE}-1"] as List<String>)
+
                     }
                 }
             }
@@ -164,7 +201,7 @@ pipeline {
 
         stage('E2E') {
             when {
-                expression { params.E2E_TESTS }
+                expression { params.E2E_TESTS && params.E2E_TESTS_RUN }
             }
             steps {
                 script {
@@ -174,15 +211,15 @@ pipeline {
 
                     def databaseUrl = ""
 
-                    if(env.PROFILE=="postgres"){
+                    if ($ { env.PROFILE.replace('_lt', '') } == "postgres") {
                         databaseUrl = "jdbc:postgresql://192.168.0.81:${env.PORT_DB}/postgres"
                     }
 
-                    if(env.PROFILE=="mssql"){
+                    if ($ { env.PROFILE.replace('_lt', '') } == "mssql") {
                         databaseUrl = """jdbc:sqlserver://192.168.0.81:${env.PORT_DB};databaseName=supportly;encrypt=false"""
                     }
 
-                    if(env.PROFILE=="oracle"){
+                    if ($ { env.PROFILE.replace('_lt', '') } == "oracle") {
                         databaseUrl = "jdbc:postgresql://192.168.0.81:${env.PORT_DB}/postgres"
                     }
 
@@ -220,10 +257,16 @@ pipeline {
 
                     echo ">>> Using project name: ${env.PROJECT_NAME} for cleanup"
 
+                    if (containsSubstring(env.PROFILE, "_lt")) {
+                        dockerStop("${env.PROJECT_NAME}-database-${env.PROFILE}-1")
+                    }
+
+
+//                docker compose -f conf/docker-compose-${env.PROFILE}-lt.yml -p ${env.PROJECT_NAME} down --volumes --remove-orphans
                     sh """
                 # Usuwamy tylko kontenery i sieci dla tego project name
-                docker compose -f conf/docker-compose-${env.PROFILE}.yml -p ${env.PROJECT_NAME} down --volumes --remove-orphans
-                
+                docker compose -f conf/docker-compose-${env.PROFILE}.yml -p ${env.PROJECT_NAME}  down --volumes 
+
                 # Opcjonalnie czyszczenie nieużywanych obrazów i wolumenów
                 docker image prune -f
                 docker volume prune -f
@@ -231,6 +274,78 @@ pipeline {
                 }
             }
         }
+//        stage('Deploy to kube') {
+//            when {
+//                expression { params.DEPLOY_TO_KUBE }
+//            }
+//            steps {
+//                dir('conf') {
+//                    script {
+//                        // 1. Sprawdzanie gotowości API serwera MicroK8s
+//                        // Używamy """ aby móc escape'ować znaki $
+//                        def checkHealthz = remoteMicrok8s("""
+//                    for i in {1..10}; do
+//                        echo ">>> Próba \$i: sprawdzanie /healthz..."
+//                        microk8s kubectl get --raw=/healthz && break
+//                        echo ">>> API jeszcze nie gotowe, czekam 5s..."
+//                        sleep 5
+//                    done
+//                """)
+//
+//                        // 2. Komenda wdrażania
+//                        def deployCommand = """
+//                    echo ">>> Wdrażanie do zdalnego MicroK8s ..."
+//                    cat kube/k8s-deployment.yaml | ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no jenkins@192.168.0.81 'microk8s kubectl apply --validate=false -f -'
+//                """
+//
+//                        // 3. Weryfikacja wdrożenia (POPRAWIONA)
+//                        // Używamy """ (cudzysłów podwójny), aby w środku użyć ' (pojedynczego) dla awk.
+//                        // Wszystkie zmienne bashowe ($TIMEOUT, $NOT_READY, $2) muszą mieć przed sobą backslash (\$).
+//                        def verifyDeployment = remoteMicrok8s("""
+//                    echo ">>> Weryfikacja wdrożenia (maks. 5 minut)..."
+//
+//                    TIMEOUT=60   # 60 x 5s = 300s = 5 minut
+//                    INTERVAL=5
+//
+//                    for i in \$(seq 1 \$TIMEOUT); do
+//                        # ZMIANA: Używamy tr i cut zamiast awk.
+//                        # grep -v "1/1" -> odrzuca gotowe pody
+//                        # tr -s ' '     -> usuwa nadmiarowe spacje (formatowanie tabeli)
+//                        # cut -d ' ' -f 1 -> bierze pierwszą kolumnę (nazwę)
+//
+//                        NOT_READY=\$(microk8s kubectl get pods -n my-app --no-headers | grep -v "1/1" | tr -s ' ' | cut -d ' ' -f 1)
+//
+//                        if [ -z "\$NOT_READY" ]; then
+//                            echo ">>> Wszystkie pody osiągnęły stan Ready."
+//                            microk8s kubectl get pods -n my-app
+//                            exit 0
+//                        fi
+//
+//                        echo ">>> Pody jeszcze nie gotowe: \$NOT_READY (\$i/\$TIMEOUT)"
+//                        sleep \$INTERVAL
+//                    done
+//
+//                    echo "Nie wszystkie pody osiągnęły stan Ready w czasie 5 minut."
+//                    microk8s kubectl get pods -n my-app
+//                    echo ">>> Debug (describe):"
+//                    microk8s kubectl describe pods -n my-app
+//                    exit 1
+//                """)
+//
+//                        // Wykonanie całości
+//                        sh """
+//                    echo ">>> Sprawdzanie gotowości MicroK8s na hoście zdalnym..."
+//                    ${checkHealthz}
+//
+//                    ${deployCommand}
+//
+//                    echo ">>> Sprawdzanie, czy wdrożenie się powiodło..."
+//                    ${verifyDeployment}
+//                """
+//                    }
+//                }
+//            }
+//        }
         stage('Deploy to kube') {
             when {
                 expression { params.DEPLOY_TO_KUBE }
@@ -238,47 +353,67 @@ pipeline {
             steps {
                 dir('conf') {
                     script {
-                        // Sprawdzanie gotowości API serwera MicroK8s
-                        def checkHealthz = remoteMicrok8s('''
-                    for i in {1..10}; do
-                        echo ">>> Próba $i: sprawdzanie /healthz..."
-                         microk8s kubectl get --raw=/healthz && break
-                        echo ">>> API jeszcze nie gotowe, czekam 5s..."
-                        sleep 5
-                    done
-                ''')
+                        // --- KROK 1: Check Healthz (Przeniesione do Groovy) ---
+                        echo ">>> [KROK 1] Sprawdzanie gotowości API MicroK8s..."
+                        int maxHealthRetries = 10
+                        boolean apiReady = false
 
-                        def deployCommand = """
-                    echo ">>> Wdrażanie do zdalnego MicroK8s ..."
-                    cat kube/k8s-deployment.yaml | ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no jenkins@192.168.0.81 ' microk8s kubectl apply --validate=false -f -'
-                """
+                        for (int i = 1; i <= maxHealthRetries; i++) {
+                            // returnStatus: true sprawia, że sh nie wywali błędu pipeline'u, tylko zwróci kod wyjścia (0 = OK, inne = błąd)
+                            // Wysyłamy prostą komendę bez pętli i bez 'break'
+                            int exitCode = sh(script: remoteMicrok8s("microk8s kubectl get --raw=/healthz"), returnStatus: true)
 
-                        def verifyDeployment = remoteMicrok8s('''
-                    echo ">>> Weryfikacja wdrożenia (maks. 2 minuty)..."
-                    for i in {1..24}; do
-                        STATUS=$( microk8s kubectl get pods -n my-app --no-headers | awk '{print $3}' | grep -v Running | wc -l)
-                        if [ "$STATUS" -eq 0 ]; then
-                            echo ">>> Wszystkie pody działają poprawnie."
-                             microk8s kubectl get all -n my-app
-                            exit 0
-                        fi
-                        echo ">>> Czekam... ($i/24)"
-                        sleep 5
-                    done
-                    echo "Nie wszystkie pody osiągnęły stan Running w ciągu 2 minut."
-                     microk8s kubectl get pods -n my-app
-                    exit 1
-                ''')
+                            if (exitCode == 0) {
+                                echo ">>> (Próba ${i}/${maxHealthRetries}) API jest gotowe!"
+                                apiReady = true
+                                break
+                            } else {
+                                echo ">>> (Próba ${i}/${maxHealthRetries}) API nie odpowiada, czekam 5s..."
+                                sleep 5
+                            }
+                        }
 
-                        sh """
-                    echo ">>> Sprawdzanie gotowości MicroK8s na hoście zdalnym..."
-                    ${checkHealthz}
+                        if (!apiReady) {
+                            error "❌ BŁĄD: API MicroK8s nie wstało po ${maxHealthRetries} próbach."
+                        }
 
-                    ${deployCommand}
+                        // --- KROK 2: Deploy ---
+                        echo ">>> [KROK 2] Wdrażanie manifestów..."
+                        // Tutaj wysyłamy jedną, konkretną komendę
+                        def deployCmd = "cat kube/k8s-deployment.yaml | ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no jenkins@192.168.0.81 'microk8s kubectl apply --validate=false -f -'"
+                        sh deployCmd
 
-                    echo ">>> Sprawdzanie, czy wdrożenie się powiodło..."
-                    ${verifyDeployment}
-                """
+                        // --- KROK 3: Weryfikacja (Logika Groovy) ---
+                        echo ">>> [KROK 3] Weryfikacja statusu podów..."
+
+                        int maxPodRetries = 60
+                        int podDelay = 5
+                        boolean podsReady = false
+
+                        for (int i = 1; i <= maxPodRetries; i++) {
+                            // Wersja BEZ tr/cut - najbardziej niezawodna przez SSH
+                            // Zwraca pełne linie podów, które nie są gotowe (np. "backend 0/1 Error ...")
+                            def checkCmdString = remoteMicrok8s("microk8s kubectl get pods -n my-app --no-headers | grep -v '1/1' || true")
+
+                            def notReadyPods = sh(script: checkCmdString, returnStdout: true).trim()
+
+                            if (notReadyPods.isEmpty()) {
+                                echo ">>> (Próba ${i}/${maxPodRetries}) SUKCES: Wszystkie pody są Ready (1/1)."
+                                podsReady = true
+                                break
+                            } else {
+                                // Teraz w logach zobaczysz pełny status, co pomoże zrozumieć dlaczego pod nie wstaje
+                                echo ">>> (Próba ${i}/${maxPodRetries}) Pody jeszcze nie gotowe:\n${notReadyPods}"
+                                sleep podDelay
+                            }
+                        }
+
+                        if (!podsReady) {
+                            echo "❌ BŁĄD: Timeout weryfikacji podów."
+                            def debugInfo = sh(script: remoteMicrok8s("microk8s kubectl describe pods -n my-app"), returnStdout: true)
+                            echo ">>> DEBUG INFO:\n${debugInfo}"
+                            error "Wdrożenie nieudane: pody nie wstały w zadanym czasie."
+                        }
                     }
                 }
             }
@@ -290,7 +425,12 @@ pipeline {
     post {
         always {
             echo "Finished"
-            junit 'supportly-e2e/target/surefire-reports/*.xml'
+            script {
+                // Bezpieczna konwersja na boolean i sprawdzenie warunku
+                if (params.E2E_TESTS_RUN.toBoolean()) {
+                    junit 'supportly-e2e/target/surefire-reports/*.xml'
+                }
+            }
             echo "Build duration: ${currentBuild.durationString}"
         }
         success {
@@ -361,6 +501,7 @@ void checkoutSources() {
 
     // Rozpoznawanie gałęzi i profilu
     env.PIPELINE_TYPE = get_branch_name(['master', 'develop', 'PullRequest'])
+    env.LT = false
     env.PROFILE = getProfile(env.JOB_NAME)
 
     println("Build profile: ${env.PROFILE}, branch: ${env.PIPELINE_TYPE}")
@@ -400,6 +541,7 @@ void prepareNames(String branch) {
 
     def props = readJSON text: pipelineConfig
     def name = "${env.PROFILE}-${branch}"
+    echo "Nazwa proffilu parametru ${name}"
 
     def wsSuffix = getWorkspaceSuffix()
     env.PROJECT_NAME = "supportly-${wsSuffix}"
@@ -453,6 +595,7 @@ def checkout_pull_request(String project) {
     """
 }
 
+value = "{AQAAABAAAAAw6Dlnncbwfn5pftuT87Ka4IDamBaplbYDJFOYLCzcWxlA/5u8E2EfRAvMMMG2yu72wQXwAZGuT1ODNfQdY0ItkQ==}"
 
 String get_branch_name(List<String> branches) {
     for (branch in branches) {
@@ -475,4 +618,222 @@ def getWorkspaceSuffix() {
     def ws = env.WORKSPACE
     def matcher = ws =~ /@(\d+)$/
     return matcher ? matcher[0][1] : "1"  // jeśli brak @, zwraca "1"
+}
+
+def startContainerSafely(String containerName) {
+    script {
+        int maxRetries = 60
+        int delaySeconds = 2      // Zwiększamy nieco czas oczekiwania
+        boolean isReady = false
+
+        echo ">>> [START] Weryfikacja i start kontenera: ${containerName}"
+
+        // 1. Znalezienie ID kontenera
+        def containerId = sh(script: "docker ps -a -q -f name=^/${containerName}\$", returnStdout: true).trim()
+
+        if (!containerId) {
+            error "Kontener '${containerName}' nie istnieje!"
+        }
+
+        // 2. Upewnienie się, że kontener działa (State.Running)
+        def isRunning = sh(script: "docker inspect -f '{{.State.Running}}' ${containerId}", returnStdout: true).trim()
+        if (isRunning != 'true') {
+            echo "Kontener nie działa. Uruchamiam..."
+            sh "docker start ${containerId}"
+        }
+
+        // 3. PĘTLA SPRAWDZAJĄCA HEALTHCHECK (To jest kluczowa zmiana)
+        echo "Czekam na status 'healthy'..."
+
+        for (int i = 1; i <= maxRetries; i++) {
+            // Pobieramy status zdrowia (healthy / starting / unhealthy / <puste>)
+            // Używamy try/catch, bo jeśli obraz nie ma healthchecka, komenda może zwrócić błąd lub pusty ciąg
+            def healthStatus = ""
+            try {
+                healthStatus = sh(script: "docker inspect --format='{{.State.Health.Status}}' ${containerId}", returnStdout: true).trim()
+            } catch (Exception e) {
+                // Jeśli brak healthchecka, zakładamy "running" jako wystarczające
+                healthStatus = "no_healthcheck"
+            }
+
+            echo "(Próba ${i}/${maxRetries}) Status zdrowia: [${healthStatus}]"
+
+            if (healthStatus == 'healthy') {
+                echo "SUKCES: Kontener jest w pełni gotowy do pracy!"
+                isReady = true
+                break
+            } else if (healthStatus == 'unhealthy') {
+                error "AWARIA: Kontener zgłosił status 'unhealthy'. Coś poszło nie tak z aplikacją."
+            } else if (healthStatus == 'no_healthcheck') {
+                echo "UWAGA: Obraz nie ma definicji Healthcheck. Zakładam, że działa, bo jest 'Running'."
+                isReady = true
+                break
+            }
+
+            // Jeśli jest 'starting', czekamy dalej
+            sleep delaySeconds
+        }
+
+        if (!isReady) {
+            echo "BŁĄD: Timeout oczekiwania na healthcheck."
+            // Logi dla diagnostyki
+            sh "docker logs --tail 50 ${containerId}"
+            error "Kontener ${containerName} nie osiągnął statusu 'healthy' w przewidzianym czasie."
+        }
+    }
+}
+
+def dockerStop(String containerName) {
+    def containerId = sh(script: "docker ps -a -q -f name=^/${containerName}\$", returnStdout: true).trim()
+    if (containerId != null) {
+        sh """docker stop ${containerName}"""
+        echo "Docker ${containerName} został wyłączony"
+    }
+    echo "Docker ${containerName} był wyłączony"
+
+}
+
+def runSql() {
+    def containerName = "${env.PROJECT_NAME}-database-${env.PROFILE}-1"
+
+    // Twój jedyny administrator to supportly
+    def dbUser = "supportly"
+
+    def sqlPath = "conf/postgres/" // Twoja ścieżka
+
+    // Ustawienie hasła
+    sh "export PGPASSWORD='Qwerty.1'"
+
+    echo "--- Krok 1: RESETOWANIE BAZY (Łączenie z 'template1') ---"
+    // Łączymy się do template1, aby móc bezpiecznie usunąć bazę supportly "z zewnątrz"
+    sh """
+        docker exec -i ${containerName} psql \
+        -U ${dbUser} \
+        -d template1 \
+        < ${sqlPath}01_reset_db.sql
+    """
+
+    echo "--- Krok 2: TWORZENIE SCHEMATU (Łączenie z nową bazą 'supportly') ---"
+    // Teraz baza już istnieje, więc wchodzimy prosto do niej
+    sh """
+        docker exec -i ${containerName} psql \
+        -U ${dbUser} \
+        -d supportly \
+        < ${sqlPath}02_create_schema.sql
+    """
+
+    echo "Pomyślnie wyzerowano bazę i utworzono schemat."
+}
+
+static boolean containsSubstring(String text, String fragment) {
+    if (text == null || fragment == null) {
+        return false;
+    }
+    return text.contains(fragment);
+}
+
+def waitForOracle(String containerName) {
+    echo ">>> [START] Oczekiwanie na gotowość Oracle (Active SQL Check): ${containerName}"
+
+    // Parametry połączenia
+    def dbUser = "SYSTEM"
+    def dbPass = "Qwerty_1"
+    def dbService = "ORCLCDB"
+
+    timeout(time: 10, unit: 'MINUTES') {
+        waitUntil {
+            script {
+                // ZMIANA: Używamy 'echo | docker exec -i' zamiast '<<<'
+                // Flaga -i w docker exec jest konieczna, aby przyjąć dane z potoku (pipe)
+                def checkCmd = """
+                    echo "SELECT 1 FROM dual;" | docker exec -i ${containerName} sqlplus -L -s ${dbUser}/${dbPass}@//localhost:1521/${dbService} > /dev/null 2>&1
+                """
+
+                // returnStatus: true sprawia, że jeśli komenda zwróci błąd (np. ORA-01033), to nie przerywamy pipeline'u
+                int status = sh(script: checkCmd, returnStatus: true)
+
+                if (status == 0) {
+                    echo ">>> SUKCES: Baza danych jest otwarta i odpowiada na zapytania!"
+                    return true // Przerywa pętlę waitUntil
+                } else {
+                    // Kod błędu inny niż 0 oznacza, że sqlplus nie mógł się połączyć
+                    echo ">>> Baza zajęta (ORA-01033 lub startowanie). Czekam 5s..."
+                    sleep 5
+                    return false // Powtarza pętlę
+                }
+            }
+        }
+    }
+}
+
+def runClearScriptOracle(String containerName) {
+    echo "🧹 Uruchamiam czyszczenie bazy jako SYSTEM na kontenerze ${containerName}..."
+
+    // ZMIANA 1: Logujemy się jako SYSTEM (hasło to zazwyczaj to samo co ustawiłeś przy starcie kontenera)
+    // ZMIANA 2: Dodajemy 'WHENEVER SQLERROR EXIT SQL.SQLCODE', żeby Jenkins wiedział o błędzie
+    def scriptCmd = """
+    docker exec -i ${containerName} \
+    sqlplus -s SYSTEM/Qwerty_1@//localhost:1521/ORCLCDB \
+    <<EOF
+    WHENEVER SQLERROR EXIT SQL.SQLCODE;
+    @/opt/oracle/scripts/E2E/SUPPORTLY/clear.sql
+    EXIT;
+EOF
+    """
+
+    def scriptCmd2 = """
+    docker exec -i ${containerName} \
+    sqlplus -s SYSTEM/Qwerty_1@//localhost:1521/ORCLCDB \
+    <<EOF
+    WHENEVER SQLERROR EXIT SQL.SQLCODE;
+    @/opt/oracle/scripts/E2E/SUPPORTLY/init.sql
+    EXIT;
+EOF
+    """
+
+    // Uruchomienie z obsługą błędów
+    try {
+        sh scriptCmd
+        sh scriptCmd2
+        echo "Baza wyczyszczona pomyślnie."
+    } catch (Exception e) {
+        error "Błąd SQL podczas czyszczenia bazy! Sprawdź logi powyżej."
+    }
+}
+
+def runSqlMssql() {
+    def containerName = "${env.PROJECT_NAME}-database-${env.PROFILE}-1"
+    def user = "SA"
+    def password = "Qwerty.1"
+
+    // Sprawdź dokładnie tę ścieżkę w wynikach 'ls -R' poniżej
+    def sqlPath = "conf/mssql/config/"
+
+
+    echo "--- Krok 1: CLEANUP ---"
+    // Zmiana: Próbujemy użyć nowszej ścieżki tools18 LUB samej komendy sqlcmd
+    // Jeśli nadal nie działa, sprawdź wynik komendy 'find' z Kroku 1
+    sh """
+        cat ${sqlPath}cleanup.sql | docker exec -i ${containerName} \
+        /opt/mssql-tools18/bin/sqlcmd \
+        -S localhost \
+        -U ${user} \
+        -P '${password}' \
+        -d master \
+        -C 
+    """
+    // UWAGA: Dodałem flagę -C (Trust Server Certificate), często potrzebna w nowych wersjach SQL
+
+    echo "--- Krok 2: SETUP ---"
+    sh """
+        cat ${sqlPath}setup.sql | docker exec -i ${containerName} \
+        /opt/mssql-tools18/bin/sqlcmd \
+        -S localhost \
+        -U ${user} \
+        -P '${password}' \
+        -d master \
+        -C
+    """
+
+    echo "Pomyślnie wykonano skrypty MSSQL."
 }
