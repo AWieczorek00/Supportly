@@ -131,9 +131,10 @@ pipeline {
 
                         // 1. ZBUDUJ (To masz) - tworzy "ciasto" na dysku
                         sh "docker compose -f docker-compose-${env.PROFILE}.yml build --no-cache"
-
-                        // 2. WYŚLIJ (Tego brakowało!) - wysyła "ciasto" do sklepu (Rejestru 192.168.0.81)
-                        sh "docker compose -f docker-compose-${env.PROFILE}.yml push"
+                        if(params.DEPLOY_TO_KUBE){
+                            // 2. WYŚLIJ (Tego brakowało!) - wysyła "ciasto" do sklepu (Rejestru 192.168.0.81)
+                            sh "docker compose -f docker-compose-${env.PROFILE}.yml push"
+                        }
                     }
                 }
             }
