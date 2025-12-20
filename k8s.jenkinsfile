@@ -185,7 +185,9 @@ pipeline {
                             // KROK 1: 'mvn clean test failsafe:integration-test' -> Uruchamia Unity i IT.
                             // KROK 2: '&& mvn package -DskipTests' -> Jeśli testy przejdą, buduje JAR (pomijając testy, bo już przeszły).
 
-                            sh "mvn clean test failsafe:integration-test -P${env.PROFILE.replace('_lt', '')} -Dspring.profiles.active=${env.PROFILE.replace('_lt', '')} -Dmaven.test.failure.ignore=true && mvn package -DskipTests -P${env.PROFILE.replace('_lt', '')} -Dspring.profiles.active=${env.PROFILE.replace('_lt', '')}"
+//                            sh "mvn clean test failsafe:integration-test -P${env.PROFILE.replace('_lt', '')} -Dspring.profiles.active=${env.PROFILE.replace('_lt', '')} -Dmaven.test.failure.ignore=true && mvn package -DskipTests -P${env.PROFILE.replace('_lt', '')} -Dspring.profiles.active=${env.PROFILE.replace('_lt', '')}"
+
+                            sh "mvn verify -Dtest=**/supportlybackend/** -Dspring.profiles.active=posgres -Dmaven.test.failure.ignore=true"
 
                             // Zbieramy wyniki
                             junit '**/target/*-reports/*.xml'
