@@ -221,6 +221,9 @@ pipeline {
             }
         }
         stage('Build & Push Images') {
+            when {
+                expression { params.E2E_TESTS }
+            }
             agent { label 'docker-agent' }
             steps {
                 script {
