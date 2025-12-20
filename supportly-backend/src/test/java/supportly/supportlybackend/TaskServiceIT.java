@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 @Transactional
 @TestPropertySource(locations = "classpath:/application-test.properties")
-public class TaskServiceTest {
+public class TaskServiceIT {
 
 
     @Autowired

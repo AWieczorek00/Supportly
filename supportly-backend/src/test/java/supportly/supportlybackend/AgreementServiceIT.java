@@ -7,7 +7,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 import supportly.supportlybackend.Dto.AgreementDto;
-import supportly.supportlybackend.Dto.CompanyDto;
 import supportly.supportlybackend.Enum.Period;
 import supportly.supportlybackend.Mapper.Mapper;
 import supportly.supportlybackend.Model.Agreement;
@@ -24,7 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 @Transactional
 @TestPropertySource(locations = "classpath:/application-test.properties")
-class AgreementServiceTest {
+class AgreementServiceIT {
 
     @Autowired
     private AgreementRepository agreementRepository;

@@ -2,10 +2,6 @@ package supportly.supportlybackend;
 
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
@@ -16,13 +12,12 @@ import supportly.supportlybackend.Service.CompanyService;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @SpringBootTest
 @Transactional
 @TestPropertySource(locations = "classpath:/application-test.properties")
-class CompanyServiceTest {
+class CompanyServiceIT {
 
     @Autowired
     private CompanyRepository companyRepository;

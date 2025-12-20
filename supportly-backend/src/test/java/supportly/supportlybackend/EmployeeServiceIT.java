@@ -22,7 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Transactional
 @TestPropertySource(locations = "classpath:/application-test.properties")
 @RequiredArgsConstructor
-public class EmployeeServiceTest {
+public class EmployeeServiceIT {
 
 
     @Autowired
