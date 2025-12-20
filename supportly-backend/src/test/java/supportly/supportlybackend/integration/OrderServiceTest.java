@@ -1,4 +1,4 @@
-package supportly.supportlybackend;
+package supportly.supportlybackend.integration;
 
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,7 +29,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 @Transactional
 @TestPropertySource(locations = "classpath:/application-test.properties")
 
-public class OrderServiceIT {
+public class OrderServiceTest {
 
     @Autowired
     private OrderService orderService;

@@ -1,4 +1,4 @@
-package supportly.supportlybackend;
+package supportly.supportlybackend.integration;
 
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,7 +23,7 @@ import static org.mockito.Mockito.verify;
 @SpringBootTest
 @Transactional
 @TestPropertySource(locations = "classpath:/application-test.properties")
-class CompanyServiceIT {
+class CompanyServiceTest {
 
     @Autowired
     private CompanyRepository companyRepository;

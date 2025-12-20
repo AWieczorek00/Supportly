@@ -1,4 +1,4 @@
-package supportly.supportlybackend;
+package supportly.supportlybackend.integration;
 
 
 import org.junit.jupiter.api.BeforeEach;
@@ -12,14 +12,12 @@ import supportly.supportlybackend.Criteria.AgreementSC;
 import supportly.supportlybackend.Dto.AgreementDto;
 import supportly.supportlybackend.Dto.CompanyDto;
 import supportly.supportlybackend.Enum.Period;
-import supportly.supportlybackend.Mapper.Mapper;
 import supportly.supportlybackend.Model.Address;
 import supportly.supportlybackend.Model.Agreement;
 import supportly.supportlybackend.Model.Company;
 import supportly.supportlybackend.Repository.AgreementRepository;
 import supportly.supportlybackend.Repository.CompanyRepository;
 import supportly.supportlybackend.Service.AgreementService;
-import supportly.supportlybackend.Service.CompanyService;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -29,7 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 @Transactional
 @TestPropertySource(locations = "classpath:/application-test.properties")
-class AgreementServiceIT {
+class AgreementServiceTest {
 
     @Autowired
     private AgreementRepository agreementRepository;

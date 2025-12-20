@@ -1,4 +1,4 @@
-package supportly.supportlybackend;
+package supportly.supportlybackend.integration;
 
 
 import jakarta.transaction.Transactional;
@@ -12,7 +12,6 @@ import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.test.context.TestPropertySource;
 import supportly.supportlybackend.Criteria.EmployeeSC;
 import supportly.supportlybackend.Dto.EmployeeDto;
-import supportly.supportlybackend.Mapper.Mapper;
 import supportly.supportlybackend.Model.Employee;
 import supportly.supportlybackend.Repository.EmployeeRepository;
 import supportly.supportlybackend.Service.EmployeeService;
@@ -27,7 +26,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 @Transactional
 @TestPropertySource(locations = "classpath:/application-test.properties")
 @RequiredArgsConstructor
-public class EmployeeServiceIT {
+public class EmployeeServiceTest {
 
 
     @Autowired

@@ -1,4 +1,4 @@
-package supportly.supportlybackend;
+package supportly.supportlybackend.integration;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -25,7 +25,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 @SpringBootTest
 @Transactional
 @TestPropertySource(locations = "classpath:/application-test.properties")
-public class TaskServiceIT {
+public class TaskServiceTest {
 
 
     @Autowired

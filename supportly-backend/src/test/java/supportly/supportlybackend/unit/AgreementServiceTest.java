@@ -1,4 +1,4 @@
-package supportly.supportlybackend;
+package supportly.supportlybackend.unit;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,6 +31,10 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+
+//sh "mvn verify -Dtest=**/supportlybackend/** -Dspring.profiles.active=posgres -Dmaven.test.failure.ignore=true"
+//sh "mvn verify -Dtest=**/integration/** -Dspring.profiles.active=posgres -Dmaven.test.failure.ignore=true"
+//sh "mvn verify -Dtest=**/unit/** -Dspring.profiles.active=posgres -Dmaven.test.failure.ignore=true"
 
 @ExtendWith(MockitoExtension.class)
 class AgreementServiceTest {
@@ -758,7 +762,7 @@ class AgreementServiceTest {
         LocalDate expectedDate = signedDate.plusMonths(periodMonths);
         assertThat(savedAgreement.getNextServiceDate()).isEqualTo(expectedDate);
     }
-
+//    mvn surefire:test -Dtest=*.unit.* -Pposgres -Dspring.profiles.active=posgres -Dmaven.test.failure.ignore=true
     @Test
     @DisplayName("add: Powinien obliczyć datę serwisu, przypisać firmę i zapisać umowę")
     void add_ShouldCalculateDateAndLinkCompany_ThenSave15() throws InterruptedException {
