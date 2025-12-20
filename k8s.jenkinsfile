@@ -160,12 +160,12 @@ pipeline {
 //                                    "Unit Tests": {
 //                                        echo "Start: Testy Jednostkowe (*Test.java)"
 //                                        // surefire:test -> Uruchamia tylko testy jednostkowe
-//                                        sh "mvn surefire:test -P${env.PROFILE.replace('_lt', '')} -Dspring.profiles.active=${env.PROFILE.replace('_lt', '')} -Dmaven.test.failure.ignore=true"
+//                                        sh "mvn verify -Dtest=**/unit/** -Dspring.profiles.active=${env.PROFILE.replace('_lt', '')} -Dmaven.test.failure.ignore=true"
 //                                    },
 //                                    "Integration Tests": {
 //                                        echo "Start: Testy Integracyjne (*IT.java)"
 //                                        // failsafe:integration-test -> Uruchamia tylko testy integracyjne (dzięki Twojej naprawie w pom.xml)
-//                                        sh "mvn failsafe:integration-test -P${env.PROFILE.replace('_lt', '')} -Dspring.profiles.active=${env.PROFILE.replace('_lt', '')} -Dmaven.test.failure.ignore=true"
+//                                        sh "mvn verify -Dtest=**/integration/** -Dspring.profiles.active=${env.PROFILE.replace('_lt', '')} -Dmaven.test.failure.ignore=true"
 //                                    }
 //                            )
 //
@@ -181,13 +181,9 @@ pipeline {
                         dir('supportly-backend') {
                             echo ">>>[URUCHAMIANIE TESTÓW I BUDOWANIE (SEKWENCYJNIE)]<<<"
 
-                            // Zastosowałem tu trik z '&&'.
-                            // KROK 1: 'mvn clean test failsafe:integration-test' -> Uruchamia Unity i IT.
-                            // KROK 2: '&& mvn package -DskipTests' -> Jeśli testy przejdą, buduje JAR (pomijając testy, bo już przeszły).
-
 //                            sh "mvn clean test failsafe:integration-test -P${env.PROFILE.replace('_lt', '')} -Dspring.profiles.active=${env.PROFILE.replace('_lt', '')} -Dmaven.test.failure.ignore=true && mvn package -DskipTests -P${env.PROFILE.replace('_lt', '')} -Dspring.profiles.active=${env.PROFILE.replace('_lt', '')}"
 
-                            sh "mvn verify -Dtest=**/supportlybackend/** -Dspring.profiles.active=${env.PROFILE.replace('_lt', '')} -Dmaven.test.failure.ignore=true"
+                            sh "mvn clean verify -Dtest=**/supportlybackend/** -Dspring.profiles.active=${env.PROFILE.replace('_lt', '')} -Dmaven.test.failure.ignore=true"
 
                             // Zbieramy wyniki
                             junit '**/target/*-reports/*.xml'
