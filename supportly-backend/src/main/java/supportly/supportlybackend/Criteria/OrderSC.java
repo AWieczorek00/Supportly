@@ -36,7 +36,7 @@ public class OrderSC {
     @SpecField(path = "dateOfExecution")
     private Double dateOfExecutionTo;
 
-    private Double status;
+    private String status;
 
     private Double priority;
 }
