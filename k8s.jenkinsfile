@@ -187,7 +187,7 @@ pipeline {
 
 //                            sh "mvn clean test failsafe:integration-test -P${env.PROFILE.replace('_lt', '')} -Dspring.profiles.active=${env.PROFILE.replace('_lt', '')} -Dmaven.test.failure.ignore=true && mvn package -DskipTests -P${env.PROFILE.replace('_lt', '')} -Dspring.profiles.active=${env.PROFILE.replace('_lt', '')}"
 
-                            sh "mvn verify -Dtest=**/supportlybackend/** -Dspring.profiles.active=posgres -Dmaven.test.failure.ignore=true"
+                            sh "mvn verify -Dtest=**/supportlybackend/** -Dspring.profiles.active=${env.PROFILE.replace('_lt', '')} -Dmaven.test.failure.ignore=true"
 
                             // Zbieramy wyniki
                             junit '**/target/*-reports/*.xml'
