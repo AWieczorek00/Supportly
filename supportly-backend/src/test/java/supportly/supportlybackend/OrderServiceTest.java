@@ -143,6 +143,261 @@ class OrderServiceTest {
     }
 
     @Test
+    @DisplayName("updateOrder: Powinien rzucić ResourceNotFoundException, gdy ID nie istnieje")
+    void updateOrder_ShouldThrowException_WhenNotFound2() {
+        // Given
+        Order inputOrder = new Order();
+        inputOrder.setId(999L);
+
+        when(orderRepository.findById(999L)).thenReturn(Optional.empty());
+
+        // When & Then
+        assertThatThrownBy(() -> orderService.updateOrder(inputOrder))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("nie znaleziono");
+
+        verify(orderRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("updateOrder: Powinien rzucić ResourceNotFoundException, gdy ID nie istnieje")
+    void updateOrder_ShouldThrowException_WhenNotFound3() {
+        // Given
+        Order inputOrder = new Order();
+        inputOrder.setId(999L);
+
+        when(orderRepository.findById(999L)).thenReturn(Optional.empty());
+
+        // When & Then
+        assertThatThrownBy(() -> orderService.updateOrder(inputOrder))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("nie znaleziono");
+
+        verify(orderRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("updateOrder: Powinien rzucić ResourceNotFoundException, gdy ID nie istnieje")
+    void updateOrder_ShouldThrowException_WhenNotFound4() {
+        // Given
+        Order inputOrder = new Order();
+        inputOrder.setId(999L);
+
+        when(orderRepository.findById(999L)).thenReturn(Optional.empty());
+
+        // When & Then
+        assertThatThrownBy(() -> orderService.updateOrder(inputOrder))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("nie znaleziono");
+
+        verify(orderRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("updateOrder: Powinien rzucić ResourceNotFoundException, gdy ID nie istnieje")
+    void updateOrder_ShouldThrowException_WhenNotFound5() {
+        // Given
+        Order inputOrder = new Order();
+        inputOrder.setId(999L);
+
+        when(orderRepository.findById(999L)).thenReturn(Optional.empty());
+
+        // When & Then
+        assertThatThrownBy(() -> orderService.updateOrder(inputOrder))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("nie znaleziono");
+
+        verify(orderRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("updateOrder: Powinien rzucić ResourceNotFoundException, gdy ID nie istnieje")
+    void updateOrder_ShouldThrowException_WhenNotFound6() {
+        // Given
+        Order inputOrder = new Order();
+        inputOrder.setId(999L);
+
+        when(orderRepository.findById(999L)).thenReturn(Optional.empty());
+
+        // When & Then
+        assertThatThrownBy(() -> orderService.updateOrder(inputOrder))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("nie znaleziono");
+
+        verify(orderRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("updateOrder: Powinien rzucić ResourceNotFoundException, gdy ID nie istnieje")
+    void updateOrder_ShouldThrowException_WhenNotFound7() {
+        // Given
+        Order inputOrder = new Order();
+        inputOrder.setId(999L);
+
+        when(orderRepository.findById(999L)).thenReturn(Optional.empty());
+
+        // When & Then
+        assertThatThrownBy(() -> orderService.updateOrder(inputOrder))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("nie znaleziono");
+
+        verify(orderRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("updateOrder: Powinien rzucić ResourceNotFoundException, gdy ID nie istnieje")
+    void updateOrder_ShouldThrowException_WhenNotFound8() {
+        // Given
+        Order inputOrder = new Order();
+        inputOrder.setId(999L);
+
+        when(orderRepository.findById(999L)).thenReturn(Optional.empty());
+
+        // When & Then
+        assertThatThrownBy(() -> orderService.updateOrder(inputOrder))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("nie znaleziono");
+
+        verify(orderRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("updateOrder: Powinien rzucić ResourceNotFoundException, gdy ID nie istnieje")
+    void updateOrder_ShouldThrowException_WhenNotFound9() {
+        // Given
+        Order inputOrder = new Order();
+        inputOrder.setId(999L);
+
+        when(orderRepository.findById(999L)).thenReturn(Optional.empty());
+
+        // When & Then
+        assertThatThrownBy(() -> orderService.updateOrder(inputOrder))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("nie znaleziono");
+
+        verify(orderRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("updateOrder: Powinien rzucić ResourceNotFoundException, gdy ID nie istnieje")
+    void updateOrder_ShouldThrowException_WhenNotFound10() {
+        // Given
+        Order inputOrder = new Order();
+        inputOrder.setId(999L);
+
+        when(orderRepository.findById(999L)).thenReturn(Optional.empty());
+
+        // When & Then
+        assertThatThrownBy(() -> orderService.updateOrder(inputOrder))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("nie znaleziono");
+
+        verify(orderRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("updateOrder: Powinien rzucić ResourceNotFoundException, gdy ID nie istnieje")
+    void updateOrder_ShouldThrowException_WhenNotFound11() {
+        // Given
+        Order inputOrder = new Order();
+        inputOrder.setId(999L);
+
+        when(orderRepository.findById(999L)).thenReturn(Optional.empty());
+
+        // When & Then
+        assertThatThrownBy(() -> orderService.updateOrder(inputOrder))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("nie znaleziono");
+
+        verify(orderRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("updateOrder: Powinien rzucić ResourceNotFoundException, gdy ID nie istnieje")
+    void updateOrder_ShouldThrowException_WhenNotFound12() {
+        // Given
+        Order inputOrder = new Order();
+        inputOrder.setId(999L);
+
+        when(orderRepository.findById(999L)).thenReturn(Optional.empty());
+
+        // When & Then
+        assertThatThrownBy(() -> orderService.updateOrder(inputOrder))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("nie znaleziono");
+
+        verify(orderRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("updateOrder: Powinien rzucić ResourceNotFoundException, gdy ID nie istnieje")
+    void updateOrder_ShouldThrowException_WhenNotFound13() {
+        // Given
+        Order inputOrder = new Order();
+        inputOrder.setId(999L);
+
+        when(orderRepository.findById(999L)).thenReturn(Optional.empty());
+
+        // When & Then
+        assertThatThrownBy(() -> orderService.updateOrder(inputOrder))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("nie znaleziono");
+
+        verify(orderRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("updateOrder: Powinien rzucić ResourceNotFoundException, gdy ID nie istnieje")
+    void updateOrder_ShouldThrowException_WhenNotFound14() {
+        // Given
+        Order inputOrder = new Order();
+        inputOrder.setId(999L);
+
+        when(orderRepository.findById(999L)).thenReturn(Optional.empty());
+
+        // When & Then
+        assertThatThrownBy(() -> orderService.updateOrder(inputOrder))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("nie znaleziono");
+
+        verify(orderRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("updateOrder: Powinien rzucić ResourceNotFoundException, gdy ID nie istnieje")
+    void updateOrder_ShouldThrowException_WhenNotFound15() {
+        // Given
+        Order inputOrder = new Order();
+        inputOrder.setId(999L);
+
+        when(orderRepository.findById(999L)).thenReturn(Optional.empty());
+
+        // When & Then
+        assertThatThrownBy(() -> orderService.updateOrder(inputOrder))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("nie znaleziono");
+
+        verify(orderRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("updateOrder: Powinien rzucić ResourceNotFoundException, gdy ID nie istnieje")
+    void updateOrder_ShouldThrowException_WhenNotFound16() {
+        // Given
+        Order inputOrder = new Order();
+        inputOrder.setId(999L);
+
+        when(orderRepository.findById(999L)).thenReturn(Optional.empty());
+
+        // When & Then
+        assertThatThrownBy(() -> orderService.updateOrder(inputOrder))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("nie znaleziono");
+
+        verify(orderRepository, never()).save(any());
+    }
+
+    @Test
     @DisplayName("search: Powinien zwrócić przefiltrowaną listę OrderDto")
     void search_ShouldReturnListOfDto() {
         // Given

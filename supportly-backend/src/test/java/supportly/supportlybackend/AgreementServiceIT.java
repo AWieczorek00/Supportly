@@ -108,6 +108,73 @@ class AgreementServiceIT {
     }
 
     @Test
+    @DisplayName("add: Powinien zapisać umowę w bazie i poprawnie obliczyć datę serwisu")
+    void shouldSaveAgreementToDatabase2() {
+        // Given
+        AgreementDto dto = new AgreementDto();
+        dto.setSignedDate(LocalDate.of(2023, 1, 1));
+        dto.setAgreementNumber("1234567890123/01012023");
+        // Zakładam, że Period to Enum. Jeśli to klasa, ustaw ją odpowiednio.
+        dto.setPeriod(Period.YEARLY); // Zakładam, że .getMonth() zwraca np. 12
+
+        // Tworzymy DTO firmy tylko z NIPem, po którym serwis szuka istniejącej firmy
+        CompanyDto companyDto = new CompanyDto();
+        companyDto.setNip("1234567890123"); // Ten sam NIP co w setUp()
+        dto.setCompany(companyDto);
+
+
+        // When
+        agreementService.add(dto);
+
+        // Then
+        List<Agreement> agreements = agreementRepository.findAll();
+        assertThat(agreements).hasSize(1);
+
+        Agreement savedAgreement = agreements.get(0);
+        // Sprawdzamy czy umowa została podpięta pod dobrą firmę
+        assertThat(savedAgreement.getCompany().getId()).isEqualTo(savedCompany.getId());
+        assertThat(savedAgreement.getCompany().getEmail()).isEqualTo("kontakt@testcompany.pl");
+
+        // Sprawdzenie daty (2023-01-01 + 12 miesięcy)
+        assertThat(savedAgreement.getNextServiceDate()).isEqualTo(LocalDate.of(2024, 1, 1));
+    }
+
+    @Test
+    @DisplayName("add: Powinien zapisać umowę w bazie i poprawnie obliczyć datę serwisu")
+    void shouldSaveAgreementToDatabase3() {
+        // Given
+        AgreementDto dto = new AgreementDto();
+        dto.setSignedDate(LocalDate.of(2023, 1, 1));
+        dto.setAgreementNumber("1234567890123/01012023");
+        // Zakładam, że Period to Enum. Jeśli to klasa, ustaw ją odpowiednio.
+        dto.setPeriod(Period.YEARLY); // Zakładam, że .getMonth() zwraca np. 12
+
+        // Tworzymy DTO firmy tylko z NIPem, po którym serwis szuka istniejącej firmy
+        CompanyDto companyDto = new CompanyDto();
+        companyDto.setNip("1234567890123"); // Ten sam NIP co w setUp()
+        dto.setCompany(companyDto);
+
+
+        // When
+        agreementService.add(dto);
+
+        // Then
+        List<Agreement> agreements = agreementRepository.findAll();
+        assertThat(agreements).hasSize(1);
+
+        Agreement savedAgreement = agreements.get(0);
+        // Sprawdzamy czy umowa została podpięta pod dobrą firmę
+        assertThat(savedAgreement.getCompany().getId()).isEqualTo(savedCompany.getId());
+        assertThat(savedAgreement.getCompany().getEmail()).isEqualTo("kontakt@testcompany.pl");
+
+        // Sprawdzenie daty (2023-01-01 + 12 miesięcy)
+        assertThat(savedAgreement.getNextServiceDate()).isEqualTo(LocalDate.of(2024, 1, 1));
+    }
+
+
+
+
+    @Test
     @DisplayName("search: Powinien znaleźć umowy używając kryteriów")
     void shouldFindAgreementsByCriteria() {
         // Given
@@ -132,6 +199,346 @@ class AgreementServiceIT {
         // Powinno zwrócić co najmniej 1 (zależy czy stworzyliśmy umowę dla drugiej firmy)
         assertThat(results).isNotEmpty();
     }
+
+    @Test
+    @DisplayName("search: Powinien znaleźć umowy używając kryteriów")
+    void shouldFindAgreementsByCriteria2() {
+        // Given
+        // Tworzymy drugą firmę (żeby test filtru był wiarygodny)
+        createAndSaveOtherCompany();
+
+        // Zapisujemy umowy dla obu firm
+        createAndSaveAgreement(savedCompany, LocalDate.now());
+
+        // When
+        // Przykładowe kryteria (zależne od Twojej klasy AgreementSC)
+        AgreementSC criteria = new AgreementSC();
+        // Zakładam, że w SC masz filtrowanie po nazwie firmy
+        // criteria.setCompanyName("Test Company Ltd.");
+
+        // Ponieważ nie znam dokładnych pól w SC, testuję przypadek "pusty filtr = zwróć wszystko"
+        // Jeśli dodasz setter w SC, odkomentuj i zmień asercję na 1
+
+        List<AgreementDto> results = agreementService.search(criteria);
+
+        // Then
+        // Powinno zwrócić co najmniej 1 (zależy czy stworzyliśmy umowę dla drugiej firmy)
+        assertThat(results).isNotEmpty();
+    }
+
+    @Test
+    @DisplayName("search: Powinien znaleźć umowy używając kryteriów")
+    void shouldFindAgreementsByCriteria3() {
+        // Given
+        // Tworzymy drugą firmę (żeby test filtru był wiarygodny)
+        createAndSaveOtherCompany();
+
+        // Zapisujemy umowy dla obu firm
+        createAndSaveAgreement(savedCompany, LocalDate.now());
+
+        // When
+        // Przykładowe kryteria (zależne od Twojej klasy AgreementSC)
+        AgreementSC criteria = new AgreementSC();
+        // Zakładam, że w SC masz filtrowanie po nazwie firmy
+        // criteria.setCompanyName("Test Company Ltd.");
+
+        // Ponieważ nie znam dokładnych pól w SC, testuję przypadek "pusty filtr = zwróć wszystko"
+        // Jeśli dodasz setter w SC, odkomentuj i zmień asercję na 1
+
+        List<AgreementDto> results = agreementService.search(criteria);
+
+        // Then
+        // Powinno zwrócić co najmniej 1 (zależy czy stworzyliśmy umowę dla drugiej firmy)
+        assertThat(results).isNotEmpty();
+    }
+
+    @Test
+    @DisplayName("search: Powinien znaleźć umowy używając kryteriów")
+    void shouldFindAgreementsByCriteria4() {
+        // Given
+        // Tworzymy drugą firmę (żeby test filtru był wiarygodny)
+        createAndSaveOtherCompany();
+
+        // Zapisujemy umowy dla obu firm
+        createAndSaveAgreement(savedCompany, LocalDate.now());
+
+        // When
+        // Przykładowe kryteria (zależne od Twojej klasy AgreementSC)
+        AgreementSC criteria = new AgreementSC();
+        // Zakładam, że w SC masz filtrowanie po nazwie firmy
+        // criteria.setCompanyName("Test Company Ltd.");
+
+        // Ponieważ nie znam dokładnych pól w SC, testuję przypadek "pusty filtr = zwróć wszystko"
+        // Jeśli dodasz setter w SC, odkomentuj i zmień asercję na 1
+
+        List<AgreementDto> results = agreementService.search(criteria);
+
+        // Then
+        // Powinno zwrócić co najmniej 1 (zależy czy stworzyliśmy umowę dla drugiej firmy)
+        assertThat(results).isNotEmpty();
+    }
+
+    @Test
+    @DisplayName("search: Powinien znaleźć umowy używając kryteriów")
+    void shouldFindAgreementsByCriteria5() {
+        // Given
+        // Tworzymy drugą firmę (żeby test filtru był wiarygodny)
+        createAndSaveOtherCompany();
+
+        // Zapisujemy umowy dla obu firm
+        createAndSaveAgreement(savedCompany, LocalDate.now());
+
+        // When
+        // Przykładowe kryteria (zależne od Twojej klasy AgreementSC)
+        AgreementSC criteria = new AgreementSC();
+        // Zakładam, że w SC masz filtrowanie po nazwie firmy
+        // criteria.setCompanyName("Test Company Ltd.");
+
+        // Ponieważ nie znam dokładnych pól w SC, testuję przypadek "pusty filtr = zwróć wszystko"
+        // Jeśli dodasz setter w SC, odkomentuj i zmień asercję na 1
+
+        List<AgreementDto> results = agreementService.search(criteria);
+
+        // Then
+        // Powinno zwrócić co najmniej 1 (zależy czy stworzyliśmy umowę dla drugiej firmy)
+        assertThat(results).isNotEmpty();
+    }
+
+    @Test
+    @DisplayName("search: Powinien znaleźć umowy używając kryteriów")
+    void shouldFindAgreementsByCriteria6() {
+        // Given
+        // Tworzymy drugą firmę (żeby test filtru był wiarygodny)
+        createAndSaveOtherCompany();
+
+        // Zapisujemy umowy dla obu firm
+        createAndSaveAgreement(savedCompany, LocalDate.now());
+
+        // When
+        // Przykładowe kryteria (zależne od Twojej klasy AgreementSC)
+        AgreementSC criteria = new AgreementSC();
+        // Zakładam, że w SC masz filtrowanie po nazwie firmy
+        // criteria.setCompanyName("Test Company Ltd.");
+
+        // Ponieważ nie znam dokładnych pól w SC, testuję przypadek "pusty filtr = zwróć wszystko"
+        // Jeśli dodasz setter w SC, odkomentuj i zmień asercję na 1
+
+        List<AgreementDto> results = agreementService.search(criteria);
+
+        // Then
+        // Powinno zwrócić co najmniej 1 (zależy czy stworzyliśmy umowę dla drugiej firmy)
+        assertThat(results).isNotEmpty();
+    }
+
+    @Test
+    @DisplayName("search: Powinien znaleźć umowy używając kryteriów")
+    void shouldFindAgreementsByCriteria7() {
+        // Given
+        // Tworzymy drugą firmę (żeby test filtru był wiarygodny)
+        createAndSaveOtherCompany();
+
+        // Zapisujemy umowy dla obu firm
+        createAndSaveAgreement(savedCompany, LocalDate.now());
+
+        // When
+        // Przykładowe kryteria (zależne od Twojej klasy AgreementSC)
+        AgreementSC criteria = new AgreementSC();
+        // Zakładam, że w SC masz filtrowanie po nazwie firmy
+        // criteria.setCompanyName("Test Company Ltd.");
+
+        // Ponieważ nie znam dokładnych pól w SC, testuję przypadek "pusty filtr = zwróć wszystko"
+        // Jeśli dodasz setter w SC, odkomentuj i zmień asercję na 1
+
+        List<AgreementDto> results = agreementService.search(criteria);
+
+        // Then
+        // Powinno zwrócić co najmniej 1 (zależy czy stworzyliśmy umowę dla drugiej firmy)
+        assertThat(results).isNotEmpty();
+    }
+
+    @Test
+    @DisplayName("search: Powinien znaleźć umowy używając kryteriów")
+    void shouldFindAgreementsByCriteria8() {
+        // Given
+        // Tworzymy drugą firmę (żeby test filtru był wiarygodny)
+        createAndSaveOtherCompany();
+
+        // Zapisujemy umowy dla obu firm
+        createAndSaveAgreement(savedCompany, LocalDate.now());
+
+        // When
+        // Przykładowe kryteria (zależne od Twojej klasy AgreementSC)
+        AgreementSC criteria = new AgreementSC();
+        // Zakładam, że w SC masz filtrowanie po nazwie firmy
+        // criteria.setCompanyName("Test Company Ltd.");
+
+        // Ponieważ nie znam dokładnych pól w SC, testuję przypadek "pusty filtr = zwróć wszystko"
+        // Jeśli dodasz setter w SC, odkomentuj i zmień asercję na 1
+
+        List<AgreementDto> results = agreementService.search(criteria);
+
+        // Then
+        // Powinno zwrócić co najmniej 1 (zależy czy stworzyliśmy umowę dla drugiej firmy)
+        assertThat(results).isNotEmpty();
+    }
+
+    @Test
+    @DisplayName("search: Powinien znaleźć umowy używając kryteriów")
+    void shouldFindAgreementsByCriteria9() {
+        // Given
+        // Tworzymy drugą firmę (żeby test filtru był wiarygodny)
+        createAndSaveOtherCompany();
+
+        // Zapisujemy umowy dla obu firm
+        createAndSaveAgreement(savedCompany, LocalDate.now());
+
+        // When
+        // Przykładowe kryteria (zależne od Twojej klasy AgreementSC)
+        AgreementSC criteria = new AgreementSC();
+        // Zakładam, że w SC masz filtrowanie po nazwie firmy
+        // criteria.setCompanyName("Test Company Ltd.");
+
+        // Ponieważ nie znam dokładnych pól w SC, testuję przypadek "pusty filtr = zwróć wszystko"
+        // Jeśli dodasz setter w SC, odkomentuj i zmień asercję na 1
+
+        List<AgreementDto> results = agreementService.search(criteria);
+
+        // Then
+        // Powinno zwrócić co najmniej 1 (zależy czy stworzyliśmy umowę dla drugiej firmy)
+        assertThat(results).isNotEmpty();
+    }
+
+    @Test
+    @DisplayName("search: Powinien znaleźć umowy używając kryteriów")
+    void shouldFindAgreementsByCriteria10() {
+        // Given
+        // Tworzymy drugą firmę (żeby test filtru był wiarygodny)
+        createAndSaveOtherCompany();
+
+        // Zapisujemy umowy dla obu firm
+        createAndSaveAgreement(savedCompany, LocalDate.now());
+
+        // When
+        // Przykładowe kryteria (zależne od Twojej klasy AgreementSC)
+        AgreementSC criteria = new AgreementSC();
+        // Zakładam, że w SC masz filtrowanie po nazwie firmy
+        // criteria.setCompanyName("Test Company Ltd.");
+
+        // Ponieważ nie znam dokładnych pól w SC, testuję przypadek "pusty filtr = zwróć wszystko"
+        // Jeśli dodasz setter w SC, odkomentuj i zmień asercję na 1
+
+        List<AgreementDto> results = agreementService.search(criteria);
+
+        // Then
+        // Powinno zwrócić co najmniej 1 (zależy czy stworzyliśmy umowę dla drugiej firmy)
+        assertThat(results).isNotEmpty();
+    }
+
+    @Test
+    @DisplayName("search: Powinien znaleźć umowy używając kryteriów")
+    void shouldFindAgreementsByCriteria11() {
+        // Given
+        // Tworzymy drugą firmę (żeby test filtru był wiarygodny)
+        createAndSaveOtherCompany();
+
+        // Zapisujemy umowy dla obu firm
+        createAndSaveAgreement(savedCompany, LocalDate.now());
+
+        // When
+        // Przykładowe kryteria (zależne od Twojej klasy AgreementSC)
+        AgreementSC criteria = new AgreementSC();
+        // Zakładam, że w SC masz filtrowanie po nazwie firmy
+        // criteria.setCompanyName("Test Company Ltd.");
+
+        // Ponieważ nie znam dokładnych pól w SC, testuję przypadek "pusty filtr = zwróć wszystko"
+        // Jeśli dodasz setter w SC, odkomentuj i zmień asercję na 1
+
+        List<AgreementDto> results = agreementService.search(criteria);
+
+        // Then
+        // Powinno zwrócić co najmniej 1 (zależy czy stworzyliśmy umowę dla drugiej firmy)
+        assertThat(results).isNotEmpty();
+    }
+
+    @Test
+    @DisplayName("search: Powinien znaleźć umowy używając kryteriów")
+    void shouldFindAgreementsByCriteria12() {
+        // Given
+        // Tworzymy drugą firmę (żeby test filtru był wiarygodny)
+        createAndSaveOtherCompany();
+
+        // Zapisujemy umowy dla obu firm
+        createAndSaveAgreement(savedCompany, LocalDate.now());
+
+        // When
+        // Przykładowe kryteria (zależne od Twojej klasy AgreementSC)
+        AgreementSC criteria = new AgreementSC();
+        // Zakładam, że w SC masz filtrowanie po nazwie firmy
+        // criteria.setCompanyName("Test Company Ltd.");
+
+        // Ponieważ nie znam dokładnych pól w SC, testuję przypadek "pusty filtr = zwróć wszystko"
+        // Jeśli dodasz setter w SC, odkomentuj i zmień asercję na 1
+
+        List<AgreementDto> results = agreementService.search(criteria);
+
+        // Then
+        // Powinno zwrócić co najmniej 1 (zależy czy stworzyliśmy umowę dla drugiej firmy)
+        assertThat(results).isNotEmpty();
+    }
+
+    @Test
+    @DisplayName("search: Powinien znaleźć umowy używając kryteriów")
+    void shouldFindAgreementsByCriteria13() {
+        // Given
+        // Tworzymy drugą firmę (żeby test filtru był wiarygodny)
+        createAndSaveOtherCompany();
+
+        // Zapisujemy umowy dla obu firm
+        createAndSaveAgreement(savedCompany, LocalDate.now());
+
+        // When
+        // Przykładowe kryteria (zależne od Twojej klasy AgreementSC)
+        AgreementSC criteria = new AgreementSC();
+        // Zakładam, że w SC masz filtrowanie po nazwie firmy
+        // criteria.setCompanyName("Test Company Ltd.");
+
+        // Ponieważ nie znam dokładnych pól w SC, testuję przypadek "pusty filtr = zwróć wszystko"
+        // Jeśli dodasz setter w SC, odkomentuj i zmień asercję na 1
+
+        List<AgreementDto> results = agreementService.search(criteria);
+
+        // Then
+        // Powinno zwrócić co najmniej 1 (zależy czy stworzyliśmy umowę dla drugiej firmy)
+        assertThat(results).isNotEmpty();
+    }
+
+    @Test
+    @DisplayName("search: Powinien znaleźć umowy używając kryteriów")
+    void shouldFindAgreementsByCriteria14() {
+        // Given
+        // Tworzymy drugą firmę (żeby test filtru był wiarygodny)
+        createAndSaveOtherCompany();
+
+        // Zapisujemy umowy dla obu firm
+        createAndSaveAgreement(savedCompany, LocalDate.now());
+
+        // When
+        // Przykładowe kryteria (zależne od Twojej klasy AgreementSC)
+        AgreementSC criteria = new AgreementSC();
+        // Zakładam, że w SC masz filtrowanie po nazwie firmy
+        // criteria.setCompanyName("Test Company Ltd.");
+
+        // Ponieważ nie znam dokładnych pól w SC, testuję przypadek "pusty filtr = zwróć wszystko"
+        // Jeśli dodasz setter w SC, odkomentuj i zmień asercję na 1
+
+        List<AgreementDto> results = agreementService.search(criteria);
+
+        // Then
+        // Powinno zwrócić co najmniej 1 (zależy czy stworzyliśmy umowę dla drugiej firmy)
+        assertThat(results).isNotEmpty();
+    }
+
+
 
     @Test
     @DisplayName("findByNextRun: Powinien zwrócić umowy po dacie serwisu")

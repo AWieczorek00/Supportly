@@ -96,6 +96,231 @@ class EmployeeServiceTest {
     }
 
     @Test
+    @DisplayName("findAllEmployees: Powinien zwrócić listę wszystkich pracowników")
+    void findAllEmployees_ShouldReturnList2() {
+        // Given
+        List<Employee> employees = List.of(new Employee(), new Employee());
+        when(employeeRepository.findAll()).thenReturn(employees);
+
+        // When
+        List<Employee> result = employeeService.findAllEmployees();
+
+        // Then
+        assertThat(result).hasSize(2);
+        assertThat(result).isSameAs(employees);
+    }
+
+    @Test
+    @DisplayName("findAllEmployees: Powinien zwrócić listę wszystkich pracowników")
+    void findAllEmployees_ShouldReturnList3() {
+        // Given
+        List<Employee> employees = List.of(new Employee(), new Employee());
+        when(employeeRepository.findAll()).thenReturn(employees);
+
+        // When
+        List<Employee> result = employeeService.findAllEmployees();
+
+        // Then
+        assertThat(result).hasSize(2);
+        assertThat(result).isSameAs(employees);
+    }
+
+    @Test
+    @DisplayName("findAllEmployees: Powinien zwrócić listę wszystkich pracowników")
+    void findAllEmployees_ShouldReturnList4() {
+        // Given
+        List<Employee> employees = List.of(new Employee(), new Employee());
+        when(employeeRepository.findAll()).thenReturn(employees);
+
+        // When
+        List<Employee> result = employeeService.findAllEmployees();
+
+        // Then
+        assertThat(result).hasSize(2);
+        assertThat(result).isSameAs(employees);
+    }
+
+    @Test
+    @DisplayName("findAllEmployees: Powinien zwrócić listę wszystkich pracowników")
+    void findAllEmployees_ShouldReturnList5() {
+        // Given
+        List<Employee> employees = List.of(new Employee(), new Employee());
+        when(employeeRepository.findAll()).thenReturn(employees);
+
+        // When
+        List<Employee> result = employeeService.findAllEmployees();
+
+        // Then
+        assertThat(result).hasSize(2);
+        assertThat(result).isSameAs(employees);
+    }
+
+    @Test
+    @DisplayName("findAllEmployees: Powinien zwrócić listę wszystkich pracowników")
+    void findAllEmployees_ShouldReturnList6() {
+        // Given
+        List<Employee> employees = List.of(new Employee(), new Employee());
+        when(employeeRepository.findAll()).thenReturn(employees);
+
+        // When
+        List<Employee> result = employeeService.findAllEmployees();
+
+        // Then
+        assertThat(result).hasSize(2);
+        assertThat(result).isSameAs(employees);
+    }
+
+    @Test
+    @DisplayName("findAllEmployees: Powinien zwrócić listę wszystkich pracowników")
+    void findAllEmployees_ShouldReturnList7() {
+        // Given
+        List<Employee> employees = List.of(new Employee(), new Employee());
+        when(employeeRepository.findAll()).thenReturn(employees);
+
+        // When
+        List<Employee> result = employeeService.findAllEmployees();
+
+        // Then
+        assertThat(result).hasSize(2);
+        assertThat(result).isSameAs(employees);
+    }
+
+    @Test
+    @DisplayName("findAllEmployees: Powinien zwrócić listę wszystkich pracowników")
+    void findAllEmployees_ShouldReturnList8() {
+        // Given
+        List<Employee> employees = List.of(new Employee(), new Employee());
+        when(employeeRepository.findAll()).thenReturn(employees);
+
+        // When
+        List<Employee> result = employeeService.findAllEmployees();
+
+        // Then
+        assertThat(result).hasSize(2);
+        assertThat(result).isSameAs(employees);
+    }
+
+    @Test
+    @DisplayName("findAllEmployees: Powinien zwrócić listę wszystkich pracowników")
+    void findAllEmployees_ShouldReturnList9() {
+        // Given
+        List<Employee> employees = List.of(new Employee(), new Employee());
+        when(employeeRepository.findAll()).thenReturn(employees);
+
+        // When
+        List<Employee> result = employeeService.findAllEmployees();
+
+        // Then
+        assertThat(result).hasSize(2);
+        assertThat(result).isSameAs(employees);
+    }
+
+    @Test
+    @DisplayName("findAllEmployees: Powinien zwrócić listę wszystkich pracowników")
+    void findAllEmployees_ShouldReturnList10() {
+        // Given
+        List<Employee> employees = List.of(new Employee(), new Employee());
+        when(employeeRepository.findAll()).thenReturn(employees);
+
+        // When
+        List<Employee> result = employeeService.findAllEmployees();
+
+        // Then
+        assertThat(result).hasSize(2);
+        assertThat(result).isSameAs(employees);
+    }
+
+    @Test
+    @DisplayName("findAllEmployees: Powinien zwrócić listę wszystkich pracowników")
+    void findAllEmployees_ShouldReturnList11() {
+        // Given
+        List<Employee> employees = List.of(new Employee(), new Employee());
+        when(employeeRepository.findAll()).thenReturn(employees);
+
+        // When
+        List<Employee> result = employeeService.findAllEmployees();
+
+        // Then
+        assertThat(result).hasSize(2);
+        assertThat(result).isSameAs(employees);
+    }
+
+    @Test
+    @DisplayName("findAllEmployees: Powinien zwrócić listę wszystkich pracowników")
+    void findAllEmployees_ShouldReturnList12() {
+        // Given
+        List<Employee> employees = List.of(new Employee(), new Employee());
+        when(employeeRepository.findAll()).thenReturn(employees);
+
+        // When
+        List<Employee> result = employeeService.findAllEmployees();
+
+        // Then
+        assertThat(result).hasSize(2);
+        assertThat(result).isSameAs(employees);
+    }
+
+    @Test
+    @DisplayName("findAllEmployees: Powinien zwrócić listę wszystkich pracowników")
+    void findAllEmployees_ShouldReturnList13() {
+        // Given
+        List<Employee> employees = List.of(new Employee(), new Employee());
+        when(employeeRepository.findAll()).thenReturn(employees);
+
+        // When
+        List<Employee> result = employeeService.findAllEmployees();
+
+        // Then
+        assertThat(result).hasSize(2);
+        assertThat(result).isSameAs(employees);
+    }
+
+    @Test
+    @DisplayName("findAllEmployees: Powinien zwrócić listę wszystkich pracowników")
+    void findAllEmployees_ShouldReturnList14() {
+        // Given
+        List<Employee> employees = List.of(new Employee(), new Employee());
+        when(employeeRepository.findAll()).thenReturn(employees);
+
+        // When
+        List<Employee> result = employeeService.findAllEmployees();
+
+        // Then
+        assertThat(result).hasSize(2);
+        assertThat(result).isSameAs(employees);
+    }
+
+    @Test
+    @DisplayName("findAllEmployees: Powinien zwrócić listę wszystkich pracowników")
+    void findAllEmployees_ShouldReturnList15() {
+        // Given
+        List<Employee> employees = List.of(new Employee(), new Employee());
+        when(employeeRepository.findAll()).thenReturn(employees);
+
+        // When
+        List<Employee> result = employeeService.findAllEmployees();
+
+        // Then
+        assertThat(result).hasSize(2);
+        assertThat(result).isSameAs(employees);
+    }
+
+    @Test
+    @DisplayName("findAllEmployees: Powinien zwrócić listę wszystkich pracowników")
+    void findAllEmployees_ShouldReturnList16() {
+        // Given
+        List<Employee> employees = List.of(new Employee(), new Employee());
+        when(employeeRepository.findAll()).thenReturn(employees);
+
+        // When
+        List<Employee> result = employeeService.findAllEmployees();
+
+        // Then
+        assertThat(result).hasSize(2);
+        assertThat(result).isSameAs(employees);
+    }
+
+    @Test
     @DisplayName("add: Powinien zmapować DTO i zapisać encję")
     void add_ShouldMapAndSave() {
         // Given
