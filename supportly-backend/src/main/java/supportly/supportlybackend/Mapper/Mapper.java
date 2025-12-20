@@ -6,7 +6,7 @@ import supportly.supportlybackend.Dto.CompanyDto;
 import supportly.supportlybackend.Dto.EmployeeDto;
 import supportly.supportlybackend.Dto.OrderDto;
 import supportly.supportlybackend.Model.*;
-import supportly.supportlybackend.Service.TaskDto;
+import supportly.supportlybackend.Dto.TaskDto;
 
 public class Mapper {
 

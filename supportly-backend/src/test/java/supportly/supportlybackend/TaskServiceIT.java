@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import supportly.supportlybackend.Criteria.TaskSC;
 import supportly.supportlybackend.Model.Task;
 import supportly.supportlybackend.Repository.TaskRepository;
-import supportly.supportlybackend.Service.TaskDto;
+import supportly.supportlybackend.Dto.TaskDto;
 import supportly.supportlybackend.Service.TaskService;
 
 import java.util.List;

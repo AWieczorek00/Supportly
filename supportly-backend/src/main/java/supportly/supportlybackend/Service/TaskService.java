@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import supportly.supportlybackend.Criteria.GenericSpecificationBuilder;
 import supportly.supportlybackend.Criteria.TaskSC;
+import supportly.supportlybackend.Dto.TaskDto;
 import supportly.supportlybackend.Mapper.Mapper;
 import supportly.supportlybackend.Model.Task;
 import supportly.supportlybackend.Repository.TaskRepository;

@@ -1,4 +1,4 @@
-package supportly.supportlybackend.Service;
+package supportly.supportlybackend.Dto;
 
 import jakarta.persistence.*;
 import lombok.Data;
