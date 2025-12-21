@@ -32,37 +32,38 @@ public class AgreementTest extends TestDatabaseSetup {
     }
 
     @Test
-    public void testSearchAgreement() throws InterruptedException {
-        WebElement panelHeader = wait.until(
-                ExpectedConditions.elementToBeClickable(By.cssSelector("mat-expansion-panel-header"))
-        );
+    public void testSearchAgreement() {
+        // Dane testowe
+        String companyName = "Tech Solutions Sp. z o.o.";
+
+        // Selektory (najlepiej byłoby je mieć w stałych/Page Object, ale tu dla czytelności lokalnie)
+        By panelHeaderLocator = By.cssSelector("mat-expansion-panel-header");
+        By nameInputLocator = By.cssSelector("input[formcontrolname='name']");
+        By searchButtonLocator = By.cssSelector("button[type='submit']");
+        By tableLocator = By.cssSelector("table.mat-mdc-table");
+
+        // 1. Otwieranie panelu wyszukiwania
+        WebElement panelHeader = wait.until(ExpectedConditions.elementToBeClickable(panelHeaderLocator));
         panelHeader.click();
 
-        // Czekamy aż inputy staną się widoczne
-        WebElement nameInput = wait.until(
-                ExpectedConditions.visibilityOfElementLocated(By.cssSelector("input[formcontrolname='name']"))
-        );
-        nameInput.sendKeys("Tech Solutions Sp. z o.o.");
+        // 2. Wprowadzanie danych (czekamy na widoczność inputa)
+        WebElement nameInput = wait.until(ExpectedConditions.visibilityOfElementLocated(nameInputLocator));
+        nameInput.clear(); // Dobra praktyka: czyścimy pole przed wpisaniem
+        nameInput.sendKeys(companyName);
 
-
-        // Klikamy przycisk Szukaj
-        WebElement searchButton = wait.until(
-                ExpectedConditions.elementToBeClickable(By.cssSelector("button[type='submit']"))
-        );
+        // 3. Kliknięcie Szukaj
+        WebElement searchButton = wait.until(ExpectedConditions.elementToBeClickable(searchButtonLocator));
         searchButton.click();
 
-        // Czekamy aż tabela się pojawi
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("table.mat-mdc-table tr[mat-row]")));
+        // 4. Weryfikacja wyników
+        // ZAMIAST Thread.sleep i ręcznego szukania w liście:
+        // Czekamy, aż w elemencie tabeli pojawi się oczekiwany tekst.
+        // Selenium będzie sprawdzać to co 500ms aż do timeoutu.
+        boolean isTextPresent = wait.until(
+                ExpectedConditions.textToBePresentInElementLocated(tableLocator, companyName)
+        );
 
-        Thread.sleep(500); // czekaj 0.5 sekundy
-
-        // Pobieramy wiersze tabeli
-        List<WebElement> rows = driver.findElements(By.cssSelector("table.mat-mdc-table tr[mat-row]"));
-
-        boolean found = rows.stream()
-                .anyMatch(row -> row.getText().contains("Tech Solutions Sp. z o.o."));
-
-        assertTrue(found, "Nie znaleziono firmy 'Tech Solutions Sp. z o.o.' w tabeli!");
+        assertTrue(isTextPresent, "Nie znaleziono firmy '" + companyName + "' w wynikach wyszukiwania!");
     }
 
 
