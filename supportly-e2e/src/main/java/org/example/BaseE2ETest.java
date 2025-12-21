@@ -145,4 +145,11 @@ public class BaseE2ETest {
         type(By.id("password"), password);
         click(By.cssSelector("button[type='submit']"));
     }
+
+    // Pomocnicza metoda, żeby nie powielać kodu wait/clear/sendKeys
+    protected void fillInput(String cssSelector, String value) {
+        WebElement input = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(cssSelector)));
+        input.clear();
+        input.sendKeys(value);
+    }
 }

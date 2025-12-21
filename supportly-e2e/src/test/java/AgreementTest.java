@@ -252,49 +252,44 @@ void shouldDisplayAgreementInWholeTable() {
 
     @Test
     void createAgreement() {
+        // Zmienna dla spójności danych (wpisujemy to samo, co potem sprawdzamy)
         String newClientName = "GreenData Sp. z o.o.";
+        String autocompletePrefix = "Gr";
 
-        // 1. Przejście do formularza
+        // 1. Wejście na stronę dodawania
         openApp("/agreement/add");
-        // Brak Thread.sleep - czekamy na pierwszy element formularza
 
-        // 2. Rozwijanie paneli (Tylko jeśli jest to konieczne, by inputy były widoczne)
-        // Pobieramy listę nagłówków i klikamy po kolei
+        // 2. Obsługa rozwijanych paneli (jeśli są zwinięte)
         List<WebElement> panelHeaders = wait.until(
                 ExpectedConditions.presenceOfAllElementsLocatedBy(By.cssSelector("mat-expansion-panel-header"))
         );
 
         for (WebElement header : panelHeaders) {
-            // Sprawdzamy, czy panel jest już rozwinięty (Angular dodaje klasę np. mat-expanded)
-            // Jeśli nie jest rozwinięty -> klikamy
+            // Sprawdzamy stan panelu przed kliknięciem
             String expansionState = header.getAttribute("class");
             if (expansionState != null && !expansionState.contains("mat-expanded")) {
                 wait.until(ExpectedConditions.elementToBeClickable(header)).click();
-                // Ważne: po kliknięciu warto poczekać chwilę na animację,
-                // ale lepiej poczekać na widoczność inputa w sekcji poniżej.
-                // Tutaj dla uproszczenia zostawiam bez sleepa, bo inputy niżej mają swoje 'wait'.
             }
         }
 
-        // 3. Wypełnianie formularza
-
-        // --- Klient (Autocomplete) ---
-        WebElement companyInput = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("input[formControlName='client']")));
+        // 3. Wypełnianie pola Klient (Autocomplete)
+        WebElement companyInput = wait.until(
+                ExpectedConditions.elementToBeClickable(By.cssSelector("input[formControlName='client']"))
+        );
         companyInput.clear();
-        companyInput.sendKeys("Gr");
+        companyInput.sendKeys(autocompletePrefix);
 
-        // Czekamy na pojawienie się listy opcji (mat-option)
+        // Czekamy na opcje i wybieramy właściwą
         List<WebElement> options = wait.until(
                 ExpectedConditions.visibilityOfAllElementsLocatedBy(By.cssSelector("mat-option"))
         );
 
-        // Wybieramy opcję pasującą do tekstu "Gr" (np. pierwszą pasującą)
         options.stream()
-                .filter(opt -> opt.getText().contains("Gr"))
+                .filter(opt -> opt.getText().contains(autocompletePrefix))
                 .findFirst()
                 .ifPresent(WebElement::click);
 
-        // --- Daty i Liczby ---
+        // 4. Wypełnianie reszty pól (używając metody pomocniczej)
         fillInput("input[formControlName='dateFrom']", "2025-10-01");
         fillInput("input[formControlName='dateTo']", "2025-10-31");
         fillInput("input[formControlName='period']", "3");
@@ -303,27 +298,36 @@ void shouldDisplayAgreementInWholeTable() {
         fillInput("input[formControlName='buildingNumber']", "10");
         fillInput("input[formControlName='apartmentNumber']", "1");
 
-        // 4. Zapisz
-        WebElement addButton = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("button[type='submit']")));
+        // 5. Zapis formularza
+        WebElement addButton = wait.until(
+                ExpectedConditions.elementToBeClickable(By.cssSelector("button[type='submit']"))
+        );
         addButton.click();
 
-        // 5. Weryfikacja (Szukanie dodanej umowy)
+        // --- KLUCZOWA POPRAWKA ---
+        // Czekamy, aż aplikacja przekieruje nas z "/add" z powrotem na listę.
+        // Bez tego Selenium szuka pola wyszukiwania będąc wciąż na starym widoku.
+        wait.until(ExpectedConditions.not(ExpectedConditions.urlContains("/add")));
 
-        // Czekamy na powrót na listę (zakładam, że panel wyszukiwania jest na liście)
+        // 6. Wyszukiwanie dodanej umowy na liście
         WebElement searchPanelHeader = wait.until(
                 ExpectedConditions.elementToBeClickable(By.cssSelector("mat-expansion-panel-header"))
         );
         searchPanelHeader.click();
 
-        WebElement nameInput = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("input[formcontrolname='name']")));
+        // Czekamy na input w panelu wyszukiwania
+        WebElement nameInput = wait.until(
+                ExpectedConditions.visibilityOfElementLocated(By.cssSelector("input[formcontrolname='name']"))
+        );
         nameInput.clear();
         nameInput.sendKeys(newClientName);
 
-        WebElement searchButton = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("button[type='submit']")));
+        WebElement searchButton = wait.until(
+                ExpectedConditions.elementToBeClickable(By.cssSelector("button[type='submit']"))
+        );
         searchButton.click();
 
-        // 6. Asercja (tak samo jak w pierwszym teście)
-        // Czekamy, aż wiersz z nazwą klienta pojawi się w tabeli
+        // 7. Weryfikacja (Czekamy na konkretny wiersz w tabeli)
         String rowXpath = String.format("//tr[contains(., '%s')]", newClientName);
 
         boolean found = wait.until(ExpectedConditions.and(
@@ -331,15 +335,9 @@ void shouldDisplayAgreementInWholeTable() {
                 ExpectedConditions.visibilityOfElementLocated(By.xpath(rowXpath))
         ));
 
-        assertTrue(found, "Znaleziono firmy '" + newClientName + "' w tabeli!");
+        assertTrue(found, "Nie znaleziono nowo dodanej firmy '" + newClientName + "' w tabeli!");
     }
 
-    // Pomocnicza metoda, żeby nie powielać kodu wait/clear/sendKeys
-    private void fillInput(String cssSelector, String value) {
-        WebElement input = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(cssSelector)));
-        input.clear();
-        input.sendKeys(value);
-    }
 
     @Test
     void shouldShowNoResultsForNonExistentCompany() {
