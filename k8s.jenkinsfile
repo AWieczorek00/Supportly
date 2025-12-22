@@ -70,6 +70,51 @@ pipeline {
                 checkoutSources()
             }
         }
+        stage('Build & Test') {
+            steps {
+                script {
+
+                    parallel('Build & Test Backend': {
+                        dir('supportly-backend') {
+                            echo ">>>[TESTY BACKENDU]<<<"
+                            sh "mvn verify -Dspring.profiles.active=${env.PROFILE.replace('_lt', '')} -Dmaven.test.failure.ignore=true"
+                            junit 'target/surefire-reports/*.xml'
+                            echo ">>>[BUDOWANIE BACKENDU]<<<"
+                            sh "mvn clean package spring-boot:repackage -P${env.PROFILE.replace('_lt', '')} -Dspring.profiles.active=${env.PROFILE.replace('_lt', '')}  -DskipTests"
+                        }
+                    },
+                            'Build & Test Frontend': {
+                                dir('supportly-frontend') {
+//                                    replaceInFile('http://localhost:8080', "http://${env.PROJECT_NAME}-backend-${env.PROFILE}-1:${env.PORT_BACKEND}", "src/assets/config.json")
+                                    echo ">>>[BUDOWANIE FRONTENDU]<<<"
+                                    sh "yes | ng version"
+                                    sh script: "npm install --force", label: "npm install"
+                                    sh script: "ng build --output-path=../conf/frontend/supportly-frontend", label: "ng build"
+                                }
+                            })
+
+//                    replaceInFile('localhost', '192.168.0.81', "conf/docker-compose-${env.PROFILE}.yml")
+                    replaceInFile('PORT_DB', env.PORT_DB, "conf/docker-compose-${env.PROFILE}.yml")
+                    replaceInFile('PORT_BACKEND', env.PORT_BACKEND, "conf/docker-compose-${env.PROFILE}.yml")
+                    replaceInFile('latest', env.BUILDTAG, "conf/docker-compose-${env.PROFILE}.yml")
+                    replaceInFile('latest', env.BUILDTAG, "conf/kube/k8s-deployment.yaml")
+                    replaceInFile('PORT_FRONTEND', env.PORT_FRONT, "conf/docker-compose-${env.PROFILE}.yml")
+//                    replaceInFile('URL_BACKEND', "${env.PROJECT_NAME}-backend-${env.PROFILE}-1/${env.PORT_BACKEND}/", "src/assets/nginx.conf")
+                    replaceInFile('http://localhost:8080', "http://${env.E2E_DOCKER_HOST}:${env.PORT_BACKEND}", "conf/frontend/supportly-frontend/browser/assets/config.json")
+                    replaceInFile('1009', env.PORT_DB, 'conf/backend/backend.env')
+                    replaceInFile('localhost', '192.168.0.81', 'conf/backend/backend.env')
+                    replaceInFile('API', "http://192.168.0.81:${env.PORT_FRONT}", 'conf/backend/backend.env')
+                    replaceInFile('default', "${env.PROFILE.replace('_lt', '')}", 'conf/backend/Dockerfile')
+
+                    sh "cat conf/docker-compose-${env.PROFILE}.yml"
+                    sh 'cat conf/backend/backend.env'
+
+                    stash name: 'supportly', includes: 'conf/**', useDefaultExcludes: false
+                    stash name: 'supportly-e2e', includes: 'supportly-e2e/**', useDefaultExcludes: false
+
+                }
+            }
+        }
 
 //        stage('Build & Test') {
 //            steps {
@@ -142,82 +187,82 @@ pipeline {
 //                }
 //            }
 //        }
-        stage('Build & Test') {
-            steps {
-                script {
-                    parallel('Build & Test Backend': {
+//        stage('Build & Test') {
+//            steps {
+//                script {
+//                    parallel('Build & Test Backend': {
+////                        dir('supportly-backend') {
+////                            echo ">>>[KOMPILACJA WSTĘPNA (Aby przygotować klasy dla obu wątków)]<<<"
+////                            // 1. Czyścimy i kompilujemy kod oraz testy RAZ.
+////                            // Dzięki temu w bloku parallel Maven korzysta już z gotowych plików .class
+////                            sh "mvn clean test-compile -P${env.PROFILE.replace('_lt', '')} -Dspring.profiles.active=${env.PROFILE.replace('_lt', '')}"
+////
+////                            echo ">>>[TESTY BACKENDU (RÓWNOLEGŁE: UNIT vs IT)]<<<"
+////
+////                            // 2. Uruchamiamy testy równolegle.
+////                            // WAŻNE: Nie używamy tu 'clean' ani 'compile', tylko same cele testowe.
+////                            parallel(
+////                                    "Unit Tests": {
+////                                        echo "Start: Testy Jednostkowe (*Test.java)"
+////                                        // surefire:test -> Uruchamia tylko testy jednostkowe
+////                                        sh "mvn verify -Dtest=**/unit/** -Dspring.profiles.active=${env.PROFILE.replace('_lt', '')} -Dmaven.test.failure.ignore=true"
+////                                    },
+////                                    "Integration Tests": {
+////                                        echo "Start: Testy Integracyjne (*IT.java)"
+////                                        // failsafe:integration-test -> Uruchamia tylko testy integracyjne (dzięki Twojej naprawie w pom.xml)
+////                                        sh "mvn verify -Dtest=**/integration/** -Dspring.profiles.active=${env.PROFILE.replace('_lt', '')} -Dmaven.test.failure.ignore=true"
+////                                    }
+////                            )
+////
+////                            // 3. Zbieramy raporty (Surefire generuje je w surefire-reports, Failsafe w failsafe-reports)
+////                            junit '**/target/*-reports/*.xml'
+////
+////                            echo ">>>[BUDOWANIE PACZKI JAR]<<<"
+////                            // 4. Pakujemy aplikację. Używamy -DskipTests, bo testy przeszły już wyżej.
+////                            // Faza package automatycznie zawiera w sobie budowanie, więc nie musimy kompilować od nowa.
+////                            sh "mvn package -DskipTests -P${env.PROFILE.replace('_lt', '')} -Dspring.profiles.active=${env.PROFILE.replace('_lt', '')}"
+////                        }
+//
 //                        dir('supportly-backend') {
-//                            echo ">>>[KOMPILACJA WSTĘPNA (Aby przygotować klasy dla obu wątków)]<<<"
-//                            // 1. Czyścimy i kompilujemy kod oraz testy RAZ.
-//                            // Dzięki temu w bloku parallel Maven korzysta już z gotowych plików .class
-//                            sh "mvn clean test-compile -P${env.PROFILE.replace('_lt', '')} -Dspring.profiles.active=${env.PROFILE.replace('_lt', '')}"
+//                            echo ">>>[URUCHAMIANIE TESTÓW I BUDOWANIE (SEKWENCYJNIE)]<<<"
 //
-//                            echo ">>>[TESTY BACKENDU (RÓWNOLEGŁE: UNIT vs IT)]<<<"
+////                            sh "mvn clean test failsafe:integration-test -P${env.PROFILE.replace('_lt', '')} -Dspring.profiles.active=${env.PROFILE.replace('_lt', '')} -Dmaven.test.failure.ignore=true && mvn package -DskipTests -P${env.PROFILE.replace('_lt', '')} -Dspring.profiles.active=${env.PROFILE.replace('_lt', '')}"
 //
-//                            // 2. Uruchamiamy testy równolegle.
-//                            // WAŻNE: Nie używamy tu 'clean' ani 'compile', tylko same cele testowe.
-//                            parallel(
-//                                    "Unit Tests": {
-//                                        echo "Start: Testy Jednostkowe (*Test.java)"
-//                                        // surefire:test -> Uruchamia tylko testy jednostkowe
-//                                        sh "mvn verify -Dtest=**/unit/** -Dspring.profiles.active=${env.PROFILE.replace('_lt', '')} -Dmaven.test.failure.ignore=true"
-//                                    },
-//                                    "Integration Tests": {
-//                                        echo "Start: Testy Integracyjne (*IT.java)"
-//                                        // failsafe:integration-test -> Uruchamia tylko testy integracyjne (dzięki Twojej naprawie w pom.xml)
-//                                        sh "mvn verify -Dtest=**/integration/** -Dspring.profiles.active=${env.PROFILE.replace('_lt', '')} -Dmaven.test.failure.ignore=true"
-//                                    }
-//                            )
+//                            sh "mvn clean verify -Dtest=**/supportlybackend/** -Dspring.profiles.active=${env.PROFILE.replace('_lt', '')} -Dmaven.test.failure.ignore=true"
 //
-//                            // 3. Zbieramy raporty (Surefire generuje je w surefire-reports, Failsafe w failsafe-reports)
+//                            // Zbieramy wyniki
 //                            junit '**/target/*-reports/*.xml'
-//
-//                            echo ">>>[BUDOWANIE PACZKI JAR]<<<"
-//                            // 4. Pakujemy aplikację. Używamy -DskipTests, bo testy przeszły już wyżej.
-//                            // Faza package automatycznie zawiera w sobie budowanie, więc nie musimy kompilować od nowa.
-//                            sh "mvn package -DskipTests -P${env.PROFILE.replace('_lt', '')} -Dspring.profiles.active=${env.PROFILE.replace('_lt', '')}"
 //                        }
-
-                        dir('supportly-backend') {
-                            echo ">>>[URUCHAMIANIE TESTÓW I BUDOWANIE (SEKWENCYJNIE)]<<<"
-
-//                            sh "mvn clean test failsafe:integration-test -P${env.PROFILE.replace('_lt', '')} -Dspring.profiles.active=${env.PROFILE.replace('_lt', '')} -Dmaven.test.failure.ignore=true && mvn package -DskipTests -P${env.PROFILE.replace('_lt', '')} -Dspring.profiles.active=${env.PROFILE.replace('_lt', '')}"
-
-                            sh "mvn clean verify -Dtest=**/supportlybackend/** -Dspring.profiles.active=${env.PROFILE.replace('_lt', '')} -Dmaven.test.failure.ignore=true"
-
-                            // Zbieramy wyniki
-                            junit '**/target/*-reports/*.xml'
-                        }
-                    },
-                            'Build & Test Frontend': {
-                                dir('supportly-frontend') {
-                                    echo ">>>[BUDOWANIE FRONTENDU]<<<"
-                                    sh "yes | ng version"
-                                    sh script: "npm install --force", label: "npm install"
-                                    sh script: "ng build --output-path=../conf/frontend/supportly-frontend", label: "ng build"
-                                }
-                            })
-
-                    // --- Reszta Twojego skryptu bez zmian ---
-                    replaceInFile('PORT_DB', env.PORT_DB, "conf/docker-compose-${env.PROFILE}.yml")
-                    replaceInFile('PORT_BACKEND', env.PORT_BACKEND, "conf/docker-compose-${env.PROFILE}.yml")
-                    replaceInFile('latest', env.BUILDTAG, "conf/docker-compose-${env.PROFILE}.yml")
-                    replaceInFile('latest', env.BUILDTAG, "conf/kube/k8s-deployment.yaml")
-                    replaceInFile('PORT_FRONTEND', env.PORT_FRONT, "conf/docker-compose-${env.PROFILE}.yml")
-                    replaceInFile('http://localhost:8080', "http://${env.E2E_DOCKER_HOST}:${env.PORT_BACKEND}", "conf/frontend/supportly-frontend/browser/assets/config.json")
-                    replaceInFile('1009', env.PORT_DB, 'conf/backend/backend.env')
-                    replaceInFile('localhost', '192.168.0.81', 'conf/backend/backend.env')
-                    replaceInFile('API', "http://192.168.0.81:${env.PORT_FRONT}", 'conf/backend/backend.env')
-                    replaceInFile('default', "${env.PROFILE.replace('_lt', '')}", 'conf/backend/Dockerfile')
-
-                    sh "cat conf/docker-compose-${env.PROFILE}.yml"
-                    sh 'cat conf/backend/backend.env'
-
-                    stash name: 'supportly', includes: 'conf/**', useDefaultExcludes: false
-                    stash name: 'supportly-e2e', includes: 'supportly-e2e/**', useDefaultExcludes: false
-                }
-            }
-        }
+//                    },
+//                            'Build & Test Frontend': {
+//                                dir('supportly-frontend') {
+//                                    echo ">>>[BUDOWANIE FRONTENDU]<<<"
+//                                    sh "yes | ng version"
+//                                    sh script: "npm install --force", label: "npm install"
+//                                    sh script: "ng build --output-path=../conf/frontend/supportly-frontend", label: "ng build"
+//                                }
+//                            })
+//
+//                    // --- Reszta Twojego skryptu bez zmian ---
+//                    replaceInFile('PORT_DB', env.PORT_DB, "conf/docker-compose-${env.PROFILE}.yml")
+//                    replaceInFile('PORT_BACKEND', env.PORT_BACKEND, "conf/docker-compose-${env.PROFILE}.yml")
+//                    replaceInFile('latest', env.BUILDTAG, "conf/docker-compose-${env.PROFILE}.yml")
+//                    replaceInFile('latest', env.BUILDTAG, "conf/kube/k8s-deployment.yaml")
+//                    replaceInFile('PORT_FRONTEND', env.PORT_FRONT, "conf/docker-compose-${env.PROFILE}.yml")
+//                    replaceInFile('http://localhost:8080', "http://${env.E2E_DOCKER_HOST}:${env.PORT_BACKEND}", "conf/frontend/supportly-frontend/browser/assets/config.json")
+//                    replaceInFile('1009', env.PORT_DB, 'conf/backend/backend.env')
+//                    replaceInFile('localhost', '192.168.0.81', 'conf/backend/backend.env')
+//                    replaceInFile('API', "http://192.168.0.81:${env.PORT_FRONT}", 'conf/backend/backend.env')
+//                    replaceInFile('default', "${env.PROFILE.replace('_lt', '')}", 'conf/backend/Dockerfile')
+//
+//                    sh "cat conf/docker-compose-${env.PROFILE}.yml"
+//                    sh 'cat conf/backend/backend.env'
+//
+//                    stash name: 'supportly', includes: 'conf/**', useDefaultExcludes: false
+//                    stash name: 'supportly-e2e', includes: 'supportly-e2e/**', useDefaultExcludes: false
+//                }
+//            }
+//        }
         stage('Build & Push Images') {
             when {
                 expression { params.E2E_TESTS }
@@ -355,10 +400,9 @@ pipeline {
             steps {
                 script {
                     echo ">>> Running Selenium E2E tests..."
-
                     unstash 'supportly-e2e'
 
-                    // --- Twoja logika wyboru bazy danych ---
+                    // --- Logika bazy danych (bez zmian) ---
                     def databaseUrl = ""
                     if (env.PROFILE.replace('_lt', '') == "postgres") {
                         databaseUrl = "jdbc:postgresql://192.168.0.81:${env.PORT_DB}/postgres"
@@ -368,42 +412,49 @@ pipeline {
                         databaseUrl = "jdbc:postgresql://192.168.0.81:${env.PORT_DB}/postgres"
                     }
 
-                    echo "URL: ${env.E2E_DOCKER_HOST_URL}${env.PORT_FRONT}"
-                    echo "DB: ${databaseUrl}"
+                    // Definicja zmiennych
+                    def e2eEnvVars = """
+                export BASE_URL=${env.E2E_DOCKER_HOST_URL}${env.PORT_FRONT}
+                export BASE_URL_DATABASE=${databaseUrl}
+                export PROFILE=${env.PROFILE}
+            """
 
                     dir('supportly-e2e') {
-                        // Definiujemy wspólne zmienne środowiskowe, żeby nie kopiować ich 2 razy
-                        // Używamy potrójnego cudzysłowu dla czytelności bloku
-                        def e2eEnvVars = """
-                    export BASE_URL=${env.E2E_DOCKER_HOST_URL}${env.PORT_FRONT}
-                    export BASE_URL_DATABASE=${databaseUrl}
-                    export PROFILE=${env.PROFILE}
-                """
+                        // 1. Kompilujemy RAZ we wspólnym folderze (żeby nie tracić czasu w wątkach)
+                        sh "mvn clean test-compile -DskipTests"
+                    }
 
-                        catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
-                            // Najpierw kompilujemy kod RAZ (sekwencyjnie), żeby wątki nie biły się o folder target
-                            sh "mvn clean test-compile -DskipTests"
+                    catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+                        parallel(
+                                "E2E Group 1": {
+                                    // Tworzymy unikalny katalog dla grupy 1 i kopiujemy tam skompilowany projekt
+                                    sh "mkdir -p e2e_work_1 && cp -r supportly-e2e/* e2e_work_1/"
 
-                            parallel(
-                                    "E2E Group 1": {
+                                    dir("e2e_work_1") {
                                         echo "Start: Agreement, Employee"
-                                        // Wstrzykujemy zmienne i odpalamy pierwsze dwa testy
                                         sh """
                                 ${e2eEnvVars}
-                                mvn surefire:test -Dtest=AgreementTest,EmployeeTest
-                            """
-                                    },
-                                    "E2E Group 2": {
-                                        echo "Start: HomePage, Login, Task"
-                                        // Wstrzykujemy zmienne i odpalamy resztę
-                                        sh """
-                                ${e2eEnvVars}
-                                mvn surefire:test -Dtest=HomePageTest,LoginTest,TaskTest
+                                mvn surefire:test -Dtest=AgreementTest,EmployeeTest -Dmaven.test.failure.ignore=true
                             """
                                     }
-                            )
-                        }
+                                },
+                                "E2E Group 2": {
+                                    // Tworzymy unikalny katalog dla grupy 2 i kopiujemy tam skompilowany projekt
+                                    sh "mkdir -p e2e_work_2 && cp -r supportly-e2e/* e2e_work_2/"
+
+                                    dir("e2e_work_2") {
+                                        echo "Start: HomePage, Login, Task"
+                                        sh """
+                                ${e2eEnvVars}
+                                mvn surefire:test -Dtest=HomePageTest,LoginTest,TaskTest -Dmaven.test.failure.ignore=true
+                            """
+                                    }
+                                }
+                        )
                     }
+
+                    // Opcjonalnie: Scalanie raportów z obu folderów (jeśli potrzebne)
+                    // junit 'e2e_work_*/target/surefire-reports/*.xml'
                 }
             }
         }
@@ -593,7 +644,8 @@ pipeline {
             script {
                 // Bezpieczna konwersja na boolean i sprawdzenie warunku
                 if (params.E2E_TESTS_RUN.toBoolean()) {
-                    junit 'supportly-e2e/target/surefire-reports/*.xml'
+                    // Zmieniona ścieżka, aby łapała wyniki z folderów tymczasowych
+                    junit 'e2e_work_*/target/surefire-reports/*.xml'
                 }
             }
             echo "Build duration: ${currentBuild.durationString}"
