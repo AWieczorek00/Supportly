@@ -32,45 +32,45 @@ public class AgreementTest extends TestDatabaseSetup {
         quitDriver();
     }
 
-    @Test
-    public void testSearchAgreement() {
-        String companyName = "Tech Solutions Sp. z o.o.";
-
-        // ... (kod otwierania panelu i wpisywania tekstu bez zmian) ...
-        WebElement panelHeader = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("mat-expansion-panel-header")));
-        panelHeader.click();
-
-        WebElement nameInput = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("input[formcontrolname='name']")));
-        nameInput.clear();
-        nameInput.sendKeys(companyName);
-
-        WebElement searchButton = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("button[type='submit']")));
-        searchButton.click();
-
-        // --- POPRAWKA PONIŻEJ ---
-
-        // Strategia: Czekamy, aż w DOM pojawi się jakikolwiek wiersz tabeli (tr),
-        // który zawiera w sobie szukany tekst.
-        // Używamy kropki (.) w XPath, co oznacza "tekst wewnątrz tego elementu lub jego dzieci".
-        String dynamicXPath = String.format("//tr[contains(., '%s')]", companyName);
-
-        try {
-            WebElement foundRow = wait.until(
-                    ExpectedConditions.visibilityOfElementLocated(By.xpath(dynamicXPath))
-            );
-
-            // Opcjonalnie: dodatkowa weryfikacja (np. czy wiersz jest wyświetlony)
-            assertTrue(foundRow.isDisplayed(), "Znaleziony wiersz nie jest widoczny!");
-
-        } catch (TimeoutException e) {
-            // Debugowanie: Jeśli nadal pada, sprawdź co jest w tabeli w momencie błędu
-            System.out.println("Timeout! Nie znaleziono wiersza z tekstem: " + companyName);
-            // Możesz tu pobrać tekst całej tabeli, żeby zobaczyć co faktycznie się wczytało
-            String tableText = driver.findElement(By.cssSelector("table.mat-mdc-table")).getText();
-            System.out.println("Aktualna zawartość tabeli: \n" + tableText);
-            throw e; // Rzuć błąd dalej, żeby test był czerwony
-        }
-    }
+//    @Test
+//    public void testSearchAgreement() {
+//        String companyName = "Tech Solutions Sp. z o.o.";
+//
+//        // ... (kod otwierania panelu i wpisywania tekstu bez zmian) ...
+//        WebElement panelHeader = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("mat-expansion-panel-header")));
+//        panelHeader.click();
+//
+//        WebElement nameInput = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("input[formcontrolname='name']")));
+//        nameInput.clear();
+//        nameInput.sendKeys(companyName);
+//
+//        WebElement searchButton = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("button[type='submit']")));
+//        searchButton.click();
+//
+//        // --- POPRAWKA PONIŻEJ ---
+//
+//        // Strategia: Czekamy, aż w DOM pojawi się jakikolwiek wiersz tabeli (tr),
+//        // który zawiera w sobie szukany tekst.
+//        // Używamy kropki (.) w XPath, co oznacza "tekst wewnątrz tego elementu lub jego dzieci".
+//        String dynamicXPath = String.format("//tr[contains(., '%s')]", companyName);
+//
+//        try {
+//            WebElement foundRow = wait.until(
+//                    ExpectedConditions.visibilityOfElementLocated(By.xpath(dynamicXPath))
+//            );
+//
+//            // Opcjonalnie: dodatkowa weryfikacja (np. czy wiersz jest wyświetlony)
+//            assertTrue(foundRow.isDisplayed(), "Znaleziony wiersz nie jest widoczny!");
+//
+//        } catch (TimeoutException e) {
+//            // Debugowanie: Jeśli nadal pada, sprawdź co jest w tabeli w momencie błędu
+//            System.out.println("Timeout! Nie znaleziono wiersza z tekstem: " + companyName);
+//            // Możesz tu pobrać tekst całej tabeli, żeby zobaczyć co faktycznie się wczytało
+//            String tableText = driver.findElement(By.cssSelector("table.mat-mdc-table")).getText();
+//            System.out.println("Aktualna zawartość tabeli: \n" + tableText);
+//            throw e; // Rzuć błąd dalej, żeby test był czerwony
+//        }
+//    }
 
     @Test
     public void testSearchAgreement() {
