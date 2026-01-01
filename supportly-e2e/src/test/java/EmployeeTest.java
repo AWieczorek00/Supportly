@@ -149,12 +149,11 @@ public class EmployeeTest extends TestDatabaseSetup {
 
     @Test
     public void createEmployee() {
-        // Generujemy unikalne nazwisko, żeby mieć pewność, że szukamy TEGO konkretnego pracownika
         String uniqueLastName = "Nita_" + System.currentTimeMillis();
+        String uniqueEmail = "jan.nita." + System.currentTimeMillis() + "@test.pl";
 
         // 1. Otwórz panel
         WebElement panelHeader = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("mat-expansion-panel-header")));
-        // Sprawdź czy nie jest już otwarty
         if (!"true".equals(panelHeader.getAttribute("aria-expanded"))) {
             panelHeader.click();
         }
@@ -166,36 +165,63 @@ public class EmployeeTest extends TestDatabaseSetup {
         // 3. Czekaj na Dialog
         WebElement dialog = wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("mat-dialog-container")));
 
-        // 4. Wypełnij Pola
-        dialog.findElement(By.cssSelector("input[formControlName='firstName']")).sendKeys("Justyna");
-        dialog.findElement(By.cssSelector("input[formControlName='lastName']")).sendKeys(uniqueLastName); // Unikalne nazwisko
+        // 4. Wypełnij WSZYSTKIE wymagane pola
+        // Używamy wait.until przy każdym polu dla stabilności
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("input[formControlName='firstName']"))).sendKeys("Justyna");
+        dialog.findElement(By.cssSelector("input[formControlName='lastName']")).sendKeys(uniqueLastName);
         dialog.findElement(By.cssSelector("input[formControlName='phoneNumber']")).sendKeys("502254567");
 
+        // --- NOWOŚĆ: Wypełnij Email i Hasło (często wymagane!) ---
+        // Jeśli w Twoim formularzu nie ma pola password, usuń tę linię, ale email na pewno jest potrzebny.
+        try {
+            dialog.findElement(By.cssSelector("input[formControlName='email']")).sendKeys(uniqueEmail);
+            dialog.findElement(By.cssSelector("input[formControlName='password']")).sendKeys("Haslo123!");
+        } catch (Exception e) {
+            // Ignorujemy, jeśli pól nie ma, ale zazwyczaj są wymagane
+            System.out.println("Nie znaleziono pola email lub hasło - pomijam.");
+        }
+
         // 5. Rola (Select)
-        dialog.findElement(By.cssSelector("mat-select[formcontrolname='role']")).click();
+        WebElement roleSelect = dialog.findElement(By.cssSelector("mat-select[formcontrolname='role']"));
+        roleSelect.click();
+
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".cdk-overlay-pane")));
         driver.findElement(By.xpath("//mat-option[contains(., 'ADMIN')]")).click();
 
+        // Czekamy chwilę, aż overlay zniknie, żeby nie zasłonił przycisku Zapisz
+        wait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(".cdk-overlay-pane")));
+
         // 6. Zapisz
         WebElement saveButton = dialog.findElement(By.xpath(".//button[contains(., 'Zapisz')]"));
-        saveButton.click();
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", saveButton);
 
-        // --- KLUCZOWA ZMIANA ---
-        // 7. Czekaj aż dialog zniknie (potwierdzenie, że request poszedł)
-        wait.until(ExpectedConditions.invisibilityOf(dialog));
-
-        // 8. Wymuś odświeżenie tabeli (kliknij Szukaj), jeśli Angular nie robi tego sam
+        // 7. Czekaj aż dialog zniknie (potwierdzenie sukcesu)
         try {
-            WebElement searchButton = driver.findElement(By.xpath("//button[contains(., 'Szukaj')]"));
-            if (searchButton.isDisplayed()) {
-                searchButton.click();
+            wait.until(ExpectedConditions.invisibilityOf(dialog));
+        } catch (TimeoutException e) {
+            // --- DEBUGOWANIE BŁĘDU ---
+            // Jeśli tu trafiliśmy, to znaczy, że okno się nie zamknęło.
+            // Pobieramy komunikaty błędów z formularza i drukujemy je w logach Jenkinsa.
+
+            System.err.println("!!! BŁĄD WALIDACJI FORMULARZA !!!");
+            List<WebElement> errors = dialog.findElements(By.cssSelector("mat-error, .mat-error, .text-danger"));
+            for (WebElement error : errors) {
+                System.err.println("Treść błędu widoczna na ekranie: " + error.getText());
             }
-        } catch (Exception e) {
-            // Ignoruj, jeśli nie ma przycisku szukaj, liczymy na auto-refresh
+
+            // Zrób screenshot (opcjonalnie, jeśli masz mechanizm w BaseTest)
+            // takeScreenshot("createEmployee_fail");
+
+            throw new RuntimeException("Dialog nie zamknął się po kliknięciu Zapisz. Prawdopodobnie błąd walidacji. Sprawdź logi powyżej.");
         }
 
-        // 9. Czekaj na pojawienie się nowego nazwiska w tabeli
-        // Używamy textToBePresentInElementLocated - to bardzo wydajny wait
+        // 8. Opcjonalne odświeżenie listy
+        try {
+            WebElement searchBtn = driver.findElement(By.xpath("//button[contains(., 'Szukaj')]"));
+            searchBtn.click();
+        } catch (Exception ignored) {}
+
+        // 9. Weryfikacja
         boolean isFound = wait.until(ExpectedConditions.textToBePresentInElementLocated(
                 By.cssSelector("table.mat-mdc-table"), uniqueLastName
         ));
