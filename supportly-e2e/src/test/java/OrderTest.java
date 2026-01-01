@@ -64,8 +64,8 @@ public class OrderTest extends TestDatabaseSetup {
     @Test
     @Order(3)
     public void filterByCreationDateRange() {
-        String dateFrom = "2025-12-27"; // Data widoczna na screenie
-        String dateTo = "2025-12-28";
+        String dateFrom = java.time.LocalDate.now().toString(); // Data widoczna na screenie
+        String dateTo = java.time.LocalDate.now().plusDays(1).toString();
 
         openPanel();
 

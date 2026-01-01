@@ -85,66 +85,122 @@ public class EmployeeTest extends TestDatabaseSetup {
         assertTrue(rows.getFirst().getText().contains(searchLastName), "Wiersz nie zawiera szukanego nazwiska!");
     }
 
+//    @Test
+//    public void createEmployee() throws InterruptedException {
+//
+//        // 1️⃣ Otwórz panel z pracownikami
+//        WebElement panelHeader = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("mat-expansion-panel-header")));
+//        panelHeader.click();
+//
+//        // 2️⃣ Kliknij przycisk "Dodaj nowego pracownika"
+//        WebElement addButton = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[contains(., 'Dodaj nowego pracownika')]")));
+//        addButton.click();
+//
+//        // 3️⃣ Poczekaj aż otworzy się dialog
+//        WebElement dialog = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("mat-dialog-container")));
+//
+//        // 4️⃣ Funkcja pomocnicza do bezpiecznego wpisywania tekstu
+//        BiConsumer<WebElement, String> safeType = (element, text) -> {
+//            wait.until(ExpectedConditions.elementToBeClickable(element));
+//            element.click();
+//            element.clear();
+//            element.sendKeys(text);
+//            wait.until(d -> element.getAttribute("value").equals(text));
+//        };
+//
+//        // 5️⃣ Wypełnij pola formularza
+//        safeType.accept(dialog.findElement(By.cssSelector("input[formControlName='firstName']")), "Justyna");
+//        safeType.accept(dialog.findElement(By.cssSelector("input[formControlName='lastName']")), "Nita");
+//        safeType.accept(dialog.findElement(By.cssSelector("input[formControlName='phoneNumber']")), "502254567");
+//
+//        // 6️⃣ Wybierz rolę
+//        WebElement roleSelect = dialog.findElement(By.cssSelector("mat-select[formcontrolname='role']"));
+//        wait.until(ExpectedConditions.elementToBeClickable(roleSelect)).click();
+//
+//        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div.cdk-overlay-pane")));
+//        List<WebElement> options = wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.cssSelector("mat-option .mdc-list-item__primary-text")));
+//        for (WebElement opt : options) {
+//            if (opt.getText().trim().equals("ADMIN")) {
+//                ((JavascriptExecutor) driver).executeScript("arguments[0].click();", opt);
+//                break;
+//            }
+//        }
+//
+//        // 7️⃣ Kliknij przycisk "Zapisz" w dialogu
+//        WebElement saveButton = dialog.findElement(By.cssSelector("button.mat-mdc-unelevated-button.mat-primary"));
+//        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", saveButton);
+//
+//        // 8️⃣ Poczekaj, aż tabela pracowników się pojawi
+//        FluentWait<RemoteWebDriver> fluentWait = new FluentWait<>(driver).withTimeout(Duration.ofSeconds(60)).pollingEvery(Duration.ofSeconds(1)).ignoring(StaleElementReferenceException.class).ignoring(NoSuchElementException.class);
+//
+//        boolean found = fluentWait.until(d -> {
+//            List<WebElement> rows = d.findElements(By.cssSelector("table.mat-mdc-table tr[mat-row]"));
+//            if (rows.isEmpty()) return false;
+//
+//            for (WebElement row : rows) {
+//                // tylko text, bez sprawdzania isDisplayed (dla wirtualizowanej tabeli)
+//                if (row.getText().contains("Nita")) return true;
+//            }
+//            return false;
+//        });
+//
+//        assertTrue(found, "Nie znaleziono nowego pracownika 'Nita' w tabeli!");
+//    }
+
     @Test
-    public void createEmployee() throws InterruptedException {
+    public void createEmployee() {
+        // Generujemy unikalne nazwisko, żeby mieć pewność, że szukamy TEGO konkretnego pracownika
+        String uniqueLastName = "Nita_" + System.currentTimeMillis();
 
-        // 1️⃣ Otwórz panel z pracownikami
+        // 1. Otwórz panel
         WebElement panelHeader = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("mat-expansion-panel-header")));
-        panelHeader.click();
+        // Sprawdź czy nie jest już otwarty
+        if (!"true".equals(panelHeader.getAttribute("aria-expanded"))) {
+            panelHeader.click();
+        }
 
-        // 2️⃣ Kliknij przycisk "Dodaj nowego pracownika"
+        // 2. Kliknij "Dodaj"
         WebElement addButton = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[contains(., 'Dodaj nowego pracownika')]")));
         addButton.click();
 
-        // 3️⃣ Poczekaj aż otworzy się dialog
-        WebElement dialog = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("mat-dialog-container")));
+        // 3. Czekaj na Dialog
+        WebElement dialog = wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("mat-dialog-container")));
 
-        // 4️⃣ Funkcja pomocnicza do bezpiecznego wpisywania tekstu
-        BiConsumer<WebElement, String> safeType = (element, text) -> {
-            wait.until(ExpectedConditions.elementToBeClickable(element));
-            element.click();
-            element.clear();
-            element.sendKeys(text);
-            wait.until(d -> element.getAttribute("value").equals(text));
-        };
+        // 4. Wypełnij Pola
+        dialog.findElement(By.cssSelector("input[formControlName='firstName']")).sendKeys("Justyna");
+        dialog.findElement(By.cssSelector("input[formControlName='lastName']")).sendKeys(uniqueLastName); // Unikalne nazwisko
+        dialog.findElement(By.cssSelector("input[formControlName='phoneNumber']")).sendKeys("502254567");
 
-        // 5️⃣ Wypełnij pola formularza
-        safeType.accept(dialog.findElement(By.cssSelector("input[formControlName='firstName']")), "Justyna");
-        safeType.accept(dialog.findElement(By.cssSelector("input[formControlName='lastName']")), "Nita");
-        safeType.accept(dialog.findElement(By.cssSelector("input[formControlName='phoneNumber']")), "502254567");
+        // 5. Rola (Select)
+        dialog.findElement(By.cssSelector("mat-select[formcontrolname='role']")).click();
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".cdk-overlay-pane")));
+        driver.findElement(By.xpath("//mat-option[contains(., 'ADMIN')]")).click();
 
-        // 6️⃣ Wybierz rolę
-        WebElement roleSelect = dialog.findElement(By.cssSelector("mat-select[formcontrolname='role']"));
-        wait.until(ExpectedConditions.elementToBeClickable(roleSelect)).click();
+        // 6. Zapisz
+        WebElement saveButton = dialog.findElement(By.xpath(".//button[contains(., 'Zapisz')]"));
+        saveButton.click();
 
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("div.cdk-overlay-pane")));
-        List<WebElement> options = wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.cssSelector("mat-option .mdc-list-item__primary-text")));
-        for (WebElement opt : options) {
-            if (opt.getText().trim().equals("ADMIN")) {
-                ((JavascriptExecutor) driver).executeScript("arguments[0].click();", opt);
-                break;
+        // --- KLUCZOWA ZMIANA ---
+        // 7. Czekaj aż dialog zniknie (potwierdzenie, że request poszedł)
+        wait.until(ExpectedConditions.invisibilityOf(dialog));
+
+        // 8. Wymuś odświeżenie tabeli (kliknij Szukaj), jeśli Angular nie robi tego sam
+        try {
+            WebElement searchButton = driver.findElement(By.xpath("//button[contains(., 'Szukaj')]"));
+            if (searchButton.isDisplayed()) {
+                searchButton.click();
             }
+        } catch (Exception e) {
+            // Ignoruj, jeśli nie ma przycisku szukaj, liczymy na auto-refresh
         }
 
-        // 7️⃣ Kliknij przycisk "Zapisz" w dialogu
-        WebElement saveButton = dialog.findElement(By.cssSelector("button.mat-mdc-unelevated-button.mat-primary"));
-        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", saveButton);
+        // 9. Czekaj na pojawienie się nowego nazwiska w tabeli
+        // Używamy textToBePresentInElementLocated - to bardzo wydajny wait
+        boolean isFound = wait.until(ExpectedConditions.textToBePresentInElementLocated(
+                By.cssSelector("table.mat-mdc-table"), uniqueLastName
+        ));
 
-        // 8️⃣ Poczekaj, aż tabela pracowników się pojawi
-        FluentWait<RemoteWebDriver> fluentWait = new FluentWait<>(driver).withTimeout(Duration.ofSeconds(60)).pollingEvery(Duration.ofSeconds(1)).ignoring(StaleElementReferenceException.class).ignoring(NoSuchElementException.class);
-
-        boolean found = fluentWait.until(d -> {
-            List<WebElement> rows = d.findElements(By.cssSelector("table.mat-mdc-table tr[mat-row]"));
-            if (rows.isEmpty()) return false;
-
-            for (WebElement row : rows) {
-                // tylko text, bez sprawdzania isDisplayed (dla wirtualizowanej tabeli)
-                if (row.getText().contains("Nita")) return true;
-            }
-            return false;
-        });
-
-        assertTrue(found, "Nie znaleziono nowego pracownika 'Nita' w tabeli!");
+        assertTrue(isFound, "Nie znaleziono pracownika: " + uniqueLastName);
     }
 
     @Test
