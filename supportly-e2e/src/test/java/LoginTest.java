@@ -12,7 +12,7 @@ public class LoginTest extends TestDatabaseSetup {
 
     @BeforeEach
     void setUp() throws Exception {
-        initDriver(false); // false = normalny tryb (headless = true jeśli chcesz w tle)
+        initDriver(true); // false = normalny tryb (headless = true jeśli chcesz w tle)
         openApp("/login"); // otworzy http://localhost:4200/login jeśli BASE_URL= http://localhost:4200
     }
 

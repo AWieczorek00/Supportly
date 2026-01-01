@@ -19,7 +19,7 @@ class HomePageTest extends BaseE2ETest {
 
     @BeforeEach
     void setup() throws Exception {
-        initDriver(false); // true = headless, false = normalny tryb
+        initDriver(true); // true = headless, false = normalny tryb
     }
 
     @AfterEach

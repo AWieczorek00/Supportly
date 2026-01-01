@@ -20,7 +20,7 @@ public class EmployeeTest extends TestDatabaseSetup {
 
     @BeforeEach
     void setup() throws Exception {
-        initDriver(false);
+        initDriver(true);
         loginAs("super.admin@gmail.com", "123456");
         Thread.sleep(500); // czekaj 0.5 sekundy
         wait = new WebDriverWait(driver, Duration.ofSeconds(15));
