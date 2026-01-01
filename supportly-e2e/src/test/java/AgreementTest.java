@@ -72,6 +72,35 @@ public class AgreementTest extends TestDatabaseSetup {
         }
     }
 
+    @Test
+    public void testSearchAgreement() {
+        String companyName = "Tech Solutions Sp. z o.o.";
+
+        // Otwarcie panelu (użyj nowej, bezpiecznej metody openPanel() jeśli ją masz)
+        openPanel();
+
+        WebElement nameInput = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("input[formcontrolname='name']")));
+        nameInput.clear();
+        nameInput.sendKeys(companyName);
+
+        WebElement searchButton = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("button[type='submit']")));
+        searchButton.click();
+
+        // --- FIX STALE ELEMENT ---
+        // Zamiast szukać konkretnego wiersza (który znika i pojawia się przy renderowaniu),
+        // czekamy, aż kontener tabeli będzie stabilnie zawierał tekst.
+
+        // 1. Czekamy na widoczność tabeli
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("table.mat-mdc-table")));
+
+        // 2. Czekamy na obecność tekstu w tabeli (Selenium samo ponawia próbę przy StaleElement)
+        boolean isFound = wait.until(ExpectedConditions.textToBePresentInElementLocated(
+                By.cssSelector("table.mat-mdc-table"), companyName
+        ));
+
+        assertTrue(isFound, "Nie znaleziono firmy " + companyName + " w tabeli!");
+    }
+
 
 //    @Test
 //    void shouldDisplayAgreementInWholeTable() throws InterruptedException {

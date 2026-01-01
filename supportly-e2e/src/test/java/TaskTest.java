@@ -150,7 +150,8 @@ public class TaskTest extends TestDatabaseSetup {
 
     // --- Metody Pomocnicze ---
 
-    private void openPanel() {
+    @Override
+    public void openPanel() {
         WebElement panelHeader = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("mat-expansion-panel-header")));
         // Sprawdzamy czy nie jest już otwarty (opcjonalnie)
         // String expanded = panelHeader.getAttribute("aria-expanded");

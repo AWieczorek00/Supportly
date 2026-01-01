@@ -191,4 +191,12 @@ public class BaseE2ETest {
         input.clear();
         input.sendKeys(value);
     }
+
+    protected void openPanel() {
+        WebElement panelHeader = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("mat-expansion-panel-header")));
+        // Sprawdzamy czy nie jest już otwarty (opcjonalnie)
+        // String expanded = panelHeader.getAttribute("aria-expanded");
+        // if ("false".equals(expanded)) { panelHeader.click(); }
+        panelHeader.click();
+    }
 }

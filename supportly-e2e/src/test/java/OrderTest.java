@@ -122,7 +122,8 @@ public class OrderTest extends TestDatabaseSetup {
         assertTrue(emailInput.getAttribute("value").isEmpty());
     }
 
-    private void openPanel() {
+    @Override
+    public void openPanel() {
         WebElement panelHeader = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("mat-expansion-panel-header")));
         if (panelHeader.getAttribute("aria-expanded") == null || "false".equals(panelHeader.getAttribute("aria-expanded"))) {
             panelHeader.click();
