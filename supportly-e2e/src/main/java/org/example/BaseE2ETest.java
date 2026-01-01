@@ -11,9 +11,11 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.io.File;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.time.Duration;
+import java.util.UUID;
 
 public class BaseE2ETest {
 
@@ -49,30 +51,55 @@ public class BaseE2ETest {
 //        wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 //    }
 
-    protected void initDriver(boolean headless) throws Exception {
-        // Konfiguracja EdgeOptions
+//    protected void initDriver(boolean headless) throws Exception {
+//        // Konfiguracja EdgeOptions
+//
+//        EdgeOptions options = new EdgeOptions();
+//        if (headless) {
+//            options.addArguments("--headless=new");
+//            options.addArguments("--disable-gpu");
+//            options.addArguments("--no-sandbox");
+//            options.addArguments("--disable-dev-shm-usage");
+//            options.addArguments("--window-size=1920,1080");
+//        }
+//
+//        // Tworzymy unikalny katalog profilu dla każdej sesji
+//        tempUserDataDir = Files.createTempDirectory("edge-profile-").toFile();
+//        tempUserDataDir.deleteOnExit();
+//        options.addArguments("--user-data-dir=" + tempUserDataDir.getAbsolutePath());
+//
+//        // Adres hosta, na którym działa EdgeDriver (zmień na swój IP / hostname)
+//        String remoteUrl = "http://192.168.0.81:9515";
+//
+//        // Tworzymy RemoteWebDriver zamiast lokalnego EdgeDriver
+//
+//        driver = new RemoteWebDriver(new URL(remoteUrl), options);
+//        wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+//    }
 
+    protected void initDriver(boolean headless) throws MalformedURLException {
         EdgeOptions options = new EdgeOptions();
+
+        options.addArguments("--remote-allow-origins=*");
+        options.addArguments("--disable-search-engine-choice-screen");
+        options.addArguments("--no-sandbox");
+        options.addArguments("--disable-dev-shm-usage");
+        options.addArguments("--disable-notifications");
+
         if (headless) {
             options.addArguments("--headless=new");
-            options.addArguments("--disable-gpu");
-            options.addArguments("--no-sandbox");
-            options.addArguments("--disable-dev-shm-usage");
             options.addArguments("--window-size=1920,1080");
+            options.addArguments("--disable-gpu");
+        } else {
+            options.addArguments("--start-maximized");
         }
 
-        // Tworzymy unikalny katalog profilu dla każdej sesji
-        tempUserDataDir = Files.createTempDirectory("edge-profile-").toFile();
-        tempUserDataDir.deleteOnExit();
-        options.addArguments("--user-data-dir=" + tempUserDataDir.getAbsolutePath());
-
-        // Adres hosta, na którym działa EdgeDriver (zmień na swój IP / hostname)
         String remoteUrl = "http://192.168.0.81:9515";
 
-        // Tworzymy RemoteWebDriver zamiast lokalnego EdgeDriver
-
         driver = new RemoteWebDriver(new URL(remoteUrl), options);
-        wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(60));
+
+        wait = new WebDriverWait(driver, Duration.ofSeconds(15));
     }
 
     protected void quitDriver() {
