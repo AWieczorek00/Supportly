@@ -86,6 +86,9 @@ public class BaseE2ETest {
         options.addArguments("--disable-dev-shm-usage");
         options.addArguments("--disable-notifications");
 
+        String uniqueProfilePath = "/tmp/edge-profile-" + UUID.randomUUID().toString();
+        options.addArguments("--user-data-dir=" + uniqueProfilePath);
+
         if (headless) {
             options.addArguments("--headless=new");
             options.addArguments("--window-size=1920,1080");
