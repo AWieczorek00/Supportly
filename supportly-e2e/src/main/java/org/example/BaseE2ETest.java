@@ -80,15 +80,18 @@ public class BaseE2ETest {
     protected void initDriver(boolean headless) throws MalformedURLException {
         EdgeOptions options = new EdgeOptions();
 
+        // --- Stabilizacja połączenia i środowiska ---
         options.addArguments("--remote-allow-origins=*");
         options.addArguments("--disable-search-engine-choice-screen");
         options.addArguments("--no-sandbox");
         options.addArguments("--disable-dev-shm-usage");
         options.addArguments("--disable-notifications");
 
-        String uniqueProfilePath = "/tmp/edge-profile-" + UUID.randomUUID().toString();
-        options.addArguments("--user-data-dir=" + uniqueProfilePath);
+        // --- USUNIĘTO RĘCZNE ZARZĄDZANIE PROFILEM ---
+        // Selenium utworzy automatycznie izolowany profil tymczasowy.
+        // To naprawia błąd "directory is already in use".
 
+        // --- Konfiguracja trybu graficznego ---
         if (headless) {
             options.addArguments("--headless=new");
             options.addArguments("--window-size=1920,1080");
@@ -100,9 +103,15 @@ public class BaseE2ETest {
         String remoteUrl = "http://192.168.0.81:9515";
 
         driver = new RemoteWebDriver(new URL(remoteUrl), options);
-        driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(60));
 
-        wait = new WebDriverWait(driver, Duration.ofSeconds(15));
+        // --- Zwiększone timeouty dla powolnego Jenkinsa ---
+        // Czas na załadowanie całej strony (HTML)
+        driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(120));
+        // Czas na wykonanie asynchronicznych skryptów JS
+        driver.manage().timeouts().scriptTimeout(Duration.ofSeconds(60));
+
+        // Explicit Wait - zwiększony do 20s, bo widziałem w logach błędy timeoutu po 15s
+        wait = new WebDriverWait(driver, Duration.ofSeconds(20));
     }
 
     protected void quitDriver() {
