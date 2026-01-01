@@ -33,6 +33,7 @@ import {Priority} from '../../enums/Priority';
 import {MatSelect} from '@angular/material/select';
 import {Order} from '../Order';
 import {HttpOrderService} from '../service/http-order.service';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-order-add',
@@ -67,7 +68,7 @@ import {HttpOrderService} from '../service/http-order.service';
 })
 export class OrderAddComponent implements OnInit {
 
-  constructor(private dialog: MatDialog, private service: HttpClientService, private cd: ChangeDetectorRef, private orderService: HttpOrderService) {
+  constructor(private dialog: MatDialog, private service: HttpClientService, private cd: ChangeDetectorRef, private orderService: HttpOrderService,private router: Router) {
   }
 
   client: Client | undefined;
@@ -250,6 +251,7 @@ export class OrderAddComponent implements OnInit {
       this.orderService.add(order).subscribe({
         next: (res) => {
           console.log('Zlecenie dodane:', res);
+          this.router.navigate(['/order/list']);
           this.form.reset();
         },
         error: (err) => {

@@ -1,17 +1,18 @@
-import org.example.BaseE2ETest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class LoginTest extends TestDatabaseSetup  {
+public class LoginTest extends TestDatabaseSetup {
 
     @BeforeEach
     void setUp() throws Exception {
-        initDriver(true); // false = normalny tryb (headless = true jeśli chcesz w tle)
+        initDriver(false); // false = normalny tryb (headless = true jeśli chcesz w tle)
         openApp("/login"); // otworzy http://localhost:4200/login jeśli BASE_URL= http://localhost:4200
     }
 
@@ -22,12 +23,57 @@ public class LoginTest extends TestDatabaseSetup  {
 
     @Test
     void shouldLoginWithCorrectCredentials() {
-        driver.findElement(By.xpath("//input[@formcontrolname='email']")).sendKeys("super.admin@gmail.com");
-        driver.findElement(By.xpath("//input[@formcontrolname='password']")).sendKeys("123456");
-        click(By.cssSelector("button[type='submit']"));
+        WebElement emailInput = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("input[formcontrolname='email']")));
+        emailInput.clear();
+        emailInput.sendKeys("super.admin@gmail.com");
 
-        // sprawdzamy czy przekierowało np. do dashboard
-        assertTrue(driver.getCurrentUrl().contains(""));
+        WebElement passwordInput = driver.findElement(By.cssSelector("input[formcontrolname='password']"));
+        passwordInput.clear();
+        passwordInput.sendKeys("123456");
+
+        WebElement loginBtn = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("button[type='submit']")));
+        loginBtn.click();
+
+        boolean isLoginSuccessful = wait.until(ExpectedConditions.or(ExpectedConditions.urlContains("dashboard"), ExpectedConditions.visibilityOfElementLocated(By.tagName("app-navbar"))));
+
+        assertTrue(isLoginSuccessful);
+    }
+
+    @Test
+    void shouldDisplayLoginViewCorrectly() {
+        WebElement welcomeHeader = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[contains(text(), 'Witaj')]")));
+        assertTrue(welcomeHeader.isDisplayed());
+
+        WebElement emailInput = driver.findElement(By.cssSelector("input[formcontrolname='email']"));
+        assertTrue(emailInput.isDisplayed());
+
+        WebElement passwordInput = driver.findElement(By.cssSelector("input[formcontrolname='password']"));
+        assertTrue(passwordInput.isDisplayed());
+        assertEquals("password", passwordInput.getAttribute("type"));
+
+        WebElement loginButton = driver.findElement(By.cssSelector("button[type='submit']"));
+        assertTrue(loginButton.isDisplayed());
+        assertEquals("Zaloguj", loginButton.getText().trim());
+    }
+
+    @Test
+    void shouldHighlightFieldsAsInvalidOnEmptySubmit() {
+        WebElement loginBtn = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("button[type='submit']")));
+        loginBtn.click();
+
+        WebElement emailInput = driver.findElement(By.cssSelector("input[formcontrolname='email']"));
+        emailInput.click();
+
+        WebElement passwordInput = driver.findElement(By.cssSelector("input[formcontrolname='password']"));
+        passwordInput.click();
+
+        loginBtn.click();
+
+        boolean isEmailInvalid = wait.until(ExpectedConditions.attributeContains(emailInput, "class", "ng-invalid"));
+        boolean isPasswordInvalid = wait.until(ExpectedConditions.attributeContains(passwordInput, "class", "ng-invalid"));
+
+        assertTrue(isEmailInvalid);
+        assertTrue(isPasswordInvalid);
     }
 
 //    @Test

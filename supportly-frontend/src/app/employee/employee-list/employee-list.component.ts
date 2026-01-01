@@ -67,12 +67,7 @@ export class EmployeeListComponent implements AfterViewInit, OnInit {
   employeeTable = new MatTableDataSource<Employee>()
 
   ngAfterViewInit() {
-    this.service.search({} as EmployeeCriteria).subscribe({
-      next: (employees) => {
-        this.employeeTable.data = employees;
-      },
-      error: (err) => console.error('Błąd przy pobieraniu danych:', err)
-    });
+    this.getEmployees();
   }
 
   ngOnInit(): void {
@@ -121,6 +116,7 @@ export class EmployeeListComponent implements AfterViewInit, OnInit {
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         console.log('Dane z formularza:', result);
+        this.getEmployees();
       }
     });
   }
@@ -136,5 +132,12 @@ export class EmployeeListComponent implements AfterViewInit, OnInit {
     });
   }
 
-
+  getEmployees() :void {
+    this.service.search({} as EmployeeCriteria).subscribe({
+      next: (employees) => {
+        this.employeeTable.data = employees;
+      },
+      error: (err) => console.error('Błąd przy pobieraniu danych:', err)
+    });
+  }
 }
