@@ -109,46 +109,33 @@ public class BaseE2ETest {
 //        wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 //    }
     protected void initDriver(boolean headless) throws Exception {
-
-        // 1. Konfiguracja ChromeOptions
+        // 1. ZAWSZE tworzymy ChromeOptions (żadnego Edge!)
         ChromeOptions options = new ChromeOptions();
 
-        // -- Fix dla błędu Connection Refused / 403 --
+        // 2. Flagi krytyczne dla Linuxa (muszą być ZAWSZE, nie tylko w headless)
         options.addArguments("--remote-allow-origins=*");
+        options.addArguments("--no-sandbox");            // Bez tego root nie odpali Chrome
+        options.addArguments("--disable-dev-shm-usage"); // Bez tego Chrome się wywali (crash)
+        options.addArguments("--disable-gpu");
 
-        // -- Wyłączenie menedżera haseł i "Leak Detection" --
+        // 3. Wyłączenie zbędnych pop-upów
         Map<String, Object> prefs = new HashMap<>();
         prefs.put("credentials_enable_service", false);
         prefs.put("profile.password_manager_enabled", false);
         prefs.put("profile.password_manager_leak_detection", false);
         options.setExperimentalOption("prefs", prefs);
 
-        // 2. Obsługa trybu Headless
+        // 4. Konfiguracja trybu widoczności
         if (headless) {
             options.addArguments("--headless=new");
-            options.addArguments("--disable-gpu");
-            options.addArguments("--no-sandbox");        // Bardzo ważne na Linuxie jako root
-            options.addArguments("--disable-dev-shm-usage"); // Zapobiega błędom pamięci
             options.addArguments("--window-size=1920,1080");
         } else {
             options.addArguments("--start-maximized");
         }
 
-        // --- USUNIĘTO ---
-        // Ten fragment powodował błąd "Chrome instance exited" przy RemoteWebDriver.
-        // Chrome sam stworzy sobie profil tymczasowy na serwerze.
-    /*
-    tempUserDataDir = Files.createTempDirectory("chrome-profile-").toFile();
-    tempUserDataDir.deleteOnExit();
-    options.addArguments("--user-data-dir=" + tempUserDataDir.getAbsolutePath());
-    */
-        // ----------------
-
-        // 4. Adres hosta
-        String remoteUrl = "http://192.168.0.81:9515";
-
-        // 5. Tworzymy RemoteWebDriver
-        driver = new RemoteWebDriver(new URL(remoteUrl), options);
+        // 5. Połączenie z serwerem
+        // UWAGA: Nie ustawiamy tutaj "--user-data-dir"! Chrome sam to ogarnie.
+        driver = new RemoteWebDriver(new URL("http://192.168.0.81:9515"), options);
 
         wait = new WebDriverWait(driver, Duration.ofSeconds(10));
     }
