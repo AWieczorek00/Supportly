@@ -2,9 +2,11 @@ package org.example;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.PageLoadStrategy;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.remote.http.ClientConfig;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -137,9 +139,25 @@ public class BaseE2ETest {
         tempUserDataDir.deleteOnExit();
         options.addArguments("--user-data-dir=" + tempUserDataDir.getAbsolutePath());
 
-        // 5. Połączenie z serwerem
-        // UWAGA: Nie ustawiamy tutaj "--user-data-dir"! Chrome sam to ogarnie.
-        driver = new RemoteWebDriver(new URL("http://192.168.0.81:9515"), options);
+        File userDataDir = Files.createTempDirectory("chrome-profile-").toFile();
+        userDataDir.deleteOnExit();
+        options.addArguments("--user-data-dir=" + userDataDir.getAbsolutePath());
+
+        options.setPageLoadStrategy(PageLoadStrategy.EAGER);
+
+        // --- FIX 3: Timeouty po stronie klienta HTTP ---
+        // Czasami Java zrywa połączenie szybciej niż przeglądarka odpowie.
+        // W Selenium 4.x konfiguruje się to tak:
+        ClientConfig config = ClientConfig.defaultConfig()
+                .readTimeout(Duration.ofMinutes(2))
+                .connectionTimeout(Duration.ofSeconds(10));
+
+        // Budujemy driver z konfiguracją klienta
+        driver = (RemoteWebDriver) RemoteWebDriver.builder()
+                .oneOf(options)
+                .address(new URL("http://192.168.0.81:9515"))
+                .config(config)
+                .build();
 
         wait = new WebDriverWait(driver, Duration.ofSeconds(10));
     }
