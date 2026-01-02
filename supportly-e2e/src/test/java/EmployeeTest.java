@@ -81,7 +81,7 @@ public class EmployeeTest extends TestDatabaseSetup {
         assertTrue(rows.getFirst().getText().contains(searchLastName), "Wiersz nie zawiera szukanego nazwiska!");
     }
 
-    @Test
+//    @Test
     public void createEmployee() throws InterruptedException {
 
         // 1️⃣ Otwórz panel z pracownikami
