@@ -133,8 +133,9 @@ public class BaseE2ETest {
             options.addArguments("--start-maximized");
         }
 
-        String uniqueProfile = "/tmp/chrome-profile-" + java.util.UUID.randomUUID();
-        options.addArguments("--user-data-dir=" + uniqueProfile);
+        tempUserDataDir = Files.createTempDirectory("edge-profile-").toFile();
+        tempUserDataDir.deleteOnExit();
+        options.addArguments("--user-data-dir=" + tempUserDataDir.getAbsolutePath());
 
         // 5. Połączenie z serwerem
         // UWAGA: Nie ustawiamy tutaj "--user-data-dir"! Chrome sam to ogarnie.
