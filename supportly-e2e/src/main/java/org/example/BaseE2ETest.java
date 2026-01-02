@@ -119,6 +119,7 @@ public class BaseE2ETest {
         // 2. Tworzymy unikalną ścieżkę: /tmp/chrome_NazwaKlasy_LosowyID
         // Dodajemy UUID, żeby przy kolejnym uruchomieniu Jenkinsa nie było konfliktu "Directory in use"
         String uniqueDirName = "chrome_" + className + "_" + java.util.UUID.randomUUID().toString();
+        System.out.println( "DEBUG: Tworzymy katalog tymczasowy: " + uniqueDirName);
 
         // Tworzenie katalogu w systemowym folderze tymczasowym (działa na Linux i Windows)
         File tempUserDataDir = Files.createTempDirectory(uniqueDirName).toFile();
