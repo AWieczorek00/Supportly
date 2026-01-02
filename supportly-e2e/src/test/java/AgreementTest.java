@@ -1,19 +1,15 @@
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.openqa.selenium.By;
-import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
 import java.util.List;
-import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class AgreementTest extends TestDatabaseSetup {
 
     @BeforeEach
@@ -73,6 +69,7 @@ public class AgreementTest extends TestDatabaseSetup {
 //    }
 
     @Test
+    @Order(1)
     public void testSearchAgreement() {
         String companyName = "Tech Solutions Sp. z o.o.";
 
@@ -105,7 +102,8 @@ public class AgreementTest extends TestDatabaseSetup {
 //    @Test
 //    void shouldDisplayAgreementInWholeTable() throws InterruptedException {
 //        // Czekamy aż tabela pojawi się w DOM
-////        wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("table.mat-table")));
+
+    /// /        wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("table.mat-table")));
 //
 //        // Pobieramy wszystkie wiersze w tabeli
 //        List<WebElement> rows = driver.findElements(By.cssSelector("table.mat-mdc-table tr[mat-row]"));
@@ -245,23 +243,24 @@ public class AgreementTest extends TestDatabaseSetup {
 //
 //
 //    }
+    @Test
+    @Order(2)
+    void shouldDisplayAgreementInWholeTable() {
+        String companyName = "Tech Solutions Sp. z o.o.";
 
-@Test
-void shouldDisplayAgreementInWholeTable() {
-    String companyName = "Tech Solutions Sp. z o.o.";
+        // ZAMIAST pętli po wierszach i sleepów:
+        // Czekamy, aż w DOM pojawi się wiersz (tr), który zawiera szukany tekst.
+        // To jedno polecenie załatwia czekanie na tabelę ORAZ szukanie tekstu.
+        boolean isRowVisible = wait.until(ExpectedConditions.and(
+                ExpectedConditions.visibilityOfElementLocated(By.cssSelector("table.mat-mdc-table")),
+                ExpectedConditions.visibilityOfElementLocated(By.xpath("//tr[contains(., '" + companyName + "')]"))
+        ));
 
-    // ZAMIAST pętli po wierszach i sleepów:
-    // Czekamy, aż w DOM pojawi się wiersz (tr), który zawiera szukany tekst.
-    // To jedno polecenie załatwia czekanie na tabelę ORAZ szukanie tekstu.
-    boolean isRowVisible = wait.until(ExpectedConditions.and(
-            ExpectedConditions.visibilityOfElementLocated(By.cssSelector("table.mat-mdc-table")),
-            ExpectedConditions.visibilityOfElementLocated(By.xpath("//tr[contains(., '" + companyName + "')]"))
-    ));
-
-    assertTrue(isRowVisible, "Nie znaleziono firmy '" + companyName + "' w tabeli!");
-}
+        assertTrue(isRowVisible, "Nie znaleziono firmy '" + companyName + "' w tabeli!");
+    }
 
     @Test
+    @Order(3)
     void routToAdd() {
         WebElement panelHeader = wait.until(
                 ExpectedConditions.elementToBeClickable(By.cssSelector("mat-expansion-panel-header"))
@@ -280,6 +279,7 @@ void shouldDisplayAgreementInWholeTable() {
     }
 
     @Test
+    @Order(4)
     void createAgreement() {
         // Zmienna dla spójności danych (wpisujemy to samo, co potem sprawdzamy)
         String newClientName = "GreenData Sp. z o.o.";
@@ -369,6 +369,7 @@ void shouldDisplayAgreementInWholeTable() {
 
 
     @Test
+    @Order(5)
     void shouldShowNoResultsForNonExistentCompany() {
         // 1. Otwórz panel wyszukiwania
         WebElement panelHeader = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("mat-expansion-panel-header")));
