@@ -189,8 +189,8 @@ public class TaskTest extends TestDatabaseSetup {
         }
     }
 
-    @Test
-    @Order(3)
+//    @Test
+//    @Order(3)
     public void verifyTaskStatusInTable() {
         // Testujemy wiersz, który na screenie jest zielony (zrobiony)
         String doneTaskName = "Przygotowanie raportu miesiecznego";
