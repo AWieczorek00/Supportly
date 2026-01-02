@@ -133,7 +133,7 @@ public class BaseE2ETest {
             options.addArguments("--start-maximized");
         }
 
-        tempUserDataDir = Files.createTempDirectory("edge-profile-").toFile();
+        tempUserDataDir = Files.createTempDirectory("chrome-profile-").toFile();
         tempUserDataDir.deleteOnExit();
         options.addArguments("--user-data-dir=" + tempUserDataDir.getAbsolutePath());
 
