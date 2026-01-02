@@ -7,7 +7,7 @@ import java.time.LocalDate;
 public class TestDatabaseSetup extends BaseE2ETest {
 
 //    protected static  String URL = System.getenv().getOrDefault("BASE_URL_DATABASE", "jdbc:sqlserver://192.168.0.81:1110;databaseName=supportly;encrypt=false");
-    protected static  String URL = System.getenv().getOrDefault("BASE_URL_DATABASE", "jdbc:postgresql://localhost:5432/postgres");
+    protected static  String URL = System.getenv().getOrDefault("BASE_URL_DATABASE", "jdbc:postgresql://192.168.0.228:5432/postgres");
     protected static final String PROFILE = System.getenv().getOrDefault("PROFILE","postgres"); // "postgres", "mssql", "oracle"
     protected static final String BASE_URL = System.getenv().getOrDefault("BASE_URL", "http://localhost:4200");
 
