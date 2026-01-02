@@ -111,23 +111,27 @@ public class BaseE2ETest {
 //        wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 //    }
     protected void initDriver(boolean headless) throws Exception {
-        // 1. ZAWSZE tworzymy ChromeOptions (żadnego Edge!)
         ChromeOptions options = new ChromeOptions();
 
-        // 2. Flagi krytyczne dla Linuxa (muszą być ZAWSZE, nie tylko w headless)
+        // 1. Pobieramy nazwę klasy, która aktualnie uruchamia test (np. "TaskTest")
+        String className = this.getClass().getSimpleName();
+
+        // 2. Tworzymy unikalną ścieżkę: /tmp/chrome_NazwaKlasy_LosowyID
+        // Dodajemy UUID, żeby przy kolejnym uruchomieniu Jenkinsa nie było konfliktu "Directory in use"
+        String uniqueDirName = "chrome_" + className + "_" + java.util.UUID.randomUUID().toString();
+
+        // Tworzenie katalogu w systemowym folderze tymczasowym (działa na Linux i Windows)
+        File tempUserDataDir = Files.createTempDirectory(uniqueDirName).toFile();
+
+        // Ustawienie flagi dla Chrome
+        options.addArguments("--user-data-dir=" + tempUserDataDir.getAbsolutePath());
+
+        // --- Reszta Twoich ustawień (bez zmian) ---
         options.addArguments("--remote-allow-origins=*");
-        options.addArguments("--no-sandbox");            // Bez tego root nie odpali Chrome
-        options.addArguments("--disable-dev-shm-usage"); // Bez tego Chrome się wywali (crash)
+        options.addArguments("--no-sandbox");
+        options.addArguments("--disable-dev-shm-usage");
         options.addArguments("--disable-gpu");
 
-        // 3. Wyłączenie zbędnych pop-upów
-        Map<String, Object> prefs = new HashMap<>();
-        prefs.put("credentials_enable_service", false);
-        prefs.put("profile.password_manager_enabled", false);
-        prefs.put("profile.password_manager_leak_detection", false);
-        options.setExperimentalOption("prefs", prefs);
-
-        // 4. Konfiguracja trybu widoczności
         if (headless) {
             options.addArguments("--headless=new");
             options.addArguments("--window-size=1920,1080");
@@ -135,24 +139,15 @@ public class BaseE2ETest {
             options.addArguments("--start-maximized");
         }
 
-        tempUserDataDir = Files.createTempDirectory("chrome-profile-").toFile();
-        tempUserDataDir.deleteOnExit();
-        options.addArguments("--user-data-dir=" + tempUserDataDir.getAbsolutePath());
-
-        File userDataDir = Files.createTempDirectory("chrome-profile-").toFile();
-        userDataDir.deleteOnExit();
-        options.addArguments("--user-data-dir=" + userDataDir.getAbsolutePath());
-
+        // Strategia ładowania strony (pomaga na TimeoutException)
         options.setPageLoadStrategy(PageLoadStrategy.EAGER);
 
-        // --- FIX 3: Timeouty po stronie klienta HTTP ---
-        // Czasami Java zrywa połączenie szybciej niż przeglądarka odpowie.
-        // W Selenium 4.x konfiguruje się to tak:
+        // Konfiguracja Timeoutów klienta
         ClientConfig config = ClientConfig.defaultConfig()
                 .readTimeout(Duration.ofMinutes(2))
                 .connectionTimeout(Duration.ofSeconds(10));
 
-        // Budujemy driver z konfiguracją klienta
+        // Tworzenie Drivera (z rzutowaniem, o którym mówiliśmy wcześniej)
         driver = (RemoteWebDriver) RemoteWebDriver.builder()
                 .oneOf(options)
                 .address(new URL("http://192.168.0.81:9515"))
@@ -160,6 +155,9 @@ public class BaseE2ETest {
                 .build();
 
         wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+
+        // Opcjonalnie: Wypisz w logach, gdzie utworzono profil (dla łatwiejszego debugowania)
+        System.out.println("DEBUG: Utworzono profil przeglądarki dla klasy " + className + " w: " + tempUserDataDir.getAbsolutePath());
     }
 
     protected void quitDriver() {
