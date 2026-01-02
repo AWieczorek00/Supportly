@@ -133,6 +133,9 @@ public class BaseE2ETest {
             options.addArguments("--start-maximized");
         }
 
+        String uniqueProfile = "/tmp/chrome-profile-" + java.util.UUID.randomUUID();
+        options.addArguments("--user-data-dir=" + uniqueProfile);
+
         // 5. Połączenie z serwerem
         // UWAGA: Nie ustawiamy tutaj "--user-data-dir"! Chrome sam to ogarnie.
         driver = new RemoteWebDriver(new URL("http://192.168.0.81:9515"), options);
