@@ -139,20 +139,7 @@ public class BaseE2ETest {
             options.addArguments("--start-maximized");
         }
 
-        // Strategia ładowania strony (pomaga na TimeoutException)
-        options.setPageLoadStrategy(PageLoadStrategy.EAGER);
-
-        // Konfiguracja Timeoutów klienta
-        ClientConfig config = ClientConfig.defaultConfig()
-                .readTimeout(Duration.ofMinutes(2))
-                .connectionTimeout(Duration.ofSeconds(10));
-
-        // Tworzenie Drivera (z rzutowaniem, o którym mówiliśmy wcześniej)
-        driver = (RemoteWebDriver) RemoteWebDriver.builder()
-                .oneOf(options)
-                .address(new URL("http://192.168.0.81:9515"))
-                .config(config)
-                .build();
+        driver = new RemoteWebDriver(new URL("http://192.168.0.81:9515"), options);
 
         wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
