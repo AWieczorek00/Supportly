@@ -2,24 +2,18 @@ package org.example;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.edge.EdgeDriver;
-import org.openqa.selenium.edge.EdgeOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.io.File;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 public class BaseE2ETest {
 
@@ -114,48 +108,50 @@ public class BaseE2ETest {
 //        driver = new RemoteWebDriver(new URL(remoteUrl), options);
 //        wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 //    }
-
     protected void initDriver(boolean headless) throws Exception {
 
-    // 1. Konfiguracja ChromeOptions
-    ChromeOptions options = new ChromeOptions();
+        // 1. Konfiguracja ChromeOptions
+        ChromeOptions options = new ChromeOptions();
 
-    // -- Fix dla błędu Connection Refused / 403 --
-    options.addArguments("--remote-allow-origins=*");
+        // -- Fix dla błędu Connection Refused / 403 --
+        options.addArguments("--remote-allow-origins=*");
 
-    // -- Wyłączenie menedżera haseł i "Leak Detection" (Twoje poprzednie zgłoszenie) --
-    Map<String, Object> prefs = new HashMap<>();
-    prefs.put("credentials_enable_service", false);
-    prefs.put("profile.password_manager_enabled", false);
-    prefs.put("profile.password_manager_leak_detection", false);
-    options.setExperimentalOption("prefs", prefs);
+        // -- Wyłączenie menedżera haseł i "Leak Detection" --
+        Map<String, Object> prefs = new HashMap<>();
+        prefs.put("credentials_enable_service", false);
+        prefs.put("profile.password_manager_enabled", false);
+        prefs.put("profile.password_manager_leak_detection", false);
+        options.setExperimentalOption("prefs", prefs);
 
-    // 2. Obsługa trybu Headless (tak jak w Edge)
-    if (headless) {
-        options.addArguments("--headless=new");
-        options.addArguments("--disable-gpu");
-        options.addArguments("--no-sandbox");
-        options.addArguments("--disable-dev-shm-usage");
-        options.addArguments("--window-size=1920,1080");
-    } else {
-        options.addArguments("--start-maximized");
-    }
+        // 2. Obsługa trybu Headless
+        if (headless) {
+            options.addArguments("--headless=new");
+            options.addArguments("--disable-gpu");
+            options.addArguments("--no-sandbox");        // Bardzo ważne na Linuxie jako root
+            options.addArguments("--disable-dev-shm-usage"); // Zapobiega błędom pamięci
+            options.addArguments("--window-size=1920,1080");
+        } else {
+            options.addArguments("--start-maximized");
+        }
 
-    // 3. Tworzymy unikalny katalog profilu dla Chrome
-    // Zmieniłem prefiks z "edge-profile-" na "chrome-profile-"
+        // --- USUNIĘTO ---
+        // Ten fragment powodował błąd "Chrome instance exited" przy RemoteWebDriver.
+        // Chrome sam stworzy sobie profil tymczasowy na serwerze.
+    /*
     tempUserDataDir = Files.createTempDirectory("chrome-profile-").toFile();
     tempUserDataDir.deleteOnExit();
     options.addArguments("--user-data-dir=" + tempUserDataDir.getAbsolutePath());
+    */
+        // ----------------
 
-    // 4. Adres hosta
-    // UWAGA: Upewnij się, że na 192.168.0.81 działa teraz CHROMEDRIVER, a nie msedgedriver
-    String remoteUrl = "http://192.168.0.81:9515";
+        // 4. Adres hosta
+        String remoteUrl = "http://192.168.0.81:9515";
 
-    // 5. Tworzymy RemoteWebDriver
-    driver = new RemoteWebDriver(new URL(remoteUrl), options);
+        // 5. Tworzymy RemoteWebDriver
+        driver = new RemoteWebDriver(new URL(remoteUrl), options);
 
-    wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-}
+        wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+    }
 
     protected void quitDriver() {
         if (driver != null) {
@@ -165,7 +161,8 @@ public class BaseE2ETest {
         if (tempUserDataDir != null && tempUserDataDir.exists()) {
             try {
                 deleteDirectoryRecursively(tempUserDataDir);
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         }
     }
 
@@ -185,7 +182,8 @@ public class BaseE2ETest {
             }
             try {
                 Thread.sleep(200);
-            } catch (InterruptedException ignored) {}
+            } catch (InterruptedException ignored) {
+            }
         }
 
         if (dir.exists()) {
