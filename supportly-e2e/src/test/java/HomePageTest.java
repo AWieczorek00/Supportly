@@ -181,7 +181,6 @@ class HomePageTest extends BaseE2ETest {
         assertTrue(isLoggedIn, "Sesja wygasła po 1 minucie bezczynności, a nie powinna!");
     }
 
-    @Test
     public void shouldLoadDataOnExtremeNetworkDelay() {
         loginAs("super.admin@gmail.com", "123456");
 
