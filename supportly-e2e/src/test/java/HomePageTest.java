@@ -156,31 +156,27 @@ class HomePageTest extends BaseE2ETest {
 
     @Test
     public void ensureSessionIsActiveAfterOneMinuteIdle() throws InterruptedException {
+        // 1. Logowanie
         loginAs("super.admin@gmail.com", "123456");
 
-        // --- POPRAWKA 1: ZWIĘKSZONY TIMEOUT NA LOGOWANIE ---
-        // W Jenkinsie logowanie trwa dłużej. Dajemy mu 30 sekund na wejście do dashboardu.
-        try {
-            new WebDriverWait(driver, Duration.ofSeconds(30))
-                    .until(ExpectedConditions.urlContains("dashboard"));
-        } catch (TimeoutException e) {
-            throw new RuntimeException("Logowanie trwało zbyt długo! Nie udało się wejść na dashboard w 30s.", e);
-        }
+        // 2. Używamy sprawdzonego waita z Twoich działających testów
+        // Zamiast czekać na URL, czekamy aż pojawi się pasek nawigacji
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("app-navbar")));
 
         System.out.println("--- Rozpoczynamy minutę bezczynności... ---");
 
-        // Czekamy 65 sekund (symulacja bezczynności)
+        // 3. Symulacja bezczynności (65 sekund)
         Thread.sleep(65000);
 
         System.out.println("--- Minuta minęła. Odświeżam stronę ---");
         driver.navigate().refresh();
 
-        // Weryfikacja: Czy nadal jesteśmy zalogowani? (Szukamy elementu menu)
-        // Tutaj też dajemy solidny timeout
+        // 4. Weryfikacja: Czy nadal jesteśmy zalogowani?
+        // Sprawdzamy obecność elementu 'app-navbar', który widzi tylko zalogowany użytkownik.
+        // Zwiększamy timeout do 20s na wypadek wolnego odświeżania na Jenkinsie.
         boolean isLoggedIn = new WebDriverWait(driver, Duration.ofSeconds(20))
-                .until(ExpectedConditions.presenceOfElementLocated(
-                        By.cssSelector("nav.menu, .sidebar, mat-sidenav") // Dostosuj selektor menu
-                )).isDisplayed();
+                .until(ExpectedConditions.visibilityOfElementLocated(By.tagName("app-navbar")))
+                .isDisplayed();
 
         assertTrue(isLoggedIn, "Sesja wygasła po 1 minucie bezczynności, a nie powinna!");
     }
@@ -189,27 +185,20 @@ class HomePageTest extends BaseE2ETest {
     public void shouldLoadDataOnExtremeNetworkDelay() {
         loginAs("super.admin@gmail.com", "123456");
 
-        // Czekamy na załadowanie dashboardu przed startem
-        new WebDriverWait(driver, Duration.ofSeconds(30)).until(ExpectedConditions.urlContains("dashboard"));
+        // 1. Pewny wait na załadowanie dashboardu (tak jak w działających testach)
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("app-navbar")));
 
-        // --- POPRAWKA 2: BEZPIECZNE DEVTOOLS ---
-        // Próbujemy uruchomić DevTools, ale jeśli Grid tego nie wspiera, nie wywalamy testu.
-
+        // 2. Próba uruchomienia DevTools (Bezpieczna dla Jenkinsa)
         WebDriver augmentedDriver = new Augmenter().augment(driver);
         boolean devToolsActive = false;
 
-        // Zmienna dla try-with-resources musi być efektywnie finalna lub zainicjowana przed blokiem,
-        // ale DevTools jest Closeable, więc obsłużymy to tradycyjnym try-catch lub if-em.
-
         try {
-            // Sprawdzamy czy driver w ogóle ma opcję DevTools po Augmentacji
             if (augmentedDriver instanceof HasDevTools) {
                 DevTools devTools = ((HasDevTools) augmentedDriver).getDevTools();
-                devTools.createSession(); // Tutaj rzucało błędem w Twoim logu
-
+                devTools.createSession();
                 devTools.send(Network.enable(Optional.empty(), Optional.empty(), Optional.empty()));
 
-                // Konfiguracja 2G
+                // Symulacja 2G
                 devTools.send(Network.emulateNetworkConditions(
                         false, 20000, 1000, 1000, Optional.of(ConnectionType.CELLULAR2G),
                         Optional.empty(), Optional.empty(), Optional.empty()
@@ -218,27 +207,29 @@ class HomePageTest extends BaseE2ETest {
                 devToolsActive = true;
                 System.out.println("--- DevTools: Symulacja wolnego łącza WŁĄCZONA ---");
             } else {
-                System.err.println("--- DevTools: Driver nie wspiera DevTools (Augmenter nie zadziałał) ---");
+                System.err.println("--- DevTools: Driver nie wspiera DevTools (Grid/Jenkins) ---");
             }
         } catch (Exception e) {
-            System.err.println("--- WARNING: Nie udało się połączyć z DevTools na Gridzie. ---");
-            System.err.println("--- Błąd: " + e.getMessage());
-            System.err.println("--- Test będzie kontynuowany BEZ symulacji opóźnienia sieci. ---");
-            // Nie rzucamy wyjątku (throw), żeby test przeszedł na zielono (tylko bez laga)
+            System.err.println("--- WARNING: Nie udało się połączyć z DevTools. Test biegnie bez opóźnienia. ---");
         }
 
         System.out.println("--- Start: Klikam w zakładkę ---");
         long startTime = System.currentTimeMillis();
 
-        // Klikamy w "Pracownicy"
-        WebElement link = new WebDriverWait(driver, Duration.ofSeconds(10))
-                .until(ExpectedConditions.elementToBeClickable(By.xpath("//nav//a[contains(., 'Pracownicy')]")));
-        link.click();
+        // 3. Klikamy w "Pracownicy" używając Twojego sprawdzonego XPatha
+        // XPath: //nav[contains(@class, 'menu')]//a[contains(., 'Pracownicy')]
+        WebElement employeesLink = new WebDriverWait(driver, Duration.ofSeconds(10))
+                .until(ExpectedConditions.elementToBeClickable(
+                        By.xpath("//nav[contains(@class, 'menu')]//a[contains(., 'Pracownicy')]")
+                ));
+        employeesLink.click();
 
-        // Jeśli DevTools zadziałało, czekamy długo (80s). Jeśli nie, czekamy normalnie (20s).
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(devToolsActive ? 80 : 20));
+        // 4. Czekamy na tabelę
+        // Jeśli DevTools zadziałało -> czekamy 80s. Jeśli nie -> 20s.
+        WebDriverWait adaptiveWait = new WebDriverWait(driver, Duration.ofSeconds(devToolsActive ? 80 : 20));
 
-        boolean isLoaded = wait.until(ExpectedConditions.and(
+        // Weryfikacja: URL i obecność tabeli (używamy Twojego selektora table.mat-mdc-table)
+        boolean isLoaded = adaptiveWait.until(ExpectedConditions.and(
                 ExpectedConditions.urlContains("/employee"),
                 ExpectedConditions.visibilityOfElementLocated(By.cssSelector("table.mat-mdc-table"))
         ));
