@@ -160,7 +160,7 @@ public class TaskTest extends TestDatabaseSetup {
     }
 
     /**
-     * Obsługuje Angular Material Autocomplete
+     * PANCERNA OBSŁUGA AUTOCOMPLETE
      */
     private void selectFromAutocomplete(WebElement context, String formControlName, String textToType) {
         // 1. Znajdź input i wpisz tekst
@@ -168,25 +168,23 @@ public class TaskTest extends TestDatabaseSetup {
         input.clear();
         input.sendKeys(textToType);
 
-        // 2. Czekaj aż pojawi się panel z opcjami (cdk-overlay-pane)
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".cdk-overlay-pane mat-option")));
+        // 2. Czekaj aż pojawi się kontener overlay (niezależnie od tego co jest w środku)
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".cdk-overlay-pane")));
 
-        // 3. Znajdź opcje i kliknij właściwą
-        List<WebElement> options = driver.findElements(By.cssSelector("mat-option"));
+        // 3. ZAMIAST PĘTLI: Czekamy na konkretną opcję zawierającą wpisany tekst
+        // XPath //mat-option[contains(., 'Tekst')] szuka opcji, która ma w sobie ten tekst.
+        // Dzięki temu Selenium samo "odświeża" poszukiwania, jeśli DOM się zmieni (nie ma StaleElement).
+        String xpathSelector = String.format("//mat-option[contains(., '%s')]", textToType);
 
-        // Klikamy pierwszą pasującą (lub po prostu pierwszą, jeśli wpisaliśmy precyzyjny tekst)
-        for (WebElement option : options) {
-            if (option.getText().contains(textToType)) {
-                option.click();
-                return;
-            }
-        }
-        // Fallback: jeśli pętla nie znajdzie idealnego dopasowania, kliknij pierwszą dostępną
-        if (!options.isEmpty()) {
-            options.getFirst().click();
-        } else {
-            throw new RuntimeException("Nie znaleziono opcji w autocomplete dla: " + textToType);
-        }
+        WebElement targetOption = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(xpathSelector)));
+
+        // 4. Kliknij bezpiecznie (JS Click)
+        // Ignoruje animacje i problemy z nakładaniem się warstw
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", targetOption);
+
+        // 5. Sprzątanie: Czekamy aż lista zniknie
+        // To zapobiega sytuacji, gdzie otwarta lista zasłania przycisk "Zapisz" pod spodem
+        wait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(".cdk-overlay-pane")));
     }
 
 //    @Test
