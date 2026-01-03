@@ -4,6 +4,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.PageLoadStrategy;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.remote.http.ClientConfig;
@@ -239,10 +240,30 @@ public class BaseE2ETest {
     }
 
     protected void openPanel() {
-        WebElement panelHeader = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("mat-expansion-panel-header")));
-        // Sprawdzamy czy nie jest już otwarty (opcjonalnie)
-        // String expanded = panelHeader.getAttribute("aria-expanded");
-        // if ("false".equals(expanded)) { panelHeader.click(); }
-        panelHeader.click();
+        // 1. Znajdź nagłówek (presence jest lepsze niż clickable na start)
+        WebElement panelHeader = wait.until(ExpectedConditions.presenceOfElementLocated(
+                By.cssSelector("mat-expansion-panel-header")
+        ));
+
+        // 2. SPRAWDŹ STAN: Klikamy tylko wtedy, gdy jest zamknięty!
+        String isExpanded = panelHeader.getAttribute("aria-expanded");
+
+        // Jeśli atrybut nie istnieje lub jest "false", to znaczy, że trzeba otworzyć
+        if (isExpanded == null || "false".equals(isExpanded)) {
+
+            // 3. UŻYJ JS CLICK: Ignoruje fakt, że inputy mogą lekko zasłaniać nagłówek
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", panelHeader);
+
+            // 4. CZEKAJ NA OTWARCIE: To jest kluczowe!
+            // Czekamy, aż Angular zmieni atrybut na "true" - to znak, że animacja startuje/trwa
+            try {
+                wait.until(ExpectedConditions.attributeToBe(panelHeader, "aria-expanded", "true"));
+
+                // Opcjonalnie: krótki sleep dla stabilizacji animacji CSS (Angularowe panele bywają kapryśne)
+                // Thread.sleep(300);
+            } catch (Exception e) {
+                System.out.println("Ostrzeżenie: Panel mógł się nie otworzyć poprawnie.");
+            }
+        }
     }
 }
