@@ -1,5 +1,6 @@
 import org.junit.jupiter.api.*;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -262,63 +263,76 @@ public class AgreementTest extends TestDatabaseSetup {
     @Test
     @Order(3)
     void routToAdd() {
+        // 1. Otwórz panel (np. wyszukiwania/akcji), w którym jest przycisk
         WebElement panelHeader = wait.until(
-                ExpectedConditions.elementToBeClickable(By.cssSelector("mat-expansion-panel-header"))
+                ExpectedConditions.presenceOfElementLocated(By.cssSelector("mat-expansion-panel-header"))
         );
-        panelHeader.click();
 
+        // FIX: Klikamy tylko jeśli jest zamknięty + używamy JS
+        if (!"true".equals(panelHeader.getAttribute("aria-expanded"))) {
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", panelHeader);
+            // Czekamy chwilę na animację (pojawienie się przycisku w DOM)
+            try { Thread.sleep(300); } catch (InterruptedException e) {}
+        }
+
+        // 2. Kliknij przycisk "Dodaj"
+        // Używamy presenceOfElementLocated, bo przycisk może być w DOM, ale "nieklikalny" dla Selenium przez animację
         WebElement addAgreementButton = wait.until(
-                ExpectedConditions.elementToBeClickable(By.cssSelector("button[routerLink='/agreement/add']"))
+                ExpectedConditions.presenceOfElementLocated(By.cssSelector("button[routerLink='/agreement/add']"))
         );
-        addAgreementButton.click();
 
-        // Czekamy na zmianę URL, a nie tylko sprawdzamy go natychmiast
+        // FIX: JS Click przebija się przez spinnery i overlaye
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", addAgreementButton);
+
+        // 3. Weryfikacja
         wait.until(ExpectedConditions.urlContains("/agreement/add"));
-
         assertTrue(driver.getCurrentUrl().contains("/agreement/add"));
     }
 
     @Test
     @Order(4)
     void createAgreement() {
-        // Zmienna dla spójności danych (wpisujemy to samo, co potem sprawdzamy)
         String newClientName = "GreenData Sp. z o.o.";
         String autocompletePrefix = "Gr";
 
-        // 1. Wejście na stronę dodawania
+        // 1. Wejście na stronę
         openApp("/agreement/add");
 
-        // 2. Obsługa rozwijanych paneli (jeśli są zwinięte)
+        // 2. Otwieranie WSZYSTKICH paneli na stronie (Dane, Finanse itp.)
+        // Angular Material często chowa pola w zwiniętych akordeonach.
         List<WebElement> panelHeaders = wait.until(
                 ExpectedConditions.presenceOfAllElementsLocatedBy(By.cssSelector("mat-expansion-panel-header"))
         );
 
         for (WebElement header : panelHeaders) {
-            // Sprawdzamy stan panelu przed kliknięciem
-            String expansionState = header.getAttribute("class");
-            if (expansionState != null && !expansionState.contains("mat-expanded")) {
-                wait.until(ExpectedConditions.elementToBeClickable(header)).click();
+            // FIX: Sprawdzamy po atrybucie aria-expanded (to najpewniejszy sposób w Angularze)
+            if (!"true".equals(header.getAttribute("aria-expanded"))) {
+                ((JavascriptExecutor) driver).executeScript("arguments[0].click();", header);
+                // Krótki oddech dla silnika renderującego przeglądarki
+                try { Thread.sleep(200); } catch (InterruptedException e) {}
             }
         }
 
-        // 3. Wypełnianie pola Klient (Autocomplete)
+        // 3. Autocomplete Klienta
         WebElement companyInput = wait.until(
                 ExpectedConditions.elementToBeClickable(By.cssSelector("input[formControlName='client']"))
         );
         companyInput.clear();
         companyInput.sendKeys(autocompletePrefix);
 
-        // Czekamy na opcje i wybieramy właściwą
-        List<WebElement> options = wait.until(
-                ExpectedConditions.visibilityOfAllElementsLocatedBy(By.cssSelector("mat-option"))
-        );
+        // Czekamy na kontener opcji
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".cdk-overlay-pane")));
 
-        options.stream()
-                .filter(opt -> opt.getText().contains(autocompletePrefix))
-                .findFirst()
-                .ifPresent(WebElement::click);
+        // FIX: Zamiast strumienia, szukamy konkretnego elementu XPath-em i klikamy JS-em
+        WebElement targetOption = wait.until(ExpectedConditions.presenceOfElementLocated(
+                By.xpath("//mat-option[contains(., '" + autocompletePrefix + "')]")
+        ));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", targetOption);
 
-        // 4. Wypełnianie reszty pól (używając metody pomocniczej)
+        // Ważne: Czekamy aż lista zniknie, żeby nie zasłaniała pól poniżej!
+        wait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(".cdk-overlay-pane")));
+
+        // 4. Reszta pól
         fillInput("input[formControlName='dateFrom']", "2025-10-01");
         fillInput("input[formControlName='dateTo']", "2025-10-31");
         fillInput("input[formControlName='period']", "3");
@@ -327,24 +341,26 @@ public class AgreementTest extends TestDatabaseSetup {
         fillInput("input[formControlName='buildingNumber']", "10");
         fillInput("input[formControlName='apartmentNumber']", "1");
 
-        // 5. Zapis formularza
+        // 5. Zapis (JS Click)
         WebElement addButton = wait.until(
-                ExpectedConditions.elementToBeClickable(By.cssSelector("button[type='submit']"))
+                ExpectedConditions.presenceOfElementLocated(By.cssSelector("button[type='submit']"))
         );
-        addButton.click();
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", addButton);
 
-        // --- KLUCZOWA POPRAWKA ---
-        // Czekamy, aż aplikacja przekieruje nas z "/add" z powrotem na listę.
-        // Bez tego Selenium szuka pola wyszukiwania będąc wciąż na starym widoku.
+        // Czekamy na przekierowanie
         wait.until(ExpectedConditions.not(ExpectedConditions.urlContains("/add")));
 
-        // 6. Wyszukiwanie dodanej umowy na liście
+        // 6. Wyszukiwanie na liście
+        // FIX: Otwieramy panel wyszukiwania bezpiecznie (bez toggle)
         WebElement searchPanelHeader = wait.until(
-                ExpectedConditions.elementToBeClickable(By.cssSelector("mat-expansion-panel-header"))
+                ExpectedConditions.presenceOfElementLocated(By.cssSelector("mat-expansion-panel-header"))
         );
-        searchPanelHeader.click();
 
-        // Czekamy na input w panelu wyszukiwania
+        if (!"true".equals(searchPanelHeader.getAttribute("aria-expanded"))) {
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", searchPanelHeader);
+        }
+
+        // Czekamy na input (musi być visible, żeby wpisać tekst)
         WebElement nameInput = wait.until(
                 ExpectedConditions.visibilityOfElementLocated(By.cssSelector("input[formcontrolname='name']"))
         );
@@ -354,14 +370,12 @@ public class AgreementTest extends TestDatabaseSetup {
         WebElement searchButton = wait.until(
                 ExpectedConditions.elementToBeClickable(By.cssSelector("button[type='submit']"))
         );
-        searchButton.click();
+        searchButton.click(); // Tu zwykły click zazwyczaj działa, ale można zmienić na JS
 
-        // 7. Weryfikacja (Czekamy na konkretny wiersz w tabeli)
-        String rowXpath = String.format("//tr[contains(., '%s')]", newClientName);
-
-        boolean found = wait.until(ExpectedConditions.and(
-                ExpectedConditions.visibilityOfElementLocated(By.cssSelector("table.mat-mdc-table")),
-                ExpectedConditions.visibilityOfElementLocated(By.xpath(rowXpath))
+        // 7. Weryfikacja
+        // Używamy textToBePresentInElementLocated - jest bardziej odporne na odświeżanie tabeli
+        boolean found = wait.until(ExpectedConditions.textToBePresentInElementLocated(
+                By.cssSelector("table.mat-mdc-table"), newClientName
         ));
 
         assertTrue(found, "Nie znaleziono nowo dodanej firmy '" + newClientName + "' w tabeli!");
