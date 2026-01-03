@@ -2,16 +2,19 @@ import org.example.BaseE2ETest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.TimeoutException;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
+import org.openqa.selenium.devtools.DevTools;
+import org.openqa.selenium.devtools.HasDevTools;
+import org.openqa.selenium.devtools.v127.network.Network;
+import org.openqa.selenium.devtools.v127.network.model.ConnectionType;
+import org.openqa.selenium.remote.Augmenter;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -149,6 +152,86 @@ class HomePageTest extends BaseE2ETest {
         ));
 
         assertTrue(isLoginPageVisible, "Po wylogowaniu użytkownik powinien trafić na stronę logowania!");
+    }
+
+    @Test
+    public void shouldLoadDataOnExtremeNetworkDelay() {
+        loginAs("super.admin@gmail.com", "123456");
+
+        // 1. Rozwiązanie problemu "Required type: RemoteWebDriver":
+        // Tworzymy nową zmienną lokalną typu WebDriver, zamiast nadpisywać pole klasowe.
+        // Augmenter dodaje możliwości DevTools do zdalnego drivera.
+        WebDriver augmentedDriver = new Augmenter().augment(driver);
+
+        // 2. Pobieramy DevTools z augmentedDriver (nie ze zwykłego drivera)
+        try (DevTools devTools = ((HasDevTools) augmentedDriver).getDevTools()) {
+            devTools.createSession();
+            devTools.send(Network.enable(Optional.empty(), Optional.empty(), Optional.empty()));
+
+            // 3. Rozwiązanie problemu "Expected 8 arguments":
+            // Dodajemy 3 puste argumenty na końcu (packetLoss, packetQueueLength, reorderingUser).
+            devTools.send(Network.emulateNetworkConditions(
+                    false,                          // offline
+                    20000,                          // latency (ms)
+                    1000,                           // downloadThroughput
+                    1000,                           // uploadThroughput
+                    Optional.of(ConnectionType.CELLULAR2G), // connectionType
+                    Optional.empty(),               // packetLoss (Nowy argument)
+                    Optional.empty(),               // packetQueueLength (Nowy argument)
+                    Optional.empty()                // reordering (Nowy argument)
+            ));
+
+            System.out.println("--- Start: Klikam w zakładkę przy ekstremalnym opóźnieniu ---");
+            long startTime = System.currentTimeMillis();
+
+            // Używamy augmentedDriver do szukania elementów (bezpieczniej)
+            WebElement link = new WebDriverWait(augmentedDriver, Duration.ofSeconds(10))
+                    .until(ExpectedConditions.elementToBeClickable(
+                            By.xpath("//nav//a[contains(., 'Pracownicy')]")
+                    ));
+            link.click();
+
+            // Zwiększony timeout dla wolnej sieci
+            WebDriverWait longWait = new WebDriverWait(augmentedDriver, Duration.ofSeconds(80));
+
+            boolean isLoaded = longWait.until(ExpectedConditions.and(
+                    ExpectedConditions.urlContains("/employee"),
+                    ExpectedConditions.visibilityOfElementLocated(By.cssSelector("table.mat-mdc-table"))
+            ));
+
+            long duration = (System.currentTimeMillis() - startTime) / 1000;
+            System.out.println("--- Stop: Załadowano po " + duration + " sekundach ---");
+
+            assertTrue(isLoaded, "Tabela nie załadowała się przy ekstremalnym opóźnieniu!");
+        }
+    }
+
+    @Test
+    public void ensureSessionIsActiveAfterOneMinuteIdle() throws InterruptedException {
+        loginAs("super.admin@gmail.com", "123456");
+
+        // Upewnij się, że jesteśmy zalogowani
+        wait.until(ExpectedConditions.urlContains("dashboard"));
+
+        System.out.println("--- Rozpoczynamy minutę bezczynności... ---");
+
+        // Czekamy 65 sekund (nic nie robimy)
+        Thread.sleep(65000);
+
+        System.out.println("--- Minuta minęła. Próbuję wykonać akcję ---");
+
+        // Próbujemy przejść do innej podstrony
+        driver.navigate().refresh(); // lub kliknięcie w link
+
+        // Weryfikacja: Czy nadal jesteśmy zalogowani?
+        // Jeśli sesja wygasła, pewnie przekieruje nas na "/login"
+        // Jeśli sesja trwa, powinniśmy widzieć dashboard/menu
+
+        boolean isLoggedIn = wait.until(ExpectedConditions.presenceOfElementLocated(
+                By.cssSelector("nav.menu") // Element widoczny tylko dla zalogowanych
+        )).isDisplayed();
+
+        assertTrue(isLoggedIn, "Sesja wygasła po 1 minucie bezczynności, a nie powinna!");
     }
 
 }
