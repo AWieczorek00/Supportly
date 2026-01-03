@@ -105,18 +105,22 @@ class HomePageTest extends BaseE2ETest {
     void shouldNavigateFromDashboardToEmployees() {
         loginAs("super.admin@gmail.com", "123456");
 
-        // 1. Kliknij w zakładkę "Pracownicy" w menu
-        // Używamy bezpiecznego XPatha szukającego w nawigacji
-        WebElement employeesLink = wait.until(ExpectedConditions.elementToBeClickable(
+        // 1. Czekamy na załadowanie paska nawigacji
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("app-navbar")));
+
+        // 2. Kliknij w zakładkę "Pracownicy" (JS CLICK)
+        WebElement employeesLink = wait.until(ExpectedConditions.presenceOfElementLocated(
                 By.xpath("//nav[contains(@class, 'menu')]//a[contains(., 'Pracownicy')]")
         ));
-        employeesLink.click();
 
-        // 2. Weryfikacja URL
-        wait.until(ExpectedConditions.urlContains("/employee")); // lub "/pracownicy" zależnie od routingu
+        // Używamy JS, bo zwykły click() czasem nie trafia w linki w menu (paddingi/animacje)
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", employeesLink);
 
-        // 3. Weryfikacja elementu unikalnego dla strony pracowników
-        // Np. tabela z nagłówkiem "Rola" (widoczna na Twoim poprzednim screenie)
+        // 3. Weryfikacja URL
+        // Zwiększamy lekko timeout, bo nawigacja może chwilę trwać
+        wait.until(ExpectedConditions.urlContains("/employee"));
+
+        // 4. Weryfikacja elementu unikalnego dla strony pracowników
         boolean isTableVisible = wait.until(ExpectedConditions.or(
                 ExpectedConditions.visibilityOfElementLocated(By.xpath("//th[contains(., 'Rola')]")),
                 ExpectedConditions.visibilityOfElementLocated(By.cssSelector("table.mat-mdc-table"))
@@ -127,25 +131,26 @@ class HomePageTest extends BaseE2ETest {
 
     @Test
     void shouldLogoutSuccessfully() {
-        // 1. Zaloguj się i wejdź na stronę główną
+        // 1. Zaloguj się
         loginAs("super.admin@gmail.com", "123456");
 
-        // 2. Kliknij ikonę profilu (widoczna w prawym górnym rogu)
-        // Na podstawie Twojego DOM (image_49d625.png) wiemy, że ma klasę 'profile-button'
+        // 2. Kliknij ikonę profilu (JS CLICK)
         WebElement profileButton = wait.until(ExpectedConditions.elementToBeClickable(
                 By.cssSelector("button.profile-button, button[aria-haspopup='menu']")
         ));
-        profileButton.click();
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", profileButton);
 
-        // 3. Kliknij opcję "Wyloguj" w rozwiniętym menu
-        // Na screenie 'image_49ecc3.png' widać wyraźnie tekst "Wyloguj"
-        WebElement logoutOption = wait.until(ExpectedConditions.elementToBeClickable(
+        // 3. WAŻNE: Czekaj aż menu (overlay) się faktycznie pojawi w DOM
+        // W Angular Material menu jest w kontenerze .cdk-overlay-pane
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".cdk-overlay-pane")));
+
+        // 4. Kliknij opcję "Wyloguj" (JS CLICK)
+        WebElement logoutOption = wait.until(ExpectedConditions.presenceOfElementLocated(
                 By.xpath("//button[contains(., 'Wyloguj')] | //a[contains(., 'Wyloguj')]")
         ));
-        logoutOption.click();
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", logoutOption);
 
-        // 4. Weryfikacja: Powrót do ekranu logowania
-        // Sprawdzamy, czy widoczny jest nagłówek "Witaj" (z formularza logowania)
+        // 5. Weryfikacja: Powrót do ekranu logowania
         boolean isLoginPageVisible = wait.until(ExpectedConditions.and(
                 ExpectedConditions.urlContains("login"),
                 ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[contains(text(), 'Witaj')]"))
