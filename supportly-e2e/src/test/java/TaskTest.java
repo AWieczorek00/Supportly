@@ -162,13 +162,17 @@ public class TaskTest extends TestDatabaseSetup {
     /**
      * PANCERNA OBSŁUGA AUTOCOMPLETE
      */
-    private void selectFromAutocomplete(WebElement context, String formControlName, String textToType) {
-        // 1. Znajdź input i wpisz tekst
-        WebElement input = context.findElement(By.cssSelector("input[formControlName='" + formControlName + "']"));
+    private void selectFromAutocomplete(WebElement ignoredContext, String formControlName, String textToType) {
+        // 1. ZAMIAST szukać w 'ignoredContext' (który może być Stale), szukamy globalnie i czekamy na visibility.
+        // Używamy "mat-dialog-container input...", żeby mieć pewność, że szukamy w modalu.
+        WebElement input = wait.until(ExpectedConditions.visibilityOfElementLocated(
+                By.cssSelector("mat-dialog-container input[formControlName='" + formControlName + "']")
+        ));
+
         input.clear();
         input.sendKeys(textToType);
 
-        // 2. Czekaj aż pojawi się lista opcji (konkretnie mat-option, a nie sam pusty overlay)
+        // 2. Czekaj na overlay (opcje)
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".cdk-overlay-pane mat-option")));
 
         // 3. Znajdź właściwą opcję (XPath bez pętli)
@@ -178,15 +182,14 @@ public class TaskTest extends TestDatabaseSetup {
         // 4. Kliknij (JS Click)
         ((JavascriptExecutor) driver).executeScript("arguments[0].click();", targetOption);
 
-        // --- POPRAWKA: USUWAMY wait.until(invisibilityOf... .cdk-overlay-pane) ---
-        // Zamiast tego upewniamy się, że dropdown nie przeszkadza, klikając ESC (opcjonalne, ale bezpieczne)
+        // 5. Zamknij dropdown (ESC) - to zapobiega błędom z overlayem
         try {
             input.sendKeys(Keys.ESCAPE);
         } catch (Exception e) {
-            // Ignorujemy, jeśli input stracił focus
+            // Ignorujemy błędy przy ESC
         }
 
-        // Dajemy chwilę UI na przetworzenie wyboru (Angular czasem potrzebuje ms na przypisanie wartości do modelu)
+        // Krótki oddech dla Angulara po wyborze
         try { Thread.sleep(200); } catch (InterruptedException e) {}
     }
 
