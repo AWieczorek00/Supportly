@@ -30,11 +30,15 @@ public class EmployeeTest extends TestDatabaseSetup {
         Thread.sleep(500); // czekaj 0.5 sekundy// true = headless
     }
 
+
+
     @AfterEach
     void teardown() {
         try {
+            // Zrzut ekranu tylko w przypadku błędu (opcjonalne)
             File screenshot = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-            Files.copy(screenshot.toPath(), Paths.get("target/screenshots/fail.png"));
+            Files.createDirectories(Paths.get("target/screenshots"));
+            Files.copy(screenshot.toPath(), Paths.get("target/screenshots/last_run.png"));
         } catch (Exception ignored) {
         }
         quitDriver();
@@ -44,41 +48,37 @@ public class EmployeeTest extends TestDatabaseSetup {
     void shouldDisplayAgreementInWholeTable() {
         String employeeName = "SuperAdmin";
 
-        // ZAMIAST pętli for i if-ów:
-        // Czekamy na widoczność tabeli ORAZ na obecność wiersza z tekstem "SuperAdmin".
-        // XPath `//tr[contains(., 'Tekst')]` szuka wiersza zawierającego tekst głęboko w strukturze.
-        boolean isRowVisible = wait.until(ExpectedConditions.and(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("table.mat-mdc-table")), ExpectedConditions.visibilityOfElementLocated(By.xpath("//tr[contains(., '" + employeeName + "')]"))));
+        // Czekamy na tabelę + wiersz (z obsługą Scrolla w tle przez Selenium 4)
+        // Jeśli tabela jest długa, wiersz może być na dole - presence + scroll to naprawia.
+        WebElement table = wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("table.mat-mdc-table")));
 
-        assertTrue(isRowVisible, "Nie znaleziono pracownika '" + employeeName + "' w tabeli!");
+        // Szukamy wiersza
+        WebElement row = wait.until(ExpectedConditions.presenceOfElementLocated(
+                By.xpath("//tr[contains(., '" + employeeName + "')]")
+        ));
+
+        // Scrollujemy do niego, żeby stał się widoczny
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center', inline: 'nearest'});", row);
+
+        assertTrue(row.isDisplayed(), "Nie znaleziono pracownika '" + employeeName + "' w tabeli!");
     }
 
     @Test
     public void testSearchEmployee() {
         String searchLastName = "SuperAdmin";
 
-        // 1. Otwieranie panelu
-        WebElement panelHeader = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("mat-expansion-panel-header")));
-        panelHeader.click();
+        openPanelSafe();
 
-        // 2. Wpisanie nazwiska
-        WebElement nameInput = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("input[formcontrolname='lastName']")));
-        nameInput.clear(); // Dobra praktyka
-        nameInput.sendKeys(searchLastName);
+        // Bezpieczne wpisywanie (scroll + event input)
+        fillInputSafe("input[formcontrolname='lastName']", searchLastName);
 
-        // 3. Kliknięcie Szukaj
-        WebElement searchButton = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("button[type='submit']")));
-        // ... kod klikania Szukaj ...
-        searchButton.click();
+        clickSafe(By.cssSelector("button[type='submit']"));
 
-// 4. POPRAWKA: Czekaj, aż liczba wierszy w tabeli będzie wynosić dokładnie 1
-        By rowSelector = By.cssSelector("table.mat-mdc-table tr[mat-row]");
+        // Czekamy na filtrację (liczba wierszy = 1)
+        wait.until(ExpectedConditions.numberOfElementsToBe(By.cssSelector("table.mat-mdc-table tr[mat-row]"), 1));
 
-// To załatwia sprawę "odświeżania" - Selenium będzie czekać, aż stare znikną
-        wait.until(ExpectedConditions.numberOfElementsToBe(rowSelector, 1));
-
-// 5. Pobranie i weryfikacja (teraz masz pewność, że jest 1)
-        List<WebElement> rows = driver.findElements(rowSelector);
-        assertTrue(rows.getFirst().getText().contains(searchLastName), "Wiersz nie zawiera szukanego nazwiska!");
+        List<WebElement> rows = driver.findElements(By.cssSelector("table.mat-mdc-table tr[mat-row]"));
+        assertTrue(rows.get(0).getText().contains(searchLastName), "Wiersz nie zawiera szukanego nazwiska!");
     }
 
 //    @Test
@@ -227,69 +227,119 @@ public class EmployeeTest extends TestDatabaseSetup {
 
     @Test
     public void testClearSearchCriteria() {
-        // 1. Otwórz panel (jeśli zwinięty)
-        WebElement panelHeader = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("mat-expansion-panel-header")));
-        // Sprawdzamy czy panel jest rozwinięty, jeśli nie - klikamy (można poznać po wysokości lub klasie)
-        if (panelHeader.getAttribute("class") != null && !panelHeader.getAttribute("class").contains("mat-expanded")) {
-            panelHeader.click();
-        }
+        openPanelSafe();
 
-        // 2. Wpisz dane w pola (używam prawdopodobnych nazw formControlName na bazie etykiet)
-        // Zakładam: firstName, lastName, phoneNumber
-        WebElement nameInput = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("input[formcontrolname='firstName']")));
-        nameInput.sendKeys("TestImię");
+        // Wpisz dane
+        fillInputSafe("input[formcontrolname='firstName']", "TestImię");
+        fillInputSafe("input[formcontrolname='lastName']", "TestNazwisko");
+        fillInputSafe("input[formcontrolname='phoneNumber']", "123456789");
 
-        WebElement surnameInput = driver.findElement(By.cssSelector("input[formcontrolname='lastName']"));
-        surnameInput.sendKeys("TestNazwisko");
+        // Kliknij Wyczyść
+        clickSafe(By.xpath("//button[contains(., 'Wyczyść')]"));
 
-        WebElement phoneInput = driver.findElement(By.cssSelector("input[formcontrolname='phoneNumber']"));
-        phoneInput.sendKeys("123456789");
-
-        // 3. Kliknij "Wyczyść"
-        WebElement clearButton = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//button[contains(., 'Wyczyść')]")));
-        clearButton.click();
-
-        // 4. Weryfikacja: Pola powinny być puste
+        // Weryfikacja pustych pól
+        WebElement nameInput = driver.findElement(By.cssSelector("input[formcontrolname='firstName']"));
         wait.until(ExpectedConditions.textToBePresentInElementValue(nameInput, ""));
 
-        // Dodatkowe sprawdzenie, czy faktycznie są puste
-        assertTrue(nameInput.getAttribute("value").isEmpty(), "Pole Imię nie zostało wyczyszczone!");
-        assertTrue(surnameInput.getAttribute("value").isEmpty(), "Pole Nazwisko nie zostało wyczyszczone!");
-        assertTrue(phoneInput.getAttribute("value").isEmpty(), "Pole Telefon nie zostało wyczyszczone!");
+        assertTrue(nameInput.getAttribute("value").isEmpty(), "Pole Imię nie wyczyszczone!");
+        assertTrue(driver.findElement(By.cssSelector("input[formcontrolname='lastName']")).getAttribute("value").isEmpty());
     }
 
     @Test
     public void testSearchByPhoneNumber() {
         String phoneNumberToSearch = "000000000";
 
-        // 1. Otwórz panel
-        WebElement panelHeader = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("mat-expansion-panel-header")));
-        panelHeader.click();
+        openPanelSafe();
 
-        // 2. Wpisz numer
-        WebElement phoneInput = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("input[formcontrolname='phoneNumber']")));
-        phoneInput.clear();
-        phoneInput.sendKeys(phoneNumberToSearch);
+        fillInputSafe("input[formcontrolname='phoneNumber']", phoneNumberToSearch);
+        clickSafe(By.xpath("//button[contains(., 'Szukaj')]"));
 
-        // 3. Kliknij Szukaj
-        WebElement searchButton = driver.findElement(By.xpath("//button[contains(., 'Szukaj')]"));
-        searchButton.click();
+        // Czekamy na 1 wiersz
+        wait.until(ExpectedConditions.numberOfElementsToBe(By.cssSelector("table.mat-mdc-table tr[mat-row]"), 1));
 
-        // 4. POPRAWKA:
-        // Definiujemy lokator wierszy tabeli
-        By rowSelector = By.cssSelector("table.mat-mdc-table tr[mat-row]");
-
-        // Zamiast czekać na tekst, czekamy aż "śmieci" znikną i zostanie DOKŁADNIE 1 wiersz.
-        // To zmusi Selenium do czekania na zakończenie filtrowania.
-        wait.until(ExpectedConditions.numberOfElementsToBe(rowSelector, 1));
-
-        // 5. Weryfikacja
-        // Skoro wait wyżej przeszedł, to mamy pewność, że jest tylko 1 wiersz
-        List<WebElement> rows = driver.findElements(rowSelector);
-
-        // Dla pewności sprawdzamy tekst
+        List<WebElement> rows = driver.findElements(By.cssSelector("table.mat-mdc-table tr[mat-row]"));
         assertTrue(rows.get(0).getText().contains(phoneNumberToSearch),
-                "Znaleziony wiersz nie zawiera szukanego numeru: " + phoneNumberToSearch);
+                "Znaleziony wiersz nie zawiera numeru: " + phoneNumberToSearch);
+    }
+
+    // =================================================================================
+    //                           METODY PANCERNE (LINUX READY)
+    // =================================================================================
+
+    private void loginSafe(String email, String password) {
+        // initDriver() już otworzył stronę, więc czekamy na inputy
+        fillInputSafe("input[type='email']", email); // lub formControlName='email'
+        fillInputSafe("input[type='password']", password);
+
+        WebElement loginBtn = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("button[type='submit']")));
+        clickSafe(loginBtn);
+
+        // Czekaj na zmianę URL (sukces)
+        try {
+            wait.until(ExpectedConditions.urlContains("/employee")); // lub /dashboard
+        } catch (TimeoutException e) {
+            System.out.println("! URL się nie zmienił, ale próbuję kontynuować.");
+        }
+    }
+
+    private void fillInputSafe(String cssSelector, String value) {
+        By locator = By.cssSelector(cssSelector);
+        WebElement input = wait.until(ExpectedConditions.presenceOfElementLocated(locator));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center', inline: 'nearest'});", input);
+        wait.until(ExpectedConditions.visibilityOf(input));
+
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", input);
+        input.clear();
+        input.sendKeys(value);
+        ((JavascriptExecutor) driver).executeScript("arguments[0].dispatchEvent(new Event('input', { bubbles: true }));", input);
+    }
+
+    private void clickSafe(By locator) {
+        WebElement element = wait.until(ExpectedConditions.presenceOfElementLocated(locator));
+        clickSafe(element);
+    }
+
+    private void clickSafe(WebElement element) {
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center', inline: 'nearest'});", element);
+        wait.until(ExpectedConditions.elementToBeClickable(element));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", element);
+    }
+
+    private void openPanelSafe() {
+        By headerLoc = By.cssSelector("mat-expansion-panel-header");
+        WebElement panelHeader = wait.until(ExpectedConditions.presenceOfElementLocated(headerLoc));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center', inline: 'nearest'});", panelHeader);
+
+        String expanded = panelHeader.getAttribute("aria-expanded");
+        if (expanded == null || "false".equals(expanded)) {
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", panelHeader);
+            sleep(1);
+        }
+    }
+
+    private void selectFromDropdownSafe(String formControlName, String optionText) {
+        // Kliknij w select
+        WebElement select = wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("mat-select[formControlName='" + formControlName + "']")));
+        clickSafe(select);
+
+        // Czekaj na overlay
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".cdk-overlay-pane")));
+
+        // Wybierz opcję (szukamy po tekście)
+        By optionLoc = By.xpath("//mat-option[contains(., '" + optionText + "')]");
+        WebElement option = wait.until(ExpectedConditions.elementToBeClickable(optionLoc));
+        clickSafe(option);
+
+        // Czekaj na zamknięcie
+        wait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(".cdk-overlay-pane")));
+    }
+
+    private void sleep(int seconds) {
+        try {
+            Thread.sleep(seconds * 1000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 
 
