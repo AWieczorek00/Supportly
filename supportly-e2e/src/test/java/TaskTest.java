@@ -48,32 +48,30 @@ public class TaskTest extends TestDatabaseSetup {
         ((JavascriptExecutor) driver).executeScript("arguments[0].click();", addButton);
 
         // 2. Czekaj na Dialog
-        WebElement dialog = wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("mat-dialog-container")));
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("mat-dialog-container")));
 
-        // 3. Wypełnij Nazwę
+        // 3. Wypełnij Nazwę (też warto szukać globalnie, żeby uniknąć StaleElement)
         WebElement nameInput = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("mat-dialog-container input[formControlName='name']")));
         nameInput.clear();
         nameInput.sendKeys(taskName);
 
-        // 4. Obsługa Autocomplete
-        // WAŻNE: Sprawdź w DevTools (F12) czy inputy faktycznie mają takie 'formControlName'
-        // Jeśli to dropdown (mat-select), ta metoda nie zadziała (trzeba innej obsługi)
+        // 4. Obsługa Autocomplete - NOWE WYWOŁANIE (bez zmiennej dialog)
+        selectFromAutocomplete("orderSearch", orderName);
 
-        selectFromAutocomplete(dialog, "orderSearch", orderName); // Sprawdź czy w HTML to nie "orderId" lub "order"
+        // Tutaj nie musisz już robić waita na zniknięcie overlay, bo metoda to robi w środku.
 
-//        // Dodajemy mały oddech między autocomplete'ami, żeby Angular zamknął poprzedni overlay
-//        wait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(".cdk-overlay-pane")));
+        selectFromAutocomplete("employeeSearch", employeeName);
 
-        // Tutaj często nazwa to po prostu "employee" lub "assignee", a nie "employeeSearch"
-        // Spróbuj zmienić na "employee", jeśli test nadal nie przechodzi
-        selectFromAutocomplete(dialog, "employeeSearch", employeeName);
-
-        // 5. Zapisz
-        WebElement saveButton = dialog.findElement(By.xpath(".//button[contains(., 'Zapisz')]"));
+        // 5. Zapisz - szukamy przycisku świeżo w DOM
+        WebElement saveButton = wait.until(ExpectedConditions.elementToBeClickable(
+                By.xpath("//mat-dialog-container//button[contains(., 'Zapisz')]")
+        ));
         ((JavascriptExecutor) driver).executeScript("arguments[0].click();", saveButton);
 
         // 6. Weryfikacja
-        wait.until(ExpectedConditions.invisibilityOf(dialog));
+        // Zamiast sprawdzać obiekt 'dialog', sprawdzamy czy element pasujący do selektora zniknął.
+        // To chroni przed StaleElementReferenceException.
+        wait.until(ExpectedConditions.invisibilityOfElementLocated(By.tagName("mat-dialog-container")));
 
         // Upewniamy się, że panel wyszukiwania jest otwarty
         openPanel();
@@ -98,46 +96,44 @@ public class TaskTest extends TestDatabaseSetup {
     }
 
     // --- METODA POMOCNICZA DO AUTOCOMPLETE (Dodaj do klasy) ---
-    public void selectFromAutocomplete(WebElement container, String formControlName, String value) {
-        // 1. Znajdź input
-        By inputLocator = By.cssSelector("input[formControlName='" + formControlName + "']");
-        WebElement input = wait.until(ExpectedConditions.visibilityOf(container.findElement(inputLocator)));
+    // Zmień sygnaturę metody - usuń "WebElement container"
+    public void selectFromAutocomplete(String formControlName, String value) {
 
-        // 2. Kliknij i wyczyść (JS dla pewności focusa, clear standardowy)
+        // 1. Szukamy inputa GLOBALNIE, ale wewnątrz dialogu.
+        // Dzięki temu unikamy błędu "Stale Element" na kontenerze dialogu.
+        By inputLocator = By.cssSelector("mat-dialog-container input[formControlName='" + formControlName + "']");
+
+        // Czekamy na widoczność inputa (wait sam odświeży referencję, jeśli DOM się zmienił)
+        WebElement input = wait.until(ExpectedConditions.visibilityOfElementLocated(inputLocator));
+
+        // 2. Klikamy i czyścimy (JS jest pewniejszy w Angularze)
         ((JavascriptExecutor) driver).executeScript("arguments[0].click();", input);
         input.clear();
 
-        // 3. Wpisz wartość
+        // 3. Wpisujemy wartość
         input.sendKeys(value);
 
-        // Opcjonalnie: krótki sleep na debounce Angulara (jeśli serwer jest wolny, zwiększ do 500)
-        try { Thread.sleep(300); } catch (InterruptedException e) {}
+        // Krótki sleep na debounce Angulara
+        try { Thread.sleep(300); } catch (Exception e) {}
 
-        // 4. Czekaj na pojawienie się listy (overlay)
+        // 4. Czekamy na listę opcji (Overlay)
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".cdk-overlay-pane")));
 
-        // 5. Znajdź opcję i kliknij
+        // 5. Szukamy opcji i klikamy
         By optionLocator = By.xpath("//mat-option[contains(., '" + value + "')]");
-        WebElement option = wait.until(ExpectedConditions.elementToBeClickable(optionLocator));
 
-        // Klikamy JS-em (najbezpieczniejsze w Angularze)
+        // Ważne: Czekamy aż opcja będzie klikalna
+        WebElement option = wait.until(ExpectedConditions.elementToBeClickable(optionLocator));
         ((JavascriptExecutor) driver).executeScript("arguments[0].click();", option);
 
-        // --- KLUCZOWA POPRAWKA DLA LINUXA ---
-        // Po kliknięciu opcji, Angular często trzyma overlay otwarty, bo input ma focus.
-        // Wymuszamy zamknięcie listy klawiszem ESCAPE na polu input.
+        // 6. FIX DLA LINUXA: Zamykamy overlay ESCAPEM na inputcie
         input.sendKeys(Keys.ESCAPE);
 
-        // Alternatywa: Jeśli ESC nie zadziała, odkomentuj linię niżej (TAB przenosi do nast. pola):
-        // input.sendKeys(Keys.TAB);
-
-        // 6. Czekaj aż overlay zniknie
-        // Używamy try-catch, bo czasem ESC zamyka go tak szybko, że Selenium rzuca błąd,
-        // że element już nie istnieje (StaleElementReference), co w sumie jest sukcesem.
+        // Upewniamy się, że overlay zniknął (z try-catch na wypadek gdyby zniknął błyskawicznie)
         try {
             wait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(".cdk-overlay-pane")));
         } catch (Exception e) {
-            // Ignorujemy - jeśli element zniknął szybciej lub stał się "stale", to nasz cel został osiągnięty
+            // Ignorujemy, jeśli już zniknął
         }
     }
 
