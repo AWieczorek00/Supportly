@@ -16,20 +16,13 @@ public class AgreementTest extends TestDatabaseSetup {
 
     @BeforeEach
     void setup() throws Exception {
-        initDriver(true); // true = headless
-
-        // 1. FIX DLA LINUXA: Ustawienie dużej rozdzielczości
-        // Bez tego elementy na dole strony są "niewidoczne" i testy padają.
-        driver.manage().window().setSize(new Dimension(1920, 1080));
-
+        initDriver(true);
         loginAs("super.admin@gmail.com", "123456");
-
-        // Inicjalizacja Waita na 30 sekund
-        wait = new WebDriverWait(driver, Duration.ofSeconds(30));
-        longWait = new WebDriverWait(driver, Duration.ofSeconds(30));
+        Thread.sleep(500); // czekaj 0.5 sekundy
+        wait = new WebDriverWait(driver, Duration.ofSeconds(15));
 
         openApp("/agreement/list");
-        sleep(1); // Krótki oddech po załadowaniu
+        Thread.sleep(500); // czekaj 0.5 sekundy// true = headless
     }
 
     @AfterEach
