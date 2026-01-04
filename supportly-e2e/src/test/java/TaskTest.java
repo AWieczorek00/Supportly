@@ -109,41 +109,55 @@ public class TaskTest extends TestDatabaseSetup {
     // --- METODA POMOCNICZA DO AUTOCOMPLETE (Dodaj do klasy) ---
     // Zmień sygnaturę metody - usuń "WebElement container"
     public void selectFromAutocomplete(String formControlName, String value) {
-        // 1. Znajdź input (szukamy globalnie w dialogu)
+        // 1. Znajdź selektor
         By inputLocator = By.cssSelector("mat-dialog-container input[formControlName='" + formControlName + "']");
-        WebElement input = wait.until(ExpectedConditions.visibilityOfElementLocated(inputLocator));
+
+        // ZMIANA: Czekamy na OBECNOŚĆ w kodzie (nie musi być widoczny na ekranie)
+        WebElement input = wait.until(ExpectedConditions.presenceOfElementLocated(inputLocator));
+
+        // ZMIANA: Scrollujemy do elementu (to naprawia problem małego ekranu na Linuxie)
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center', inline: 'nearest'});", input);
+
+        // Teraz czekamy aż faktycznie będzie widoczny i klikalny
+        wait.until(ExpectedConditions.visibilityOf(input));
 
         // 2. Kliknij i wyczyść
         ((JavascriptExecutor) driver).executeScript("arguments[0].click();", input);
         input.clear();
 
-        // --- KROK 3: PANCERNE WPISYWANIE (TU WKLEJASZ KOD) ---
+        // 3. Wpisz wartość + Event input
         input.sendKeys(value);
-
-        // Ręczne wymuszenie zdarzenia 'input' dla Angulara.
-        // To naprawia sytuację, gdy Angular "nie zauważył", że wpisałeś tekst i nie otworzył listy.
         ((JavascriptExecutor) driver).executeScript(
                 "arguments[0].dispatchEvent(new Event('input', { bubbles: true }));",
                 input
         );
-        // ----------------------------------------------------
 
         try { Thread.sleep(500); } catch (Exception e) {}
 
-        // 4. Czekaj na listę opcji (Overlay)
+        // 4. Czekaj na listę
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".cdk-overlay-pane")));
 
-        // 5. Wybierz PIERWSZĄ opcję z listy (bezpieczniejsze niż szukanie po tekście)
-        // Dzięki temu, jeśli szukasz "SuperAdmin", a na liście jest "Jan Kowalski", to i tak zadziała.
+        // 5. Wybierz pierwszą opcję
         By firstOptionLocator = By.cssSelector("mat-option");
-
         WebElement option = wait.until(ExpectedConditions.elementToBeClickable(firstOptionLocator));
+
+        // Scroll do opcji też się przydaje
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center', inline: 'nearest'});", option);
         ((JavascriptExecutor) driver).executeScript("arguments[0].click();", option);
 
-        // 6. Zamknij overlay (Escape) - sprzątanie po sobie
+        // 6. Zamknij overlay i przenieś focus
         input.sendKeys(Keys.ESCAPE);
 
-        // Upewnij się, że zniknęło
+        // DODATKOWE ZABEZPIECZENIE:
+        // Klikamy w tło dialogu (np. w tytuł), żeby na pewno zdjąć focus z inputa.
+        // To definitywnie zamyka wszystkie overlaye.
+        try {
+            WebElement dialogTitle = driver.findElement(By.cssSelector("h2[mat-dialog-title]"));
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", dialogTitle);
+        } catch (Exception e) {
+            // Ignorujemy jeśli nie ma tytułu
+        }
+
         try {
             wait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(".cdk-overlay-pane")));
         } catch (Exception e) {}
