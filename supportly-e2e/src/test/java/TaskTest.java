@@ -73,7 +73,7 @@ public class TaskTest extends TestDatabaseSetup {
     @Test
     @Order(2)
     public void testSearchTask() {
-        String searchPhrase = "Raport";
+        String searchPhrase = "Przygotowanie raportu";
 
         openPanelSafe();
 
