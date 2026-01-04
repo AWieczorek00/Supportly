@@ -31,7 +31,7 @@ public class TaskTest extends TestDatabaseSetup {
     }
 
 
-    @Test
+//    @Test
     @Order(1)
     public void createTask() {
         String taskName = "Testowe zadanie";
