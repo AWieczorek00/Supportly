@@ -109,7 +109,7 @@ public class TaskTest extends TestDatabaseSetup {
     // --- METODA POMOCNICZA DO AUTOCOMPLETE (Dodaj do klasy) ---
     // Zmień sygnaturę metody - usuń "WebElement container"
     public void selectFromAutocomplete(String formControlName, String value) {
-        // 1. Znajdź input
+        // 1. Znajdź input (szukamy globalnie w dialogu)
         By inputLocator = By.cssSelector("mat-dialog-container input[formControlName='" + formControlName + "']");
         WebElement input = wait.until(ExpectedConditions.visibilityOfElementLocated(inputLocator));
 
@@ -117,33 +117,33 @@ public class TaskTest extends TestDatabaseSetup {
         ((JavascriptExecutor) driver).executeScript("arguments[0].click();", input);
         input.clear();
 
-        // 3. Wpisz wartość
+        // --- KROK 3: PANCERNE WPISYWANIE (TU WKLEJASZ KOD) ---
         input.sendKeys(value);
 
-        // TRICK: Czasami Angular nie łapie wpisania tekstu. Dodajemy spację, żeby wymusić zdarzenie 'input', a potem Backspace (opcjonalnie)
-        // input.sendKeys(" ");
+        // Ręczne wymuszenie zdarzenia 'input' dla Angulara.
+        // To naprawia sytuację, gdy Angular "nie zauważył", że wpisałeś tekst i nie otworzył listy.
+        ((JavascriptExecutor) driver).executeScript(
+                "arguments[0].dispatchEvent(new Event('input', { bubbles: true }));",
+                input
+        );
+        // ----------------------------------------------------
 
         try { Thread.sleep(500); } catch (Exception e) {}
 
         // 4. Czekaj na listę opcji (Overlay)
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".cdk-overlay-pane")));
 
-        // --- ZMIANA LOGIKI ---
-        // 5. Zamiast szukać konkretnego tekstu, bierzemy pierwszą opcję z brzegu.
-        // Zakładamy, że wyszukiwarka działa i pierwszy wynik jest tym, którego szukamy.
-
-        By firstOptionLocator = By.cssSelector("mat-option"); // Bierzemy jakikolwiek mat-option
+        // 5. Wybierz PIERWSZĄ opcję z listy (bezpieczniejsze niż szukanie po tekście)
+        // Dzięki temu, jeśli szukasz "SuperAdmin", a na liście jest "Jan Kowalski", to i tak zadziała.
+        By firstOptionLocator = By.cssSelector("mat-option");
 
         WebElement option = wait.until(ExpectedConditions.elementToBeClickable(firstOptionLocator));
-
-        // Logujemy co klikamy (dla debugowania)
-        System.out.println("Klikam w opcję: " + option.getText());
-
         ((JavascriptExecutor) driver).executeScript("arguments[0].click();", option);
 
-        // 6. Zamknij overlay (sprzątanie)
+        // 6. Zamknij overlay (Escape) - sprzątanie po sobie
         input.sendKeys(Keys.ESCAPE);
 
+        // Upewnij się, że zniknęło
         try {
             wait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(".cdk-overlay-pane")));
         } catch (Exception e) {}
