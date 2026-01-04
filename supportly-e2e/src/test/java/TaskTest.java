@@ -39,7 +39,179 @@ public class TaskTest extends TestDatabaseSetup {
     }
 
 
-//    @Test
+    @Test
+    public void selectCheckboxByCompanyName() {
+        String companyToSelect = "Tech Solutions Sp. z o.o.";
+
+        // Upewnij się, że tabela jest widoczna
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("table.mat-mdc-table")));
+
+        // STRATEGIA:
+        // 1. Znajdź wiersz zawierający nazwę firmy
+        // 2. W tym wierszu znajdź <mat-checkbox> (kontener) lub <input>
+        String rowXpath = String.format("//tr[contains(., '%s')]", companyToSelect);
+
+        // Szukamy wiersza (presence + scroll)
+        WebElement row = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(rowXpath)));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center', inline: 'nearest'});", row);
+
+        // Szukamy INPUTA checkboxa wewnątrz tego wiersza
+        WebElement checkboxInput = row.findElement(By.xpath(".//input[@type='checkbox']"));
+
+        // Sprawdzamy stan
+        if (!checkboxInput.isSelected()) {
+            // KLUCZOWE DLA LINUXA:
+            // Input jest często "przykryty" przez stylizację Angulara.
+            // Klikamy chamsko JS-em w input, co zmienia jego stan logiczny.
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", checkboxInput);
+        }
+
+        // Weryfikacja
+        assertTrue(checkboxInput.isSelected(), "Checkbox dla firmy " + companyToSelect + " nie został zaznaczony!");
+    }
+
+    @Test
+    @Order(2)
+    public void testSearchTask() {
+        String searchPhrase = "Raport";
+
+        openPanelSafe();
+
+        fillInputSafe("input[formcontrolname='name']", searchPhrase);
+        clickSafe(By.cssSelector("button[type='submit']"));
+
+        // Czekamy na wyniki (liczba wierszy > 0 lub konkretny tekst)
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("table.mat-mdc-table")));
+
+        // Weryfikacja (tutaj zakładam, że po prostu coś znajduje)
+        List<WebElement> rows = driver.findElements(By.cssSelector("table.mat-mdc-table tr[mat-row]"));
+        assertFalse(rows.isEmpty(), "Brak wyników wyszukiwania dla frazy: " + searchPhrase);
+    }
+
+    @Test
+    @Order(3)
+    public void shouldClearSearchCriteria() {
+        openPanelSafe();
+
+        // 1. Wpisz dane
+        fillInputSafe("input[formControlName='name']", "Do Usunięcia");
+
+        // Input "Nazwa firmy" może nie mieć formControlName, szukamy po Labelu
+        By companyInputLoc = By.xpath("//mat-form-field[.//mat-label[contains(., 'Nazwa firmy')]]//input");
+        fillInputSafe(companyInputLoc, "Firma XYZ");
+
+        // 2. Kliknij Wyczyść
+        clickSafe(By.xpath("//button[contains(., 'Wyczyść')]"));
+
+        // 3. Weryfikacja
+        WebElement taskInput = driver.findElement(By.cssSelector("input[formControlName='name']"));
+        // Czekamy aż tekst zniknie (Angular czyści asynchronicznie)
+        wait.until(ExpectedConditions.textToBePresentInElementValue(taskInput, ""));
+
+        assertTrue(taskInput.getAttribute("value").isEmpty(), "Pole Nazwa zadania nie jest puste!");
+
+        WebElement compInput = driver.findElement(companyInputLoc);
+        assertTrue(compInput.getAttribute("value").isEmpty(), "Pole Nazwa firmy nie jest puste!");
+    }
+
+    // =================================================================================
+    //                           METODY POMOCNICZE (PANCERNE)
+    // =================================================================================
+
+    /**
+     * Kluczowa metoda naprawiająca błąd "Element not clickable/visible".
+     * Sprawdza czy panel jest zwinięty. Jeśli tak -> klika. Jeśli nie -> nic nie robi.
+     */
+    private void openPanelSafe() {
+        By headerLoc = By.cssSelector("mat-expansion-panel-header");
+        WebElement panelHeader = wait.until(ExpectedConditions.presenceOfElementLocated(headerLoc));
+
+        // Scrollujemy do nagłówka (ważne na Linuxie)
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center', inline: 'nearest'});", panelHeader);
+
+        // Sprawdzamy stan atrybutu aria-expanded
+        String expanded = panelHeader.getAttribute("aria-expanded");
+
+        // Klikamy TYLKO jeśli jest zamknięty ("false" lub null)
+        if (expanded == null || "false".equals(expanded)) {
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", panelHeader);
+            sleep(1); // Czekamy na animację otwarcia
+        }
+    }
+
+    private void fillInputSafe(String cssSelector, String value) {
+        fillInputSafe(By.cssSelector(cssSelector), value);
+    }
+
+    private void fillInputSafe(By locator, String value) {
+        WebElement input = wait.until(ExpectedConditions.presenceOfElementLocated(locator));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center', inline: 'nearest'});", input);
+        wait.until(ExpectedConditions.visibilityOf(input));
+
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", input);
+        input.clear();
+        input.sendKeys(value);
+        // Event input dla Angulara
+        ((JavascriptExecutor) driver).executeScript("arguments[0].dispatchEvent(new Event('input', { bubbles: true }));", input);
+    }
+
+    private void clickSafe(By locator) {
+        WebElement element = wait.until(ExpectedConditions.presenceOfElementLocated(locator));
+        clickSafe(element);
+    }
+
+    private void clickSafe(WebElement element) {
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center', inline: 'nearest'});", element);
+        wait.until(ExpectedConditions.elementToBeClickable(element));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", element);
+    }
+
+    private void selectFromAutocompleteSafe(String formControlName, String value) {
+        By inputLoc = By.cssSelector("input[formControlName='" + formControlName + "']");
+        fillInputSafe(inputLoc, value);
+
+        try { sleep(1); } catch (Exception e) {} // Czekamy na backend
+
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".cdk-overlay-pane")));
+
+        // Wybieramy PIERWSZĄ opcję
+        By optionLoc = By.cssSelector("mat-option");
+        WebElement option = wait.until(ExpectedConditions.elementToBeClickable(optionLoc));
+        clickSafe(option);
+
+        // Zamykamy overlay Escapem
+        driver.findElement(inputLoc).sendKeys(Keys.ESCAPE);
+        try {
+            wait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(".cdk-overlay-pane")));
+        } catch (Exception e) {}
+    }
+
+    private void loginSafe(String email, String password) {
+        // Zakładam, że initDriver już otworzył URL logowania.
+        // Jeśli nie, odkomentuj: driver.get("http://TWOJ_URL/login");
+
+        fillInputSafe("input[type='email']", email);
+        fillInputSafe("input[type='password']", password);
+
+        WebElement loginBtn = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("button[type='submit']")));
+        clickSafe(loginBtn);
+
+        try {
+            wait.until(ExpectedConditions.urlContains("/task")); // lub inny dashboard
+        } catch (TimeoutException e) {
+            System.out.println("! URL się nie zmienił po logowaniu, ale kontynuuję.");
+        }
+    }
+
+    private void sleep(int seconds) {
+        try {
+            Thread.sleep(seconds * 1000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    //    @Test
 //    @Order(1)
 //    public void createTaskSimulation() throws InterruptedException {
 //        // 1. KONFIGURACJA CZASU (30 sekund na znalezienie elementu)
@@ -216,176 +388,4 @@ public class TaskTest extends TestDatabaseSetup {
 //
 //        assertTrue(found, "Nie znaleziono frazy '" + expectedTextInRow + "' w wynikach wyszukiwania!");
 //    }
-
-    @Test
-    public void selectCheckboxByCompanyName() {
-        String companyToSelect = "Tech Solutions Sp. z o.o.";
-
-        // Upewnij się, że tabela jest widoczna
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("table.mat-mdc-table")));
-
-        // STRATEGIA:
-        // 1. Znajdź wiersz zawierający nazwę firmy
-        // 2. W tym wierszu znajdź <mat-checkbox> (kontener) lub <input>
-        String rowXpath = String.format("//tr[contains(., '%s')]", companyToSelect);
-
-        // Szukamy wiersza (presence + scroll)
-        WebElement row = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(rowXpath)));
-        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center', inline: 'nearest'});", row);
-
-        // Szukamy INPUTA checkboxa wewnątrz tego wiersza
-        WebElement checkboxInput = row.findElement(By.xpath(".//input[@type='checkbox']"));
-
-        // Sprawdzamy stan
-        if (!checkboxInput.isSelected()) {
-            // KLUCZOWE DLA LINUXA:
-            // Input jest często "przykryty" przez stylizację Angulara.
-            // Klikamy chamsko JS-em w input, co zmienia jego stan logiczny.
-            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", checkboxInput);
-        }
-
-        // Weryfikacja
-        assertTrue(checkboxInput.isSelected(), "Checkbox dla firmy " + companyToSelect + " nie został zaznaczony!");
-    }
-
-    @Test
-    @Order(2)
-    public void testSearchTask() {
-        String searchPhrase = "Raport";
-
-        openPanelSafe();
-
-        fillInputSafe("input[formcontrolname='name']", searchPhrase);
-        clickSafe(By.cssSelector("button[type='submit']"));
-
-        // Czekamy na wyniki (liczba wierszy > 0 lub konkretny tekst)
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("table.mat-mdc-table")));
-
-        // Weryfikacja (tutaj zakładam, że po prostu coś znajduje)
-        List<WebElement> rows = driver.findElements(By.cssSelector("table.mat-mdc-table tr[mat-row]"));
-        assertFalse(rows.isEmpty(), "Brak wyników wyszukiwania dla frazy: " + searchPhrase);
-    }
-
-    @Test
-    @Order(3)
-    public void shouldClearSearchCriteria() {
-        openPanelSafe();
-
-        // 1. Wpisz dane
-        fillInputSafe("input[formControlName='name']", "Do Usunięcia");
-
-        // Input "Nazwa firmy" może nie mieć formControlName, szukamy po Labelu
-        By companyInputLoc = By.xpath("//mat-form-field[.//mat-label[contains(., 'Nazwa firmy')]]//input");
-        fillInputSafe(companyInputLoc, "Firma XYZ");
-
-        // 2. Kliknij Wyczyść
-        clickSafe(By.xpath("//button[contains(., 'Wyczyść')]"));
-
-        // 3. Weryfikacja
-        WebElement taskInput = driver.findElement(By.cssSelector("input[formControlName='name']"));
-        // Czekamy aż tekst zniknie (Angular czyści asynchronicznie)
-        wait.until(ExpectedConditions.textToBePresentInElementValue(taskInput, ""));
-
-        assertTrue(taskInput.getAttribute("value").isEmpty(), "Pole Nazwa zadania nie jest puste!");
-
-        WebElement compInput = driver.findElement(companyInputLoc);
-        assertTrue(compInput.getAttribute("value").isEmpty(), "Pole Nazwa firmy nie jest puste!");
-    }
-
-    // =================================================================================
-    //                           METODY POMOCNICZE (PANCERNE)
-    // =================================================================================
-
-    /**
-     * Kluczowa metoda naprawiająca błąd "Element not clickable/visible".
-     * Sprawdza czy panel jest zwinięty. Jeśli tak -> klika. Jeśli nie -> nic nie robi.
-     */
-    private void openPanelSafe() {
-        By headerLoc = By.cssSelector("mat-expansion-panel-header");
-        WebElement panelHeader = wait.until(ExpectedConditions.presenceOfElementLocated(headerLoc));
-
-        // Scrollujemy do nagłówka (ważne na Linuxie)
-        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center', inline: 'nearest'});", panelHeader);
-
-        // Sprawdzamy stan atrybutu aria-expanded
-        String expanded = panelHeader.getAttribute("aria-expanded");
-
-        // Klikamy TYLKO jeśli jest zamknięty ("false" lub null)
-        if (expanded == null || "false".equals(expanded)) {
-            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", panelHeader);
-            sleep(1); // Czekamy na animację otwarcia
-        }
-    }
-
-    private void fillInputSafe(String cssSelector, String value) {
-        fillInputSafe(By.cssSelector(cssSelector), value);
-    }
-
-    private void fillInputSafe(By locator, String value) {
-        WebElement input = wait.until(ExpectedConditions.presenceOfElementLocated(locator));
-        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center', inline: 'nearest'});", input);
-        wait.until(ExpectedConditions.visibilityOf(input));
-
-        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", input);
-        input.clear();
-        input.sendKeys(value);
-        // Event input dla Angulara
-        ((JavascriptExecutor) driver).executeScript("arguments[0].dispatchEvent(new Event('input', { bubbles: true }));", input);
-    }
-
-    private void clickSafe(By locator) {
-        WebElement element = wait.until(ExpectedConditions.presenceOfElementLocated(locator));
-        clickSafe(element);
-    }
-
-    private void clickSafe(WebElement element) {
-        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center', inline: 'nearest'});", element);
-        wait.until(ExpectedConditions.elementToBeClickable(element));
-        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", element);
-    }
-
-    private void selectFromAutocompleteSafe(String formControlName, String value) {
-        By inputLoc = By.cssSelector("input[formControlName='" + formControlName + "']");
-        fillInputSafe(inputLoc, value);
-
-        try { sleep(1); } catch (Exception e) {} // Czekamy na backend
-
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".cdk-overlay-pane")));
-
-        // Wybieramy PIERWSZĄ opcję
-        By optionLoc = By.cssSelector("mat-option");
-        WebElement option = wait.until(ExpectedConditions.elementToBeClickable(optionLoc));
-        clickSafe(option);
-
-        // Zamykamy overlay Escapem
-        driver.findElement(inputLoc).sendKeys(Keys.ESCAPE);
-        try {
-            wait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(".cdk-overlay-pane")));
-        } catch (Exception e) {}
-    }
-
-    private void loginSafe(String email, String password) {
-        // Zakładam, że initDriver już otworzył URL logowania.
-        // Jeśli nie, odkomentuj: driver.get("http://TWOJ_URL/login");
-
-        fillInputSafe("input[type='email']", email);
-        fillInputSafe("input[type='password']", password);
-
-        WebElement loginBtn = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("button[type='submit']")));
-        clickSafe(loginBtn);
-
-        try {
-            wait.until(ExpectedConditions.urlContains("/task")); // lub inny dashboard
-        } catch (TimeoutException e) {
-            System.out.println("! URL się nie zmienił po logowaniu, ale kontynuuję.");
-        }
-    }
-
-    private void sleep(int seconds) {
-        try {
-            Thread.sleep(seconds * 1000);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-    }
 }

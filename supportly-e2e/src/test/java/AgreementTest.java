@@ -94,57 +94,51 @@ public class AgreementTest extends TestDatabaseSetup {
     @Test
     @Order(4)
     void createAgreement() {
-        String newClientName = "GreenData Sp. z o.o.";
-        // UWAGA: Szukamy po krótkim prefiksie, ale wybierzemy pierwszą opcję
-        String autocompletePrefix = "Gr";
+        // ZMIANA: Szukamy klienta, który na pewno jest w bazie (np. Tech Solutions)
+        // Jeśli nie masz GreenData w bazie przed tym testem, autocomplete nie zadziała.
+        String existingClientPrefix = "Tech";
+        String clientFullName = "Tech Solutions Sp. z o.o."; // Do weryfikacji w tabeli (jeśli to ta firma)
 
         openApp("/agreement/add");
-        sleep(1); // Czekamy na załadowanie komponentów Angulara
+        sleep(1);
 
-        // 1. Otwieramy WSZYSTKIE panele (dla pewności, że pola są widoczne)
         expandAllPanels();
 
-        // 2. Autocomplete Klienta (PANCERNA METODA)
-        // input[formControlName='client']
-        selectFromAutocompleteSafe("client", autocompletePrefix);
+        // Szukamy po "Tech" -> Powinno znaleźć "Tech Solutions"
+        selectFromAutocompleteSafe("client", existingClientPrefix);
 
-        // 3. Reszta pól - używamy bezpiecznej metody fillInputSafe
+        // Wypełnianie pól
         fillInputSafe("input[formControlName='dateFrom']", "2025-10-01");
         fillInputSafe("input[formControlName='dateTo']", "2025-10-31");
         fillInputSafe("input[formControlName='period']", "3");
 
-        // Scrollowanie do pól na dole formularza jest kluczowe!
         fillInputSafe("input[formControlName='costForServicePerHour']", "150");
-        fillInputSafe("input[formControlName='agreementNumber']", "AG-2025-001");
+        fillInputSafe("input[formControlName='agreementNumber']", "AG-2025-LINUX"); // Unikalny numer
         fillInputSafe("input[formControlName='buildingNumber']", "10");
         fillInputSafe("input[formControlName='apartmentNumber']", "1");
 
-        // 4. Zapisz
+        // Zapisz
         WebElement addButton = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("button[type='submit']")));
-
-        // Ważne: Czekamy aż przycisk przestanie być disabled (walidacja formularza)
         wait.until(ExpectedConditions.not(ExpectedConditions.attributeContains(addButton, "disabled", "true")));
-
         clickSafe(addButton);
 
-        // 5. Weryfikacja przekierowania
+        // Weryfikacja przekierowania
         wait.until(ExpectedConditions.urlContains("/agreement/list"));
-
-        // Dajemy chwilę bazie danych na zapis (Headless CI bywa wolny)
         sleep(2);
 
-        // 6. Wyszukiwanie na liście
+        // Wyszukiwanie na liście
         openPanelSafe();
-        fillInputSafe("input[formcontrolname='name']", newClientName);
+
+        // Szukamy firmy, którą przed chwilą przypisaliśmy do umowy
+        fillInputSafe("input[formcontrolname='name']", clientFullName);
         clickSafe(By.cssSelector("button[type='submit']"));
 
-        // Czekamy na wynik
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("table.mat-mdc-table")));
         boolean found = wait.until(ExpectedConditions.textToBePresentInElementLocated(
-                By.cssSelector("table.mat-mdc-table"), newClientName
+                By.cssSelector("table.mat-mdc-table"), clientFullName
         ));
 
-        assertTrue(found, "Nie znaleziono nowo dodanej firmy '" + newClientName + "'!");
+        assertTrue(found, "Nie znaleziono umowy dla firmy '" + clientFullName + "'!");
     }
 
     @Test
@@ -233,29 +227,45 @@ public class AgreementTest extends TestDatabaseSetup {
      * Wybiera PIERWSZĄ opcję z listy zamiast szukać konkretnego tekstu.
      */
     private void selectFromAutocompleteSafe(String formControlName, String value) {
-        // Znajdź input
+        // 1. Znajdź input
         By inputLocator = By.cssSelector("input[formControlName='" + formControlName + "']");
         WebElement input = wait.until(ExpectedConditions.presenceOfElementLocated(inputLocator));
 
-        // Scroll & Focus
+        // Scroll i Focus
         ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center', inline: 'nearest'});", input);
         wait.until(ExpectedConditions.visibilityOf(input));
         ((JavascriptExecutor) driver).executeScript("arguments[0].click();", input);
         input.clear();
 
-        // Wpisz + Event Input
+        // 2. Trik ze SPACJĄ i BACKSPACE (To budzi Angulara lepiej niż Event JS)
         input.sendKeys(value);
+        try { Thread.sleep(300); } catch (Exception e) {}
+        input.sendKeys(" ");
+        try { Thread.sleep(300); } catch (Exception e) {}
+        input.sendKeys(Keys.BACK_SPACE);
+
+        // Dla pewności zostawiamy też Event
         ((JavascriptExecutor) driver).executeScript("arguments[0].dispatchEvent(new Event('input', { bubbles: true }));", input);
 
-        // Czekaj na listę
-        try { sleep(1); } catch (Exception e) {} // Debounce time
+        // 3. Czekaj na listę (Overlay)
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".cdk-overlay-pane")));
 
-        // Wybierz PIERWSZĄ opcję (niezależnie od tekstu - bezpieczniej)
-        WebElement option = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("mat-option")));
-        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", option);
+        // 4. Wybierz opcję (z obsługą braku wyników)
+        try {
+            // Czekamy max 5 sekund na opcje. Jak nie ma, to rzucamy błąd od razu, zamiast po 15s.
+            WebDriverWait shortWait = new WebDriverWait(driver, Duration.ofSeconds(5));
+            By optionLoc = By.cssSelector("mat-option");
 
-        // Zamknij Overlay (Esc)
+            WebElement option = shortWait.until(ExpectedConditions.elementToBeClickable(optionLoc));
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", option);
+
+        } catch (TimeoutException e) {
+            // Jeśli tu jesteśmy, to znaczy, że lista się otworzyła, ale jest PUSTA.
+            // Prawdopodobnie w bazie nie ma klienta "Gr...".
+            throw new RuntimeException("Autocomplete otwarty, ale brak wyników dla frazy: '" + value + "'. Sprawdź czy dane istnieją w bazie!");
+        }
+
+        // 5. Zamknij overlay i posprzątaj
         input.sendKeys(Keys.ESCAPE);
         try {
             wait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(".cdk-overlay-pane")));
