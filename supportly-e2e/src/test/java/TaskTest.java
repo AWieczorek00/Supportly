@@ -168,23 +168,26 @@ public class TaskTest extends TestDatabaseSetup {
         input.clear();
         input.sendKeys(textToType);
 
-        // 2. Czekaj aż pojawi się kontener overlay (niezależnie od tego co jest w środku)
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".cdk-overlay-pane")));
+        // 2. Czekaj aż pojawi się lista opcji (konkretnie mat-option, a nie sam pusty overlay)
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".cdk-overlay-pane mat-option")));
 
-        // 3. ZAMIAST PĘTLI: Czekamy na konkretną opcję zawierającą wpisany tekst
-        // XPath //mat-option[contains(., 'Tekst')] szuka opcji, która ma w sobie ten tekst.
-        // Dzięki temu Selenium samo "odświeża" poszukiwania, jeśli DOM się zmieni (nie ma StaleElement).
+        // 3. Znajdź właściwą opcję (XPath bez pętli)
         String xpathSelector = String.format("//mat-option[contains(., '%s')]", textToType);
-
         WebElement targetOption = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(xpathSelector)));
 
-        // 4. Kliknij bezpiecznie (JS Click)
-        // Ignoruje animacje i problemy z nakładaniem się warstw
+        // 4. Kliknij (JS Click)
         ((JavascriptExecutor) driver).executeScript("arguments[0].click();", targetOption);
 
-        // 5. Sprzątanie: Czekamy aż lista zniknie
-        // To zapobiega sytuacji, gdzie otwarta lista zasłania przycisk "Zapisz" pod spodem
-        wait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(".cdk-overlay-pane")));
+        // --- POPRAWKA: USUWAMY wait.until(invisibilityOf... .cdk-overlay-pane) ---
+        // Zamiast tego upewniamy się, że dropdown nie przeszkadza, klikając ESC (opcjonalne, ale bezpieczne)
+        try {
+            input.sendKeys(Keys.ESCAPE);
+        } catch (Exception e) {
+            // Ignorujemy, jeśli input stracił focus
+        }
+
+        // Dajemy chwilę UI na przetworzenie wyboru (Angular czasem potrzebuje ms na przypisanie wartości do modelu)
+        try { Thread.sleep(200); } catch (InterruptedException e) {}
     }
 
 //    @Test
