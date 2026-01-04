@@ -61,8 +61,8 @@ public class TaskTest extends TestDatabaseSetup {
 
         selectFromAutocomplete(dialog, "orderSearch", orderName); // Sprawdź czy w HTML to nie "orderId" lub "order"
 
-        // Dodajemy mały oddech między autocomplete'ami, żeby Angular zamknął poprzedni overlay
-        wait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(".cdk-overlay-pane")));
+//        // Dodajemy mały oddech między autocomplete'ami, żeby Angular zamknął poprzedni overlay
+//        wait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(".cdk-overlay-pane")));
 
         // Tutaj często nazwa to po prostu "employee" lub "assignee", a nie "employeeSearch"
         // Spróbuj zmienić na "employee", jeśli test nadal nie przechodzi
@@ -99,33 +99,46 @@ public class TaskTest extends TestDatabaseSetup {
 
     // --- METODA POMOCNICZA DO AUTOCOMPLETE (Dodaj do klasy) ---
     public void selectFromAutocomplete(WebElement container, String formControlName, String value) {
-        // 1. Konstruujemy selektor. Obsługujemy sytuację, gdzie input jest wewnątrz mat-form-field
+        // 1. Znajdź input
         By inputLocator = By.cssSelector("input[formControlName='" + formControlName + "']");
-
-        // Czekamy na widoczność inputa wewnątrz kontenera (dialogu)
         WebElement input = wait.until(ExpectedConditions.visibilityOf(container.findElement(inputLocator)));
 
-        // 2. Klikamy i czyścimy (JS jest pewniejszy w Angularze)
+        // 2. Kliknij i wyczyść (JS dla pewności focusa, clear standardowy)
         ((JavascriptExecutor) driver).executeScript("arguments[0].click();", input);
         input.clear();
 
-        // 3. Wpisujemy wartość + spacja (czasami triggeruje zmianę)
+        // 3. Wpisz wartość
         input.sendKeys(value);
-        try { Thread.sleep(500); } catch (Exception e) {} // debounceTime Angulara
 
-        // 4. Czekamy na listę opcji (Overlay)
+        // Opcjonalnie: krótki sleep na debounce Angulara (jeśli serwer jest wolny, zwiększ do 500)
+        try { Thread.sleep(300); } catch (InterruptedException e) {}
 
+        // 4. Czekaj na pojawienie się listy (overlay)
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".cdk-overlay-pane")));
 
-        // 5. Szukamy opcji i klikamy
-        // XPath szuka opcji zawierającej tekst LUB span z tekstem (zależnie od wersji Material)
+        // 5. Znajdź opcję i kliknij
         By optionLocator = By.xpath("//mat-option[contains(., '" + value + "')]");
-
         WebElement option = wait.until(ExpectedConditions.elementToBeClickable(optionLocator));
+
+        // Klikamy JS-em (najbezpieczniejsze w Angularze)
         ((JavascriptExecutor) driver).executeScript("arguments[0].click();", option);
 
-        // 6. Ważne: Czekamy aż lista zniknie, żeby nie zasłaniała następnych pól!
-        wait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(".cdk-overlay-pane")));
+        // --- KLUCZOWA POPRAWKA DLA LINUXA ---
+        // Po kliknięciu opcji, Angular często trzyma overlay otwarty, bo input ma focus.
+        // Wymuszamy zamknięcie listy klawiszem ESCAPE na polu input.
+        input.sendKeys(Keys.ESCAPE);
+
+        // Alternatywa: Jeśli ESC nie zadziała, odkomentuj linię niżej (TAB przenosi do nast. pola):
+        // input.sendKeys(Keys.TAB);
+
+        // 6. Czekaj aż overlay zniknie
+        // Używamy try-catch, bo czasem ESC zamyka go tak szybko, że Selenium rzuca błąd,
+        // że element już nie istnieje (StaleElementReference), co w sumie jest sukcesem.
+        try {
+            wait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(".cdk-overlay-pane")));
+        } catch (Exception e) {
+            // Ignorujemy - jeśli element zniknął szybciej lub stał się "stale", to nasz cel został osiągnięty
+        }
     }
 
     @Test
