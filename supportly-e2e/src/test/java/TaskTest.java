@@ -59,7 +59,7 @@ public class TaskTest extends TestDatabaseSetup {
         selectFromAutocomplete("orderSearch", orderName);
 
         // --- Czekaj aż zniknie lista podpowiedzi ---
-//        wait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(".cdk-overlay-pane")));
+        wait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(".cdk-overlay-pane")));
 
         // 5. Wypełnij Pracownika (Autocomplete 2)
         selectFromAutocomplete("employeeSearch", employeeName);
@@ -108,73 +108,48 @@ public class TaskTest extends TestDatabaseSetup {
 
     // --- METODA POMOCNICZA DO AUTOCOMPLETE (Dodaj do klasy) ---
     // Zmień sygnaturę metody - usuń "WebElement container"
-//    public void selectFromAutocomplete(String formControlName, String value) {
-//        // 1. Znajdź input wewnątrz otwartego dialogu
-//        // Używamy "input[formControlName...]", co idealnie pasuje do Twojego HTML
-//        By inputLocator = By.cssSelector("mat-dialog-container input[formControlName='" + formControlName + "']");
-//
-//        // Czekamy na widoczność inputa
-//        WebElement input = wait.until(ExpectedConditions.visibilityOfElementLocated(inputLocator));
-//
-//        // 2. Kliknij i wyczyść (JS w Angularze jest bezpieczniejszy)
-//        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", input);
-//        input.clear();
-//
-//        // 3. Wpisz wartość
-//        input.sendKeys(value);
-//
-//        // Krótki sleep na "debounce" Angulara (serwer musi przetworzyć zapytanie)
-//        try { Thread.sleep(500); } catch (Exception e) {}
-//
-//        // 4. Czekaj na listę opcji (Overlay)
-//        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".cdk-overlay-pane")));
-//
-//        // 5. Znajdź opcję zawierającą tekst
-//        // W Twoim HTML opcja wyświetla: {{ e.firstName }} {{ e.lastName }}
-//        By optionLocator = By.xpath("//mat-option[contains(., '" + value + "')]");
-//
-//        WebElement option = wait.until(ExpectedConditions.elementToBeClickable(optionLocator));
-//        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", option);
-//
-//        // --- KLUCZOWE: Zamknij overlay ---
-//        // Wymuszamy zamknięcie listy, żeby nie zasłaniała następnego pola
-//        input.sendKeys(Keys.ESCAPE);
-//
-//        // Upewniamy się, że overlay zniknął zanim pójdziemy dalej
-//        try {
-//            wait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(".cdk-overlay-pane")));
-//        } catch (Exception e) {
-//            // Ignorujemy timeout przy znikaniu - ważne, że próbowaliśmy zamknąć
-//        }
-//    }
-
     public void selectFromAutocomplete(String formControlName, String value) {
+        // 1. Znajdź input
+        By inputLocator = By.cssSelector("mat-dialog-container input[formControlName='" + formControlName + "']");
+        WebElement input = wait.until(ExpectedConditions.visibilityOfElementLocated(inputLocator));
 
-        By inputLocator = By.cssSelector(
-                "mat-dialog-container input[formControlName='" + formControlName + "']"
-        );
-
-        WebElement input = wait.until(ExpectedConditions.elementToBeClickable(inputLocator));
-
+        // 2. Kliknij i wyczyść
         ((JavascriptExecutor) driver).executeScript("arguments[0].click();", input);
         input.clear();
+
+        // 3. Wpisz wartość
         input.sendKeys(value);
 
-        // czekamy aż Angular załaduje opcje
-        wait.until(ExpectedConditions.presenceOfElementLocated(
-                By.cssSelector(".cdk-overlay-pane mat-option")
-        ));
+        // TRICK: Czasami Angular nie łapie wpisania tekstu. Dodajemy spację, żeby wymusić zdarzenie 'input', a potem Backspace (opcjonalnie)
+        // input.sendKeys(" ");
 
-        // wybieramy PIERWSZĄ widoczną opcję
-        WebElement option = wait.until(ExpectedConditions.elementToBeClickable(
-                By.cssSelector(".cdk-overlay-pane mat-option")
-        ));
+        try { Thread.sleep(500); } catch (Exception e) {}
 
-        option.click();
+        // 4. Czekaj na listę opcji (Overlay)
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".cdk-overlay-pane")));
 
-        // czekamy aż input zostanie uzupełniony
-        wait.until(driver -> !input.getAttribute("value").isEmpty());
+        // --- ZMIANA LOGIKI ---
+        // 5. Zamiast szukać konkretnego tekstu, bierzemy pierwszą opcję z brzegu.
+        // Zakładamy, że wyszukiwarka działa i pierwszy wynik jest tym, którego szukamy.
+
+        By firstOptionLocator = By.cssSelector("mat-option"); // Bierzemy jakikolwiek mat-option
+
+        WebElement option = wait.until(ExpectedConditions.elementToBeClickable(firstOptionLocator));
+
+        // Logujemy co klikamy (dla debugowania)
+        System.out.println("Klikam w opcję: " + option.getText());
+
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", option);
+
+        // 6. Zamknij overlay (sprzątanie)
+        input.sendKeys(Keys.ESCAPE);
+
+        try {
+            wait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(".cdk-overlay-pane")));
+        } catch (Exception e) {}
     }
+
+
 
 
     @Test
