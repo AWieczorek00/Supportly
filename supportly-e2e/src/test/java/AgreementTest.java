@@ -29,45 +29,7 @@ public class AgreementTest extends TestDatabaseSetup {
         quitDriver();
     }
 
-//    @Test
-//    public void testSearchAgreement() {
-//        String companyName = "Tech Solutions Sp. z o.o.";
 //
-//        // ... (kod otwierania panelu i wpisywania tekstu bez zmian) ...
-//        WebElement panelHeader = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("mat-expansion-panel-header")));
-//        panelHeader.click();
-//
-//        WebElement nameInput = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("input[formcontrolname='name']")));
-//        nameInput.clear();
-//        nameInput.sendKeys(companyName);
-//
-//        WebElement searchButton = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("button[type='submit']")));
-//        searchButton.click();
-//
-//        // --- POPRAWKA PONIŻEJ ---
-//
-//        // Strategia: Czekamy, aż w DOM pojawi się jakikolwiek wiersz tabeli (tr),
-//        // który zawiera w sobie szukany tekst.
-//        // Używamy kropki (.) w XPath, co oznacza "tekst wewnątrz tego elementu lub jego dzieci".
-//        String dynamicXPath = String.format("//tr[contains(., '%s')]", companyName);
-//
-//        try {
-//            WebElement foundRow = wait.until(
-//                    ExpectedConditions.visibilityOfElementLocated(By.xpath(dynamicXPath))
-//            );
-//
-//            // Opcjonalnie: dodatkowa weryfikacja (np. czy wiersz jest wyświetlony)
-//            assertTrue(foundRow.isDisplayed(), "Znaleziony wiersz nie jest widoczny!");
-//
-//        } catch (TimeoutException e) {
-//            // Debugowanie: Jeśli nadal pada, sprawdź co jest w tabeli w momencie błędu
-//            System.out.println("Timeout! Nie znaleziono wiersza z tekstem: " + companyName);
-//            // Możesz tu pobrać tekst całej tabeli, żeby zobaczyć co faktycznie się wczytało
-//            String tableText = driver.findElement(By.cssSelector("table.mat-mdc-table")).getText();
-//            System.out.println("Aktualna zawartość tabeli: \n" + tableText);
-//            throw e; // Rzuć błąd dalej, żeby test był czerwony
-//        }
-//    }
 
     @Test
     @Order(1)
@@ -99,151 +61,6 @@ public class AgreementTest extends TestDatabaseSetup {
         assertTrue(isFound, "Nie znaleziono firmy " + companyName + " w tabeli!");
     }
 
-
-//    @Test
-//    void shouldDisplayAgreementInWholeTable() throws InterruptedException {
-//        // Czekamy aż tabela pojawi się w DOM
-
-    /// /        wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("table.mat-table")));
-//
-//        // Pobieramy wszystkie wiersze w tabeli
-//        List<WebElement> rows = driver.findElements(By.cssSelector("table.mat-mdc-table tr[mat-row]"));
-//
-//        boolean found = false;
-//        for (WebElement row : rows) {
-//            System.out.println(row.getText());
-//            if (row.getText().contains("Tech Solutions Sp. z o.o.")) {
-//                found = true;
-//                break;
-//            }
-//        }
-//
-//        assertTrue(found, "Nie znaleziono firmy 'Tech Solutions Sp. z o.o.' w tabeli!");
-//    }
-//
-//    @Test
-//    void routToAdd() {
-//
-//        WebElement panelHeader = wait.until(
-//                ExpectedConditions.elementToBeClickable(By.cssSelector("mat-expansion-panel-header"))
-//        );
-//        panelHeader.click();
-//
-//        WebElement addAgreementButton = wait.until(
-//                ExpectedConditions.elementToBeClickable(By.cssSelector("button[routerLink='/agreement/add']"))
-//        );
-//        addAgreementButton.click();
-//
-//        assertTrue(Objects.requireNonNull(driver.getCurrentUrl()).contains("/agreement/add"));
-//
-//    }
-//
-//    @Test
-//    void createAgreement() throws InterruptedException {
-//        openApp("/agreement/add");
-//        Thread.sleep(500); // czekaj 0.5 sekundy
-//
-//        // znajdź wszystkie nagłówki paneli
-//        List<WebElement> panelHeaders = wait.until(
-//                ExpectedConditions.presenceOfAllElementsLocatedBy(By.cssSelector("mat-expansion-panel-header"))
-//        );
-//
-//        for (WebElement panelHeader : panelHeaders) {
-//            wait.until(ExpectedConditions.elementToBeClickable(panelHeader)).click();
-//            Thread.sleep(300); // mała przerwa, żeby UI zdążyło się rozwinąć
-//        }
-//
-//        WebElement companyInput = wait.until(
-//                ExpectedConditions.elementToBeClickable(By.cssSelector("input[formControlName='client']"))
-//        );
-//        companyInput.sendKeys("Gr");
-//
-//        List<WebElement> options = wait.until(
-//                ExpectedConditions.visibilityOfAllElementsLocatedBy(By.cssSelector("mat-option"))
-//        );
-//
-//        for (WebElement option : options) {
-//            if (option.getText().contains("Gr")) {
-//                option.click();
-//                break;
-//            }
-//        }
-//
-//        WebElement startDate = wait.until(
-//                ExpectedConditions.elementToBeClickable(By.cssSelector("input[formControlName='dateFrom']"))
-//        );
-//        startDate.sendKeys("2025-10-01");
-//
-//        WebElement endDate = wait.until(
-//                ExpectedConditions.elementToBeClickable(By.cssSelector("input[formControlName='dateTo']"))
-//        );
-//        endDate.sendKeys("2025-10-31");
-//
-//        WebElement period = wait.until(
-//                ExpectedConditions.elementToBeClickable(By.cssSelector("input[formControlName='period']"))
-//        );
-//        period.sendKeys("3");
-//
-//        WebElement costPerHour = wait.until(
-//                ExpectedConditions.elementToBeClickable(By.cssSelector("input[formControlName='costForServicePerHour']"))
-//        );
-//        costPerHour.sendKeys("150");
-//
-//        WebElement agreementNumber = wait.until(
-//                ExpectedConditions.elementToBeClickable(By.cssSelector("input[formControlName='agreementNumber']"))
-//        );
-//        agreementNumber.sendKeys("AG-2025-001");
-//
-//        WebElement buildingNumber = wait.until(
-//                ExpectedConditions.elementToBeClickable(By.cssSelector("input[formControlName='buildingNumber']"))
-//        );
-//        buildingNumber.sendKeys("10");
-//
-//        WebElement apartmentNumber = wait.until(
-//                ExpectedConditions.elementToBeClickable(By.cssSelector("input[formControlName='apartmentNumber']"))
-//        );
-//        apartmentNumber.sendKeys("1");
-//
-//        WebElement add = wait.until(
-//                ExpectedConditions.elementToBeClickable(By.cssSelector("button[type='submit']"))
-//        );
-//        add.click();
-//
-//        Thread.sleep(500);
-//
-//        WebElement panelHeader = wait.until(
-//                ExpectedConditions.elementToBeClickable(By.cssSelector("mat-expansion-panel-header"))
-//        );
-//        panelHeader.click();
-//
-//        // Czekamy aż inputy staną się widoczne
-//        WebElement nameInput = wait.until(
-//                ExpectedConditions.visibilityOfElementLocated(By.cssSelector("input[formcontrolname='name']"))
-//        );
-//        nameInput.sendKeys("GreenData Sp. z o.o.");
-//
-//        // Klikamy przycisk Szukaj
-//        WebElement searchButton = wait.until(
-//                ExpectedConditions.elementToBeClickable(By.cssSelector("button[type='submit']"))
-//        );
-//        searchButton.click();
-//
-//
-//        // Czekamy aż tabela się pojawi
-//        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("table.mat-mdc-table tr[mat-row]")));
-//
-//        // Pobieramy wiersze tabeli
-//        List<WebElement> rows = driver.findElements(By.cssSelector("table.mat-mdc-table tr[mat-row]"));
-//
-//        Thread.sleep(500);
-//
-//        boolean found = rows.stream()
-//                .anyMatch(row -> row.getText().contains("GreenData Sp. z o.o."));
-//
-//        assertTrue(found, "Znaleziono firmy 'GreenData Sp. z o.o.' w tabeli!");
-//
-//
-//    }
     @Test
     @Order(2)
     void shouldDisplayAgreementInWholeTable() {
@@ -288,48 +105,74 @@ public class AgreementTest extends TestDatabaseSetup {
         wait.until(ExpectedConditions.urlContains("/agreement/add"));
         assertTrue(driver.getCurrentUrl().contains("/agreement/add"));
     }
+    // --- METODA POMOCNICZA (Dodaj ją do klasy) ---
+    // Bezpiecznie otwiera panel tylko wtedy, gdy jest zamknięty
+    private void ensurePanelIsOpen(By headerSelector) {
+        WebElement panelHeader = wait.until(ExpectedConditions.presenceOfElementLocated(headerSelector));
+
+        // Sprawdzamy stan panelu przed kliknięciem
+        // Angular Material ustawia klasę "mat-expanded" lub atrybut "aria-expanded"
+        String expansionState = panelHeader.getAttribute("aria-expanded");
+
+        if (expansionState == null || "false".equals(expansionState)) {
+            // Panel zamknięty -> klikamy (JS jest pewniejszy przy animacjach)
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", panelHeader);
+
+            // Czekamy chwilę na animację otwarcia (Angular animations)
+            try { Thread.sleep(500); } catch (InterruptedException e) {}
+        }
+    }
 
     @Test
     @Order(4)
     void createAgreement() {
         String newClientName = "GreenData Sp. z o.o.";
-        String autocompletePrefix = "Gr";
+        String autocompletePrefix = "Gr"; // Wpisujemy tylko początek
 
         // 1. Wejście na stronę
         openApp("/agreement/add");
 
-        // 2. Otwieranie WSZYSTKICH paneli na stronie (Dane, Finanse itp.)
-        // Angular Material często chowa pola w zwiniętych akordeonach.
+        // 2. Otwieranie WSZYSTKICH paneli (używamy nowej metody pomocniczej)
         List<WebElement> panelHeaders = wait.until(
                 ExpectedConditions.presenceOfAllElementsLocatedBy(By.cssSelector("mat-expansion-panel-header"))
         );
-
-        for (WebElement header : panelHeaders) {
-            // FIX: Sprawdzamy po atrybucie aria-expanded (to najpewniejszy sposób w Angularze)
-            if (!"true".equals(header.getAttribute("aria-expanded"))) {
-                ((JavascriptExecutor) driver).executeScript("arguments[0].click();", header);
-                // Krótki oddech dla silnika renderującego przeglądarki
-                try { Thread.sleep(200); } catch (InterruptedException e) {}
+        // Iterujemy po indeksach, bo referencje do elementów mogą się zgubić przy zmianach DOM
+        for (int i = 0; i < panelHeaders.size(); i++) {
+            // Pobieramy listę od nowa, żeby uniknąć StaleElementReferenceException
+            List<WebElement> headers = driver.findElements(By.cssSelector("mat-expansion-panel-header"));
+            if (i < headers.size()) {
+                String isExpanded = headers.get(i).getAttribute("aria-expanded");
+                if (!"true".equals(isExpanded)) {
+                    ((JavascriptExecutor) driver).executeScript("arguments[0].click();", headers.get(i));
+                    try { Thread.sleep(300); } catch (InterruptedException e) {}
+                }
             }
         }
 
-        // 3. Autocomplete Klienta
+        // 3. Autocomplete Klienta - POPRAWKA GŁÓWNA
         WebElement companyInput = wait.until(
                 ExpectedConditions.elementToBeClickable(By.cssSelector("input[formControlName='client']"))
         );
         companyInput.clear();
         companyInput.sendKeys(autocompletePrefix);
 
-        // Czekamy na kontener opcji
+        // KLUCZOWE: Angular ma debounceTime (np. 300ms) zanim wyśle request do backendu.
+        // Selenium działa w 1ms. Musimy poczekać, aż Angular "zrozumie", że przestaliśmy pisać.
+        try { Thread.sleep(1000); } catch (InterruptedException e) {}
+
+        // Czekamy na pojawienie się kontenera opcji (overlay)
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".cdk-overlay-pane")));
 
-        // FIX: Zamiast strumienia, szukamy konkretnego elementu XPath-em i klikamy JS-em
-        WebElement targetOption = wait.until(ExpectedConditions.presenceOfElementLocated(
-                By.xpath("//mat-option[contains(., '" + autocompletePrefix + "')]")
+        // Czekamy na konkretną opcję. Używamy 'contains' ale czekamy na VISIBILITY, nie tylko presence.
+        // Jeśli backend nie zwróci "Gr...", ten wait rzuci czytelny wyjątek.
+        WebElement targetOption = wait.until(ExpectedConditions.visibilityOfElementLocated(
+                By.xpath("//mat-option//span[contains(text(), '" + autocompletePrefix + "')] | //mat-option[contains(., '" + autocompletePrefix + "')]")
         ));
+
+        // Klikamy JS-em, żeby uniknąć problemów z przysłanianiem elementu
         ((JavascriptExecutor) driver).executeScript("arguments[0].click();", targetOption);
 
-        // Ważne: Czekamy aż lista zniknie, żeby nie zasłaniała pól poniżej!
+        // Upewniamy się, że dropdown zniknął
         wait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(".cdk-overlay-pane")));
 
         // 4. Reszta pól
@@ -341,26 +184,22 @@ public class AgreementTest extends TestDatabaseSetup {
         fillInput("input[formControlName='buildingNumber']", "10");
         fillInput("input[formControlName='apartmentNumber']", "1");
 
-        // 5. Zapis (JS Click)
+        // 5. Zapis
         WebElement addButton = wait.until(
                 ExpectedConditions.presenceOfElementLocated(By.cssSelector("button[type='submit']"))
         );
         ((JavascriptExecutor) driver).executeScript("arguments[0].click();", addButton);
 
-        // Czekamy na przekierowanie
+        // Czekamy na przekierowanie (zmianę URL)
         wait.until(ExpectedConditions.not(ExpectedConditions.urlContains("/add")));
 
+        // Opcjonalnie: Dajmy chwilę na załadowanie listy
+        wait.until(ExpectedConditions.urlContains("/agreement/list"));
+
         // 6. Wyszukiwanie na liście
-        // FIX: Otwieramy panel wyszukiwania bezpiecznie (bez toggle)
-        WebElement searchPanelHeader = wait.until(
-                ExpectedConditions.presenceOfElementLocated(By.cssSelector("mat-expansion-panel-header"))
-        );
+        // Otwieramy panel bezpiecznie
+        ensurePanelIsOpen(By.cssSelector("mat-expansion-panel-header"));
 
-        if (!"true".equals(searchPanelHeader.getAttribute("aria-expanded"))) {
-            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", searchPanelHeader);
-        }
-
-        // Czekamy na input (musi być visible, żeby wpisać tekst)
         WebElement nameInput = wait.until(
                 ExpectedConditions.visibilityOfElementLocated(By.cssSelector("input[formcontrolname='name']"))
         );
@@ -370,10 +209,9 @@ public class AgreementTest extends TestDatabaseSetup {
         WebElement searchButton = wait.until(
                 ExpectedConditions.elementToBeClickable(By.cssSelector("button[type='submit']"))
         );
-        searchButton.click(); // Tu zwykły click zazwyczaj działa, ale można zmienić na JS
+        searchButton.click();
 
         // 7. Weryfikacja
-        // Używamy textToBePresentInElementLocated - jest bardziej odporne na odświeżanie tabeli
         boolean found = wait.until(ExpectedConditions.textToBePresentInElementLocated(
                 By.cssSelector("table.mat-mdc-table"), newClientName
         ));
@@ -381,33 +219,45 @@ public class AgreementTest extends TestDatabaseSetup {
         assertTrue(found, "Nie znaleziono nowo dodanej firmy '" + newClientName + "' w tabeli!");
     }
 
-
     @Test
     @Order(5)
     void shouldShowNoResultsForNonExistentCompany() {
-        // 1. Otwórz panel wyszukiwania
-        WebElement panelHeader = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("mat-expansion-panel-header")));
-        panelHeader.click();
+        // Upewniamy się, że jesteśmy na liście (jeśli poprzedni test się wywalił, to nas ratuje)
+        if (!driver.getCurrentUrl().contains("/agreement/list")) {
+            openApp("/agreement/list");
+        }
+
+        // 1. Otwórz panel wyszukiwania (BEZPIECZNIE)
+        // Błąd w logach sugerował, że input nie był widoczny -> panel był zamknięty
+        ensurePanelIsOpen(By.cssSelector("mat-expansion-panel-header"));
 
         // 2. Wpisz bzdury
         WebElement nameInput = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("input[formcontrolname='name']")));
         nameInput.clear();
-        nameInput.sendKeys("Firma Która Nie Istnieje 12345XYZ");
+        nameInput.sendKeys("Firma Która Nie Istnieje " + System.currentTimeMillis()); // Unikalna nazwa
 
         WebElement searchButton = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("button[type='submit']")));
         searchButton.click();
 
         // 3. Weryfikacja
-        // Opcja A: Tabela jest pusta
-        // Czekamy chwilę, żeby upewnić się, że stary wynik zniknął (jeśli był)
-        wait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector("div.loading-spinner"))); // Opcjonalne, jeśli masz loader
+        // Musimy poczekać aż tabela się przeładuje.
+        // Najlepszy sposób to poczekać, aż spinner zniknie (jeśli jest) lub sprawdzić brak wierszy
 
-        List<WebElement> rows = driver.findElements(By.cssSelector("table.mat-mdc-table tr[mat-row]"));
+        try {
+            // Dajemy chwilę na request do backendu
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {}
 
-        // Opcja B: Sprawdzamy czy wyświetla się komunikat "Brak danych" (częste w Angular Material)
-        // WebElement noDataRow = driver.findElement(By.cssSelector(".no-data-row"));
+        List<WebElement> rows = driver.findElements(By.cssSelector("table.mat-mdc-table tbody tr"));
 
-        assertTrue(rows.isEmpty(), "Tabela powinna być pusta dla nieistniejącej firmy!");
+        // Filtrujemy, żeby ignorować nagłówki lub puste wiersze techniczne Angulara
+        long dataRows = rows.stream()
+                .filter(r -> r.getAttribute("mat-row") != null || r.getText().length() > 0)
+                .count();
+
+        // Jeśli Angular wyświetla specjalny wiersz "No data matching the filter", musisz to uwzględnić
+        // Ale zazwyczaj tabela po prostu jest pusta.
+        assertTrue(dataRows == 0, "Tabela powinna być pusta dla nieistniejącej firmy! Znaleziono wierszy: " + dataRows);
     }
 
 }
