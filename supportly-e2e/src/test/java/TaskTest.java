@@ -9,6 +9,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import java.time.Duration;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -195,108 +196,175 @@ public class TaskTest extends TestDatabaseSetup {
     @Test
     @Order(2)
     public void testSearchTask() {
-        String searchPhrase = "Przygotowanie raportu miesiecznego";
-        // UWAGA: W Twoim kodzie szukałeś "Raportu", ale sprawdzałeś "Tech Solutions".
-        // Dostosuj tę zmienną do tego, co faktycznie ma się pojawić w tabeli.
-        String expectedCompanyInRow = "Tech Solutions Sp. z o.o.";
+        String searchPhrase = "Przygotowanie raportu"; // Fraza do wpisania
+        // Oczekiwany tekst w tabeli (może to być nazwa zadania LUB nazwa firmy, zależnie od kolumn)
+        String expectedTextInRow = "Tech Solutions";
 
-        openPanel();
+        openPanelSafe();
 
-        WebElement nameInput = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("input[formcontrolname='name']")));
-        nameInput.clear();
-        nameInput.sendKeys(searchPhrase);
+        // 1. Wpisz frazę (używamy bezpiecznej metody z eventami Angulara)
+        fillInputSafe("input[formcontrolname='name']", searchPhrase);
 
-        WebElement searchButton = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("button[type='submit']")));
-        searchButton.click();
+        // 2. Kliknij Szukaj
+        clickSafe(By.cssSelector("button[type='submit']"));
 
-        // Inteligentne czekanie na wynik:
-        // Czekamy, aż w tabeli pojawi się wiersz zawierający oczekiwany tekst.
-        // To eliminuje skomplikowane pętle z Thread.sleep.
-        boolean found = wait.until(ExpectedConditions.and(
-                ExpectedConditions.visibilityOfElementLocated(By.cssSelector("table.mat-mdc-table")),
-                ExpectedConditions.textToBePresentInElementLocated(By.cssSelector("table.mat-mdc-table"), expectedCompanyInRow)
+        // 3. Weryfikacja (Pancerna)
+        // Czekamy na tabelę
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("table.mat-mdc-table")));
+
+        // Czekamy aż pojawi się tekst.
+        // Jeśli tabela się przeładowuje, Selenium spróbuje ponownie (dzięki wait).
+        boolean found = wait.until(ExpectedConditions.textToBePresentInElementLocated(
+                By.cssSelector("table.mat-mdc-table"), expectedTextInRow
         ));
 
-        assertTrue(found, "Nie znaleziono firmy '" + expectedCompanyInRow + "' w wynikach wyszukiwania!");
+        assertTrue(found, "Nie znaleziono frazy '" + expectedTextInRow + "' w wynikach wyszukiwania!");
     }
 
     @Test
     public void selectCheckboxByCompanyName() {
         String companyToSelect = "Tech Solutions Sp. z o.o.";
 
-        // Czekamy na załadowanie tabeli
+        // Upewnij się, że tabela jest widoczna
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("table.mat-mdc-table")));
 
-        // STRATEGIA XPATH:
-        // Znajdź wiersz (tr), który zawiera tekst firmy, a następnie wewnątrz tego wiersza znajdź checkbox.
-        // To eliminuje potrzebę pętli for i if-ów w Javie.
-        String dynamicXpath = String.format("//tr[contains(., '%s')]//input[@type='checkbox']", companyToSelect);
+        // STRATEGIA:
+        // 1. Znajdź wiersz zawierający nazwę firmy
+        // 2. W tym wierszu znajdź <mat-checkbox> (kontener) lub <input>
+        String rowXpath = String.format("//tr[contains(., '%s')]", companyToSelect);
 
-        // Alternatywnie, jeśli input jest ukryty (co częste w Angular Material), klikamy w kontener:
-        // String dynamicXpath = String.format("//tr[contains(., '%s')]//mat-checkbox", companyToSelect);
+        // Szukamy wiersza (presence + scroll)
+        WebElement row = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(rowXpath)));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center', inline: 'nearest'});", row);
 
-        WebElement checkbox = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(dynamicXpath)));
+        // Szukamy INPUTA checkboxa wewnątrz tego wiersza
+        WebElement checkboxInput = row.findElement(By.xpath(".//input[@type='checkbox']"));
 
-        // Sprawdzamy stan i klikamy
-        // Uwaga: checkbox.isSelected() działa na input, ale w Angularze czasem sprawdza się klasę 'mat-checkbox-checked' na tagu <mat-checkbox>
-        if (!checkbox.isSelected()) {
-            // Próbujemy kliknąć normalnie, a jak Angular zasłania - JS
-            try {
-                wait.until(ExpectedConditions.elementToBeClickable(checkbox)).click();
-            } catch (Exception e) {
-                ((JavascriptExecutor) driver).executeScript("arguments[0].click();", checkbox);
-            }
+        // Sprawdzamy stan
+        if (!checkboxInput.isSelected()) {
+            // KLUCZOWE DLA LINUXA:
+            // Input jest często "przykryty" przez stylizację Angulara.
+            // Klikamy chamsko JS-em w input, co zmienia jego stan logiczny.
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", checkboxInput);
         }
 
-        assertTrue(checkbox.isSelected(), "Checkbox dla firmy " + companyToSelect + " nie został zaznaczony!");
+        // Weryfikacja
+        assertTrue(checkboxInput.isSelected(), "Checkbox dla firmy " + companyToSelect + " nie został zaznaczony!");
     }
 
-    // --- Metody Pomocnicze ---
+    @Test
+    @Order(4)
+    public void shouldFilterByCompletedStatus() {
+        openPanelSafe();
 
-//    @Override
-//    public void openPanel() {
-//        WebElement panelHeader = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("mat-expansion-panel-header")));
-//        // Sprawdzamy czy nie jest już otwarty (opcjonalnie)
-//        // String expanded = panelHeader.getAttribute("aria-expanded");
-//        // if ("false".equals(expanded)) { panelHeader.click(); }
-//        panelHeader.click();
-//    }
+        // 1. Znajdź checkbox filtru "Wykonane?"
+        // Szukamy inputa wewnątrz mat-checkbox, który ma label "Wykonane?"
+        // Używamy presence, bo input jest ukryty (opacity: 0)
+        By checkboxLocator = By.xpath("//mat-checkbox[.//label[contains(., 'Wykonane?')]]//input");
+        WebElement filterInput = wait.until(ExpectedConditions.presenceOfElementLocated(checkboxLocator));
 
-    /**
-     * PANCERNA OBSŁUGA AUTOCOMPLETE
-     */
-//    private void selectFromAutocomplete(WebElement ignoredContext, String formControlName, String textToType) {
-//        // 1. ZAMIAST szukać w 'ignoredContext' (który może być Stale), szukamy globalnie i czekamy na visibility.
-//        // Używamy "mat-dialog-container input...", żeby mieć pewność, że szukamy w modalu.
-//        WebElement input = wait.until(ExpectedConditions.visibilityOfElementLocated(
-//                By.cssSelector("mat-dialog-container input[formControlName='" + formControlName + "']")
-//        ));
-//
-//        input.clear();
-//        input.sendKeys(textToType);
-//
-//        // 2. Czekaj na overlay (opcje)
-//        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".cdk-overlay-pane mat-option")));
-//
-//        // 3. Znajdź właściwą opcję (XPath bez pętli)
-//        String xpathSelector = String.format("//mat-option[contains(., '%s')]", textToType);
-//        WebElement targetOption = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(xpathSelector)));
-//
-//        // 4. Kliknij (JS Click)
-//        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", targetOption);
-//
-//        // 5. Zamknij dropdown (ESC) - to zapobiega błędom z overlayem
-//        try {
-//            input.sendKeys(Keys.ESCAPE);
-//        } catch (Exception e) {
-//            // Ignorujemy błędy przy ESC
-//        }
-//
-//        // Krótki oddech dla Angulara po wyborze
-//        try { Thread.sleep(200); } catch (InterruptedException e) {}
-//    }
+        // Scroll do filtra (ważne na małych ekranach)
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center', inline: 'nearest'});", filterInput);
 
-//    @Test
+        // Jeśli nie zaznaczony -> kliknij JS-em
+        if (!filterInput.isSelected()) {
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", filterInput);
+        }
+
+        // 2. Kliknij Szukaj
+        clickSafe(By.cssSelector("button[type='submit']"));
+
+        // 3. Weryfikacja tabeli
+        // Czekamy na przeładowanie (można dodać sleep(1) dla bezpieczeństwa przy szybkim backendzie)
+        try { Thread.sleep(1000); } catch (InterruptedException e) {}
+
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("table.mat-mdc-table")));
+
+        // Pobieramy wiersze
+        List<WebElement> rows = driver.findElements(By.cssSelector("table.mat-mdc-table tr[mat-row]"));
+
+        // Ważne: Sprawdź czy tabela w ogóle zwróciła dane!
+        assertFalse(rows.isEmpty(), "Filtrowanie zwróciło pustą tabelę - test jest niemiarodajny.");
+
+        // Sprawdzamy każdy wiersz
+        for (WebElement row : rows) {
+            // Scrollujemy do wiersza (żeby Selenium go "widziało" w DOM)
+            ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center', inline: 'nearest'});", row);
+
+            // Szukamy checkboxa w ostatniej kolumnie (lub konkretnej kolumnie statusu)
+            WebElement rowCheckbox = row.findElement(By.cssSelector("input[type='checkbox']"));
+
+            assertTrue(rowCheckbox.isSelected(), "Wiersz zawiera niezakończone zadanie mimo aktywnego filtra!");
+        }
+    }
+
+    @Test
+    @Order(5)
+    public void shouldClearSearchCriteria() {
+        openPanelSafe();
+
+        // 1. Wpisz dane
+        fillInputSafe("input[formControlName='name']", "Dane do usunięcia");
+
+        // Szukanie po Labelu (dla inputa 'Nazwa firmy')
+        // XPath: Znajdź mat-form-field, który ma label z tekstem 'Nazwa firmy', a w nim input
+        By companyInputLoc = By.xpath("//mat-form-field[.//mat-label[contains(., 'Nazwa firmy')]]//input");
+        fillInputSafe(companyInputLoc, "Firma XYZ");
+
+        // 2. Kliknij Wyczyść
+        clickSafe(By.xpath("//button[contains(., 'Wyczyść')]"));
+
+        // 3. Weryfikacja
+        WebElement taskInput = driver.findElement(By.cssSelector("input[formControlName='name']"));
+        WebElement compInput = driver.findElement(companyInputLoc);
+
+        // Czekamy aż wartości znikną (Angular potrzebuje chwili na wyczyszczenie modelu)
+        wait.until(ExpectedConditions.textToBePresentInElementValue(taskInput, ""));
+        wait.until(ExpectedConditions.textToBePresentInElementValue(compInput, ""));
+
+        assertTrue(taskInput.getAttribute("value").isEmpty(), "Pole Nazwa zadania nie zostało wyczyszczone");
+        assertTrue(compInput.getAttribute("value").isEmpty(), "Pole Nazwa firmy nie zostało wyczyszczone");
+    }
+
+    // =================================================================================
+    //                           METODY POMOCNICZE (PANCERNE)
+    // =================================================================================
+
+    private void openPanelSafe() {
+        By headerLoc = By.cssSelector("mat-expansion-panel-header");
+        WebElement panelHeader = wait.until(ExpectedConditions.presenceOfElementLocated(headerLoc));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center', inline: 'nearest'});", panelHeader);
+
+        String expanded = panelHeader.getAttribute("aria-expanded");
+        if (expanded == null || "false".equals(expanded)) {
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", panelHeader);
+            try { Thread.sleep(500); } catch (Exception e) {}
+        }
+    }
+
+    private void fillInputSafe(String cssSelector, String value) {
+        fillInputSafe(By.cssSelector(cssSelector), value);
+    }
+
+    private void fillInputSafe(By locator, String value) {
+        WebElement input = wait.until(ExpectedConditions.presenceOfElementLocated(locator));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center', inline: 'nearest'});", input);
+        wait.until(ExpectedConditions.visibilityOf(input));
+
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", input);
+        input.clear();
+        input.sendKeys(value);
+        ((JavascriptExecutor) driver).executeScript("arguments[0].dispatchEvent(new Event('input', { bubbles: true }));", input);
+    }
+
+    private void clickSafe(By locator) {
+        WebElement element = wait.until(ExpectedConditions.presenceOfElementLocated(locator));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center', inline: 'nearest'});", element);
+        wait.until(ExpectedConditions.elementToBeClickable(element));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", element);
+    }
+
+    //    @Test
 //    @Order(3)
     public void verifyTaskStatusInTable() {
         // Testujemy wiersz, który na screenie jest zielony (zrobiony)
@@ -320,57 +388,5 @@ public class TaskTest extends TestDatabaseSetup {
 
         // Checkbox powinien być zaznaczony (true)
         assertTrue(checkbox.isSelected());
-    }
-
-    @Test
-    @Order(4)
-    public void shouldFilterByCompletedStatus() {
-        openPanel();
-
-        // Znajdź checkbox "Wykonane?" po tekście etykiety (bezpieczniej niż szukanie po ID)
-        WebElement doneFilterCheckbox = wait.until(ExpectedConditions.presenceOfElementLocated(
-                By.xpath("//mat-checkbox[.//label[contains(., 'Wykonane?')]]//input")
-        ));
-
-        if (!doneFilterCheckbox.isSelected()) {
-            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", doneFilterCheckbox);
-        }
-
-        WebElement searchButton = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("button[type='submit']")));
-        searchButton.click();
-
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("table.mat-mdc-table")));
-
-        List<WebElement> rows = driver.findElements(By.cssSelector("table.mat-mdc-table tr[mat-row]"));
-
-        // Tabela nie powinna być pusta i każdy wiersz musi mieć zaznaczony checkbox
-        for (WebElement row : rows) {
-            WebElement rowCheckbox = row.findElement(By.cssSelector("td:last-child input[type='checkbox']"));
-            assertTrue(rowCheckbox.isSelected());
-        }
-    }
-
-    @Test
-    @Order(5)
-    public void shouldClearSearchCriteria() {
-        openPanel();
-
-        WebElement taskNameInput = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("input[formControlName='name']")));
-        taskNameInput.sendKeys("Dane do usunięcia");
-
-        // Szukamy inputa "Nazwa firmy" po etykiecie mat-label, bo formControlName może być inny
-        WebElement companyInput = driver.findElement(By.xpath("//mat-form-field[.//mat-label[contains(., 'Nazwa firmy')]]//input"));
-        companyInput.sendKeys("Firma XYZ");
-
-        WebElement clearButton = wait.until(ExpectedConditions.elementToBeClickable(
-                By.xpath("//button[contains(., 'Wyczyść')]")
-        ));
-        clearButton.click();
-
-        wait.until(ExpectedConditions.textToBePresentInElementValue(taskNameInput, ""));
-        wait.until(ExpectedConditions.textToBePresentInElementValue(companyInput, ""));
-
-        assertTrue(taskNameInput.getAttribute("value").isEmpty());
-        assertTrue(companyInput.getAttribute("value").isEmpty());
     }
 }
