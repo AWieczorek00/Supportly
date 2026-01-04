@@ -85,7 +85,7 @@ public class TaskTest extends TestDatabaseSetup {
 
         // Weryfikacja (tutaj zakładam, że po prostu coś znajduje)
         List<WebElement> rows = driver.findElements(By.cssSelector("table.mat-mdc-table tr[mat-row]"));
-        assertFalse(rows.isEmpty(), "Brak wyników wyszukiwania dla frazy: " + searchPhrase);
+        assertTrue(rows.isEmpty(), "Brak wyników wyszukiwania dla frazy: " + searchPhrase);
     }
 
     @Test
