@@ -9,7 +9,6 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import java.time.Duration;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -31,139 +30,156 @@ public class TaskTest extends TestDatabaseSetup {
     }
 
 
-//    @Test
+// ... wewnątrz klasy testowej ...
+
+    @Test
     @Order(1)
-    public void createTask() {
-        String taskName = "Testowe zadanie";
+    public void createTaskSimulation() throws InterruptedException {
+        // 1. KONFIGURACJA CZASU (30 sekund na znalezienie elementu)
+        WebDriverWait longWait = new WebDriverWait(driver, Duration.ofSeconds(30));
+
+        // Zmienne testowe
+        String taskName = "Testowe zadanie " + System.currentTimeMillis(); // Unikalna nazwa
         String orderName = "InnovaTech";
         String fullOrderName = "InnovaTech S.A.";
-        String employeeName = "SuperAdmin";
+        String employeeName = "SuperAdmin"; // Lub po prostu "Super" - ważne żeby coś znalazło
 
+        System.out.println(">>> START TESTU: Otwieram panel...");
         openPanel();
+        Thread.sleep(2000); // Odczekaj chwilę po otwarciu
 
-        // 1. Kliknij "Dodaj nowe zadanie"
-        WebElement addButton = wait.until(ExpectedConditions.elementToBeClickable(
+        // 2. Kliknij "Dodaj nowe zadanie"
+        WebElement addButton = longWait.until(ExpectedConditions.elementToBeClickable(
                 By.xpath("//button[contains(., 'Dodaj nowe zadanie')]")
         ));
         ((JavascriptExecutor) driver).executeScript("arguments[0].click();", addButton);
 
-        // 2. Czekaj na Dialog
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("mat-dialog-container")));
+        System.out.println(">>> Kliknięto przycisk dodawania.");
+        Thread.sleep(2000); // DEBUG: Czekaj 2s
 
-        // 3. Wypełnij Nazwę
-        WebElement nameInput = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("mat-dialog-container input[formControlName='name']")));
+        // 3. Czekaj na Dialog
+        longWait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("mat-dialog-container")));
+
+        // 4. Wypełnij Nazwę
+        WebElement nameInput = longWait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("mat-dialog-container input[formControlName='name']")));
         nameInput.clear();
         nameInput.sendKeys(taskName);
+        System.out.println(">>> Wpisano nazwę zadania.");
 
-        // 4. Wypełnij Zamówienie (Autocomplete 1)
-        selectFromAutocomplete("orderSearch", orderName);
+        // 5. Wypełnij Zamówienie (Używamy metody z długim waitiem)
+        selectFromAutocompleteSlow("orderSearch", orderName, longWait);
 
-        // --- Czekaj aż zniknie lista podpowiedzi ---
-        wait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(".cdk-overlay-pane")));
+        System.out.println(">>> Wybrano zamówienie. Czekam 2 sekundy na ogarnięcie DOM...");
+        Thread.sleep(2000); // Oddech dla Angulara
 
-        // 5. Wypełnij Pracownika (Autocomplete 2)
-        selectFromAutocomplete("employeeSearch", employeeName);
+        // 6. Wypełnij Pracownika
+        selectFromAutocompleteSlow("employeeSearch", employeeName, longWait);
 
-        // 6. Zapisz
-        WebElement saveButton = wait.until(ExpectedConditions.elementToBeClickable(
+        System.out.println(">>> Wybrano pracownika.");
+
+        // 7. Zapisz
+        WebElement saveButton = longWait.until(ExpectedConditions.elementToBeClickable(
                 By.xpath("//mat-dialog-container//button[contains(., 'Zapisz')]")
         ));
 
-        // Upewniamy się, że przycisk jest aktywny (formularz waliduje się poprawnie)
-        wait.until(ExpectedConditions.not(ExpectedConditions.attributeContains(saveButton, "disabled", "true")));
+        // Czekaj aż przycisk będzie aktywny (nie disabled)
+        longWait.until(ExpectedConditions.not(ExpectedConditions.attributeContains(saveButton, "disabled", "true")));
+
+        System.out.println(">>> Przycisk Zapisz jest aktywny. Klikam...");
         ((JavascriptExecutor) driver).executeScript("arguments[0].click();", saveButton);
 
-        // 7. Weryfikacja zamknięcia dialogu
-        wait.until(ExpectedConditions.invisibilityOfElementLocated(By.tagName("mat-dialog-container")));
+        // 8. Weryfikacja zamknięcia dialogu
+        longWait.until(ExpectedConditions.invisibilityOfElementLocated(By.tagName("mat-dialog-container")));
 
-        // --- PRZYWRÓCONA LOGIKA WYSZUKIWANIA ---
-        // Musimy znaleźć to zadanie, żeby potwierdzić utworzenie
+        System.out.println(">>> Dialog zamknięty. Czekam 10 SEKUND (Symulacja requestu)...");
+        Thread.sleep(10000); // TU JEST TWOJE CZEKANIE (10s powinno wystarczyć, zwiększ do 30000 jeśli trzeba)
 
-        // Otwórz panel wyszukiwania (chyba że openPanel() sam sprawdza czy jest otwarty)
+        // 9. Wyszukiwanie
         openPanel();
 
-        // Wpisz nazwę zadania w filtry
-        WebElement searchNameInput = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("input[formControlName='name']")));
+        WebElement searchNameInput = longWait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("input[formControlName='name']")));
         searchNameInput.clear();
         searchNameInput.sendKeys(taskName);
 
-        // Kliknij Szukaj
-        WebElement searchButton = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("button[type='submit']")));
-        // lub inny selektor przycisku szukania, np. button z lupką
+        WebElement searchButton = longWait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("button[type='submit']")));
         searchButton.click();
 
-        // Czekaj chwilę na przeładowanie tabeli (częsty błąd: test sprawdza tabelę zanim ta się odświeży)
-        // Jeśli masz spinner ładowania, warto na niego poczekać:
-        // wait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(".mat-spinner")));
+        System.out.println(">>> Kliknięto szukaj. Czekam na tabelę...");
 
-        // 8. Asercja w tabeli
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("table.mat-mdc-table")));
+        // Czekamy aż tabela się odświeży (spinner zniknie)
+        try {
+            longWait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(".mat-spinner"))); // Jeśli masz spinner
+        } catch (Exception e) {
+        }
 
-        boolean rowFound = wait.until(ExpectedConditions.textToBePresentInElementLocated(
+        // 10. Asercja
+        longWait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("table.mat-mdc-table")));
+
+        // Dodatkowy sleep przed szukaniem tekstu w tabeli
+        Thread.sleep(2000);
+
+        boolean rowFound = longWait.until(ExpectedConditions.textToBePresentInElementLocated(
                 By.cssSelector("table.mat-mdc-table"), fullOrderName
         ));
+
+        if (rowFound) {
+            System.out.println(">>> SUKCES: Znaleziono zadanie w tabeli!");
+        }
 
         assertTrue(rowFound, "Nie znaleziono zadania dla firmy: " + fullOrderName);
     }
 
-    // --- METODA POMOCNICZA DO AUTOCOMPLETE (Dodaj do klasy) ---
-    // Zmień sygnaturę metody - usuń "WebElement container"
-    public void selectFromAutocomplete(String formControlName, String value) {
-        // 1. Znajdź selektor
+    // --- METODA POMOCNICZA (SPOWOLNIONA I PANCERNA) ---
+    public void selectFromAutocompleteSlow(String formControlName, String value, WebDriverWait customWait) throws InterruptedException {
+        System.out.println("   -> Autocomplete: Szukam pola " + formControlName);
+
         By inputLocator = By.cssSelector("mat-dialog-container input[formControlName='" + formControlName + "']");
 
-        // ZMIANA: Czekamy na OBECNOŚĆ w kodzie (nie musi być widoczny na ekranie)
-        WebElement input = wait.until(ExpectedConditions.presenceOfElementLocated(inputLocator));
-
-        // ZMIANA: Scrollujemy do elementu (to naprawia problem małego ekranu na Linuxie)
+        // Scroll + Wait
+        WebElement input = customWait.until(ExpectedConditions.presenceOfElementLocated(inputLocator));
         ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center', inline: 'nearest'});", input);
+        customWait.until(ExpectedConditions.visibilityOf(input));
 
-        // Teraz czekamy aż faktycznie będzie widoczny i klikalny
-        wait.until(ExpectedConditions.visibilityOf(input));
-
-        // 2. Kliknij i wyczyść
+        // Kliknij i Wyczyść
         ((JavascriptExecutor) driver).executeScript("arguments[0].click();", input);
         input.clear();
+        Thread.sleep(500); // wolniej
 
-        // 3. Wpisz wartość + Event input
+        // Wpisz + Dispatch Event
         input.sendKeys(value);
-        ((JavascriptExecutor) driver).executeScript(
-                "arguments[0].dispatchEvent(new Event('input', { bubbles: true }));",
-                input
-        );
+        ((JavascriptExecutor) driver).executeScript("arguments[0].dispatchEvent(new Event('input', { bubbles: true }));", input);
 
-        try { Thread.sleep(500); } catch (Exception e) {}
+        System.out.println("   -> Autocomplete: Wpisano '" + value + "'. Czekam na listę...");
+        Thread.sleep(1000); // Czekaj na backend
 
-        // 4. Czekaj na listę
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".cdk-overlay-pane")));
+        // Czekaj na Overlay
+        customWait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".cdk-overlay-pane")));
 
-        // 5. Wybierz pierwszą opcję
+        // Wybierz PIERWSZĄ opcję (niezależnie od tekstu)
         By firstOptionLocator = By.cssSelector("mat-option");
-        WebElement option = wait.until(ExpectedConditions.elementToBeClickable(firstOptionLocator));
+        WebElement option = customWait.until(ExpectedConditions.elementToBeClickable(firstOptionLocator));
 
-        // Scroll do opcji też się przydaje
-        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center', inline: 'nearest'});", option);
+        System.out.println("   -> Autocomplete: Lista widoczna. Klikam w pierwszą opcję.");
         ((JavascriptExecutor) driver).executeScript("arguments[0].click();", option);
+        Thread.sleep(500);
 
-        // 6. Zamknij overlay i przenieś focus
+        // Zamknij ESCAPEM
         input.sendKeys(Keys.ESCAPE);
 
-        // DODATKOWE ZABEZPIECZENIE:
-        // Klikamy w tło dialogu (np. w tytuł), żeby na pewno zdjąć focus z inputa.
-        // To definitywnie zamyka wszystkie overlaye.
+        // Kliknij w Tytuł Dialogu (żeby na pewno zdjąć focus)
         try {
-            WebElement dialogTitle = driver.findElement(By.cssSelector("h2[mat-dialog-title]"));
-            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", dialogTitle);
+            driver.findElement(By.cssSelector("h2")).click();
         } catch (Exception e) {
-            // Ignorujemy jeśli nie ma tytułu
         }
 
+        // Czekaj aż zniknie lista
         try {
-            wait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(".cdk-overlay-pane")));
-        } catch (Exception e) {}
+            customWait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(".cdk-overlay-pane")));
+        } catch (Exception e) {
+        }
+
+        System.out.println("   -> Autocomplete: Zakończono wybór dla " + formControlName);
     }
-
-
 
 
     @Test
