@@ -41,53 +41,64 @@ public class TaskTest extends TestDatabaseSetup {
 
         openPanel();
 
+        // 1. Kliknij "Dodaj nowe zadanie"
         WebElement addButton = wait.until(ExpectedConditions.elementToBeClickable(
                 By.xpath("//button[contains(., 'Dodaj nowe zadanie')]")
         ));
-        // Używamy JS click, bo przycisk może być przesłonięty animacją panelu
         ((JavascriptExecutor) driver).executeScript("arguments[0].click();", addButton);
 
         // 2. Czekaj na Dialog
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("mat-dialog-container")));
 
-        // 3. Wypełnij Nazwę (też warto szukać globalnie, żeby uniknąć StaleElement)
+        // 3. Wypełnij Nazwę
         WebElement nameInput = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("mat-dialog-container input[formControlName='name']")));
         nameInput.clear();
         nameInput.sendKeys(taskName);
 
-        // 4. Obsługa Autocomplete - NOWE WYWOŁANIE (bez zmiennej dialog)
+        // 4. Wypełnij Zamówienie (Autocomplete 1)
         selectFromAutocomplete("orderSearch", orderName);
 
-        // Tutaj nie musisz już robić waita na zniknięcie overlay, bo metoda to robi w środku.
+        // --- Czekaj aż zniknie lista podpowiedzi ---
+        wait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(".cdk-overlay-pane")));
 
+        // 5. Wypełnij Pracownika (Autocomplete 2)
         selectFromAutocomplete("employeeSearch", employeeName);
 
-        // 5. Zapisz - szukamy przycisku świeżo w DOM
+        // 6. Zapisz
         WebElement saveButton = wait.until(ExpectedConditions.elementToBeClickable(
                 By.xpath("//mat-dialog-container//button[contains(., 'Zapisz')]")
         ));
+
+        // Upewniamy się, że przycisk jest aktywny (formularz waliduje się poprawnie)
+        wait.until(ExpectedConditions.not(ExpectedConditions.attributeContains(saveButton, "disabled", "true")));
         ((JavascriptExecutor) driver).executeScript("arguments[0].click();", saveButton);
 
-        // 6. Weryfikacja
-        // Zamiast sprawdzać obiekt 'dialog', sprawdzamy czy element pasujący do selektora zniknął.
-        // To chroni przed StaleElementReferenceException.
+        // 7. Weryfikacja zamknięcia dialogu
         wait.until(ExpectedConditions.invisibilityOfElementLocated(By.tagName("mat-dialog-container")));
 
-        // Upewniamy się, że panel wyszukiwania jest otwarty
+        // --- PRZYWRÓCONA LOGIKA WYSZUKIWANIA ---
+        // Musimy znaleźć to zadanie, żeby potwierdzić utworzenie
+
+        // Otwórz panel wyszukiwania (chyba że openPanel() sam sprawdza czy jest otwarty)
         openPanel();
 
-        WebElement searchNameInput = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("input[formcontrolname='name']")));
+        // Wpisz nazwę zadania w filtry
+        WebElement searchNameInput = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("input[formControlName='name']")));
         searchNameInput.clear();
         searchNameInput.sendKeys(taskName);
 
+        // Kliknij Szukaj
         WebElement searchButton = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("button[type='submit']")));
+        // lub inny selektor przycisku szukania, np. button z lupką
         searchButton.click();
 
-        // 7. Asercja
-        // Czekamy na załadowanie tabeli
+        // Czekaj chwilę na przeładowanie tabeli (częsty błąd: test sprawdza tabelę zanim ta się odświeży)
+        // Jeśli masz spinner ładowania, warto na niego poczekać:
+        // wait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(".mat-spinner")));
+
+        // 8. Asercja w tabeli
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("table.mat-mdc-table")));
 
-        // Szukamy konkretnego wiersza
         boolean rowFound = wait.until(ExpectedConditions.textToBePresentInElementLocated(
                 By.cssSelector("table.mat-mdc-table"), fullOrderName
         ));
@@ -98,42 +109,42 @@ public class TaskTest extends TestDatabaseSetup {
     // --- METODA POMOCNICZA DO AUTOCOMPLETE (Dodaj do klasy) ---
     // Zmień sygnaturę metody - usuń "WebElement container"
     public void selectFromAutocomplete(String formControlName, String value) {
-
-        // 1. Szukamy inputa GLOBALNIE, ale wewnątrz dialogu.
-        // Dzięki temu unikamy błędu "Stale Element" na kontenerze dialogu.
+        // 1. Znajdź input wewnątrz otwartego dialogu
+        // Używamy "input[formControlName...]", co idealnie pasuje do Twojego HTML
         By inputLocator = By.cssSelector("mat-dialog-container input[formControlName='" + formControlName + "']");
 
-        // Czekamy na widoczność inputa (wait sam odświeży referencję, jeśli DOM się zmienił)
+        // Czekamy na widoczność inputa
         WebElement input = wait.until(ExpectedConditions.visibilityOfElementLocated(inputLocator));
 
-        // 2. Klikamy i czyścimy (JS jest pewniejszy w Angularze)
+        // 2. Kliknij i wyczyść (JS w Angularze jest bezpieczniejszy)
         ((JavascriptExecutor) driver).executeScript("arguments[0].click();", input);
         input.clear();
 
-        // 3. Wpisujemy wartość
+        // 3. Wpisz wartość
         input.sendKeys(value);
 
-        // Krótki sleep na debounce Angulara
-        try { Thread.sleep(300); } catch (Exception e) {}
+        // Krótki sleep na "debounce" Angulara (serwer musi przetworzyć zapytanie)
+        try { Thread.sleep(500); } catch (Exception e) {}
 
-        // 4. Czekamy na listę opcji (Overlay)
+        // 4. Czekaj na listę opcji (Overlay)
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".cdk-overlay-pane")));
 
-        // 5. Szukamy opcji i klikamy
+        // 5. Znajdź opcję zawierającą tekst
+        // W Twoim HTML opcja wyświetla: {{ e.firstName }} {{ e.lastName }}
         By optionLocator = By.xpath("//mat-option[contains(., '" + value + "')]");
 
-        // Ważne: Czekamy aż opcja będzie klikalna
         WebElement option = wait.until(ExpectedConditions.elementToBeClickable(optionLocator));
         ((JavascriptExecutor) driver).executeScript("arguments[0].click();", option);
 
-        // 6. FIX DLA LINUXA: Zamykamy overlay ESCAPEM na inputcie
+        // --- KLUCZOWE: Zamknij overlay ---
+        // Wymuszamy zamknięcie listy, żeby nie zasłaniała następnego pola
         input.sendKeys(Keys.ESCAPE);
 
-        // Upewniamy się, że overlay zniknął (z try-catch na wypadek gdyby zniknął błyskawicznie)
+        // Upewniamy się, że overlay zniknął zanim pójdziemy dalej
         try {
             wait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(".cdk-overlay-pane")));
         } catch (Exception e) {
-            // Ignorujemy, jeśli już zniknął
+            // Ignorujemy timeout przy znikaniu - ważne, że próbowaliśmy zamknąć
         }
     }
 
