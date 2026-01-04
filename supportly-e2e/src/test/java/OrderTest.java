@@ -122,19 +122,6 @@ public class OrderTest extends TestDatabaseSetup {
         assertTrue(emailInput.getAttribute("value").isEmpty());
     }
 
-    @Override
-    public void openPanel() {
-        WebElement panelHeader = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("mat-expansion-panel-header")));
-        if (panelHeader.getAttribute("aria-expanded") == null || "false".equals(panelHeader.getAttribute("aria-expanded"))) {
-            panelHeader.click();
-        }
-        // Czekamy aż panel się ustabilizuje (animacja)
-        try {
-            wait.until(ExpectedConditions.attributeToBe(panelHeader, "aria-expanded", "true"));
-        } catch (Exception e) {
-            // Ignorujemy timeout jeśli panel jest już otwarty, ale atrybut wolno się odświeża
-        }
-    }
 
     @Test
     public void createOrderFullProcess() {
