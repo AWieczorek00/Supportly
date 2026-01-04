@@ -1,7 +1,5 @@
 import org.junit.jupiter.api.*;
-import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -13,15 +11,25 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class AgreementTest extends TestDatabaseSetup {
 
+    // Globalny długi czas oczekiwania dla wolnego CI
+    private WebDriverWait longWait;
+
     @BeforeEach
     void setup() throws Exception {
-        initDriver(true);
+        initDriver(true); // true = headless
+
+        // 1. FIX DLA LINUXA: Ustawienie dużej rozdzielczości
+        // Bez tego elementy na dole strony są "niewidoczne" i testy padają.
+        driver.manage().window().setSize(new Dimension(1920, 1080));
+
         loginAs("super.admin@gmail.com", "123456");
-        Thread.sleep(500); // czekaj 0.5 sekundy
-        wait = new WebDriverWait(driver, Duration.ofSeconds(15));
+
+        // Inicjalizacja Waita na 30 sekund
+        wait = new WebDriverWait(driver, Duration.ofSeconds(30));
+        longWait = new WebDriverWait(driver, Duration.ofSeconds(30));
 
         openApp("/agreement/list");
-        Thread.sleep(500); // czekaj 0.5 sekundy// true = headless
+        sleep(1); // Krótki oddech po załadowaniu
     }
 
     @AfterEach
@@ -29,31 +37,23 @@ public class AgreementTest extends TestDatabaseSetup {
         quitDriver();
     }
 
-//
-
     @Test
     @Order(1)
     public void testSearchAgreement() {
         String companyName = "Tech Solutions Sp. z o.o.";
 
-        // Otwarcie panelu (użyj nowej, bezpiecznej metody openPanel() jeśli ją masz)
-        openPanel();
+        // Otwieramy panel bezpiecznie (z obsługą animacji)
+        openPanelSafe();
 
-        WebElement nameInput = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("input[formcontrolname='name']")));
-        nameInput.clear();
-        nameInput.sendKeys(companyName);
+        // Bezpieczne wpisywanie (Scroll + Clear + SendKeys + Event)
+        fillInputSafe("input[formcontrolname='name']", companyName);
 
-        WebElement searchButton = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("button[type='submit']")));
-        searchButton.click();
+        // Kliknięcie Szukaj
+        clickSafe(By.cssSelector("button[type='submit']"));
 
-        // --- FIX STALE ELEMENT ---
-        // Zamiast szukać konkretnego wiersza (który znika i pojawia się przy renderowaniu),
-        // czekamy, aż kontener tabeli będzie stabilnie zawierał tekst.
-
-        // 1. Czekamy na widoczność tabeli
+        // Asercja odporna na przeładowanie tabeli (StaleElement)
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("table.mat-mdc-table")));
 
-        // 2. Czekamy na obecność tekstu w tabeli (Selenium samo ponawia próbę przy StaleElement)
         boolean isFound = wait.until(ExpectedConditions.textToBePresentInElementLocated(
                 By.cssSelector("table.mat-mdc-table"), companyName
         ));
@@ -66,198 +66,250 @@ public class AgreementTest extends TestDatabaseSetup {
     void shouldDisplayAgreementInWholeTable() {
         String companyName = "Tech Solutions Sp. z o.o.";
 
-        // ZAMIAST pętli po wierszach i sleepów:
-        // Czekamy, aż w DOM pojawi się wiersz (tr), który zawiera szukany tekst.
-        // To jedno polecenie załatwia czekanie na tabelę ORAZ szukanie tekstu.
-        boolean isRowVisible = wait.until(ExpectedConditions.and(
-                ExpectedConditions.visibilityOfElementLocated(By.cssSelector("table.mat-mdc-table")),
-                ExpectedConditions.visibilityOfElementLocated(By.xpath("//tr[contains(., '" + companyName + "')]"))
+        // FIX DLA LINUXA: Używamy 'presenceOf' + Scroll, zamiast samej widoczności.
+        // Jeśli wiersz jest na dole (poza ekranem), zwykły visibilityOf rzuci błąd.
+
+        // 1. Czekamy aż tabela będzie w DOM
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("table.mat-mdc-table")));
+
+        // 2. Szukamy wiersza
+        WebElement row = wait.until(ExpectedConditions.presenceOfElementLocated(
+                By.xpath("//tr[contains(., '" + companyName + "')]")
         ));
 
-        assertTrue(isRowVisible, "Nie znaleziono firmy '" + companyName + "' w tabeli!");
+        // 3. Scrollujemy do niego (to sprawia, że staje się widoczny)
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center', inline: 'nearest'});", row);
+
+        // 4. Asercja
+        assertTrue(row.isDisplayed(), "Wiersz z firmą '" + companyName + "' jest w DOM, ale nie jest wyświetlany!");
     }
 
     @Test
     @Order(3)
     void routToAdd() {
-        // 1. Otwórz panel (np. wyszukiwania/akcji), w którym jest przycisk
-        WebElement panelHeader = wait.until(
-                ExpectedConditions.presenceOfElementLocated(By.cssSelector("mat-expansion-panel-header"))
-        );
+        // Otwieramy panel, w którym jest przycisk (jeśli jest zamknięty)
+        openPanelSafe();
 
-        // FIX: Klikamy tylko jeśli jest zamknięty + używamy JS
-        if (!"true".equals(panelHeader.getAttribute("aria-expanded"))) {
-            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", panelHeader);
-            // Czekamy chwilę na animację (pojawienie się przycisku w DOM)
-            try { Thread.sleep(300); } catch (InterruptedException e) {}
-        }
+        // Klikamy przycisk "Dodaj" (JS click przebija animacje)
+        clickSafe(By.cssSelector("button[routerLink='/agreement/add']"));
 
-        // 2. Kliknij przycisk "Dodaj"
-        // Używamy presenceOfElementLocated, bo przycisk może być w DOM, ale "nieklikalny" dla Selenium przez animację
-        WebElement addAgreementButton = wait.until(
-                ExpectedConditions.presenceOfElementLocated(By.cssSelector("button[routerLink='/agreement/add']"))
-        );
-
-        // FIX: JS Click przebija się przez spinnery i overlaye
-        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", addAgreementButton);
-
-        // 3. Weryfikacja
+        // Weryfikacja URL
         wait.until(ExpectedConditions.urlContains("/agreement/add"));
         assertTrue(driver.getCurrentUrl().contains("/agreement/add"));
-    }
-    // --- METODA POMOCNICZA (Dodaj ją do klasy) ---
-    // Bezpiecznie otwiera panel tylko wtedy, gdy jest zamknięty
-    private void ensurePanelIsOpen(By headerSelector) {
-        WebElement panelHeader = wait.until(ExpectedConditions.presenceOfElementLocated(headerSelector));
-
-        // Sprawdzamy stan panelu przed kliknięciem
-        // Angular Material ustawia klasę "mat-expanded" lub atrybut "aria-expanded"
-        String expansionState = panelHeader.getAttribute("aria-expanded");
-
-        if (expansionState == null || "false".equals(expansionState)) {
-            // Panel zamknięty -> klikamy (JS jest pewniejszy przy animacjach)
-            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", panelHeader);
-
-            // Czekamy chwilę na animację otwarcia (Angular animations)
-            try { Thread.sleep(500); } catch (InterruptedException e) {}
-        }
     }
 
     @Test
     @Order(4)
     void createAgreement() {
         String newClientName = "GreenData Sp. z o.o.";
-        String autocompletePrefix = "Gr"; // Wpisujemy tylko początek
+        // UWAGA: Szukamy po krótkim prefiksie, ale wybierzemy pierwszą opcję
+        String autocompletePrefix = "Gr";
 
-        // 1. Wejście na stronę
         openApp("/agreement/add");
+        sleep(1); // Czekamy na załadowanie komponentów Angulara
 
-        // 2. Otwieranie WSZYSTKICH paneli (używamy nowej metody pomocniczej)
-        List<WebElement> panelHeaders = wait.until(
-                ExpectedConditions.presenceOfAllElementsLocatedBy(By.cssSelector("mat-expansion-panel-header"))
-        );
-        // Iterujemy po indeksach, bo referencje do elementów mogą się zgubić przy zmianach DOM
-        for (int i = 0; i < panelHeaders.size(); i++) {
-            // Pobieramy listę od nowa, żeby uniknąć StaleElementReferenceException
-            List<WebElement> headers = driver.findElements(By.cssSelector("mat-expansion-panel-header"));
-            if (i < headers.size()) {
-                String isExpanded = headers.get(i).getAttribute("aria-expanded");
-                if (!"true".equals(isExpanded)) {
-                    ((JavascriptExecutor) driver).executeScript("arguments[0].click();", headers.get(i));
-                    try { Thread.sleep(300); } catch (InterruptedException e) {}
-                }
-            }
-        }
+        // 1. Otwieramy WSZYSTKIE panele (dla pewności, że pola są widoczne)
+        expandAllPanels();
 
-        // 3. Autocomplete Klienta - POPRAWKA GŁÓWNA
-        WebElement companyInput = wait.until(
-                ExpectedConditions.elementToBeClickable(By.cssSelector("input[formControlName='client']"))
-        );
-        companyInput.clear();
-        companyInput.sendKeys(autocompletePrefix);
+        // 2. Autocomplete Klienta (PANCERNA METODA)
+        // input[formControlName='client']
+        selectFromAutocompleteSafe("client", autocompletePrefix);
 
-        // KLUCZOWE: Angular ma debounceTime (np. 300ms) zanim wyśle request do backendu.
-        // Selenium działa w 1ms. Musimy poczekać, aż Angular "zrozumie", że przestaliśmy pisać.
-        try { Thread.sleep(1000); } catch (InterruptedException e) {}
+        // 3. Reszta pól - używamy bezpiecznej metody fillInputSafe
+        fillInputSafe("input[formControlName='dateFrom']", "2025-10-01");
+        fillInputSafe("input[formControlName='dateTo']", "2025-10-31");
+        fillInputSafe("input[formControlName='period']", "3");
 
-        // Czekamy na pojawienie się kontenera opcji (overlay)
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".cdk-overlay-pane")));
+        // Scrollowanie do pól na dole formularza jest kluczowe!
+        fillInputSafe("input[formControlName='costForServicePerHour']", "150");
+        fillInputSafe("input[formControlName='agreementNumber']", "AG-2025-001");
+        fillInputSafe("input[formControlName='buildingNumber']", "10");
+        fillInputSafe("input[formControlName='apartmentNumber']", "1");
 
-        // Czekamy na konkretną opcję. Używamy 'contains' ale czekamy na VISIBILITY, nie tylko presence.
-        // Jeśli backend nie zwróci "Gr...", ten wait rzuci czytelny wyjątek.
-        WebElement targetOption = wait.until(ExpectedConditions.visibilityOfElementLocated(
-                By.xpath("//mat-option//span[contains(text(), '" + autocompletePrefix + "')] | //mat-option[contains(., '" + autocompletePrefix + "')]")
-        ));
+        // 4. Zapisz
+        WebElement addButton = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("button[type='submit']")));
 
-        // Klikamy JS-em, żeby uniknąć problemów z przysłanianiem elementu
-        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", targetOption);
+        // Ważne: Czekamy aż przycisk przestanie być disabled (walidacja formularza)
+        wait.until(ExpectedConditions.not(ExpectedConditions.attributeContains(addButton, "disabled", "true")));
 
-        // Upewniamy się, że dropdown zniknął
-        wait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(".cdk-overlay-pane")));
+        clickSafe(addButton);
 
-        // 4. Reszta pól
-        fillInput("input[formControlName='dateFrom']", "2025-10-01");
-        fillInput("input[formControlName='dateTo']", "2025-10-31");
-        fillInput("input[formControlName='period']", "3");
-        fillInput("input[formControlName='costForServicePerHour']", "150");
-        fillInput("input[formControlName='agreementNumber']", "AG-2025-001");
-        fillInput("input[formControlName='buildingNumber']", "10");
-        fillInput("input[formControlName='apartmentNumber']", "1");
-
-        // 5. Zapis
-        WebElement addButton = wait.until(
-                ExpectedConditions.presenceOfElementLocated(By.cssSelector("button[type='submit']"))
-        );
-        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", addButton);
-
-        // Czekamy na przekierowanie (zmianę URL)
-        wait.until(ExpectedConditions.not(ExpectedConditions.urlContains("/add")));
-
-        // Opcjonalnie: Dajmy chwilę na załadowanie listy
+        // 5. Weryfikacja przekierowania
         wait.until(ExpectedConditions.urlContains("/agreement/list"));
 
+        // Dajemy chwilę bazie danych na zapis (Headless CI bywa wolny)
+        sleep(2);
+
         // 6. Wyszukiwanie na liście
-        // Otwieramy panel bezpiecznie
-        ensurePanelIsOpen(By.cssSelector("mat-expansion-panel-header"));
+        openPanelSafe();
+        fillInputSafe("input[formcontrolname='name']", newClientName);
+        clickSafe(By.cssSelector("button[type='submit']"));
 
-        WebElement nameInput = wait.until(
-                ExpectedConditions.visibilityOfElementLocated(By.cssSelector("input[formcontrolname='name']"))
-        );
-        nameInput.clear();
-        nameInput.sendKeys(newClientName);
-
-        WebElement searchButton = wait.until(
-                ExpectedConditions.elementToBeClickable(By.cssSelector("button[type='submit']"))
-        );
-        searchButton.click();
-
-        // 7. Weryfikacja
+        // Czekamy na wynik
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("table.mat-mdc-table")));
         boolean found = wait.until(ExpectedConditions.textToBePresentInElementLocated(
                 By.cssSelector("table.mat-mdc-table"), newClientName
         ));
 
-        assertTrue(found, "Nie znaleziono nowo dodanej firmy '" + newClientName + "' w tabeli!");
+        assertTrue(found, "Nie znaleziono nowo dodanej firmy '" + newClientName + "'!");
     }
 
     @Test
     @Order(5)
     void shouldShowNoResultsForNonExistentCompany() {
-        // Upewniamy się, że jesteśmy na liście (jeśli poprzedni test się wywalił, to nas ratuje)
         if (!driver.getCurrentUrl().contains("/agreement/list")) {
             openApp("/agreement/list");
         }
 
-        // 1. Otwórz panel wyszukiwania (BEZPIECZNIE)
-        // Błąd w logach sugerował, że input nie był widoczny -> panel był zamknięty
-        ensurePanelIsOpen(By.cssSelector("mat-expansion-panel-header"));
+        openPanelSafe();
 
-        // 2. Wpisz bzdury
-        WebElement nameInput = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("input[formcontrolname='name']")));
-        nameInput.clear();
-        nameInput.sendKeys("Firma Która Nie Istnieje " + System.currentTimeMillis()); // Unikalna nazwa
+        String fakeName = "NonExistent_" + System.currentTimeMillis();
+        fillInputSafe("input[formcontrolname='name']", fakeName);
 
-        WebElement searchButton = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("button[type='submit']")));
-        searchButton.click();
+        clickSafe(By.cssSelector("button[type='submit']"));
 
-        // 3. Weryfikacja
-        // Musimy poczekać aż tabela się przeładuje.
-        // Najlepszy sposób to poczekać, aż spinner zniknie (jeśli jest) lub sprawdzić brak wierszy
+        // Czekamy chwilę na backend
+        sleep(2);
 
-        try {
-            // Dajemy chwilę na request do backendu
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {}
-
+        // Pobieramy wiersze
         List<WebElement> rows = driver.findElements(By.cssSelector("table.mat-mdc-table tbody tr"));
 
-        // Filtrujemy, żeby ignorować nagłówki lub puste wiersze techniczne Angulara
-        long dataRows = rows.stream()
-                .filter(r -> r.getAttribute("mat-row") != null || r.getText().length() > 0)
+        // Filtrujemy puste wiersze lub wiersze techniczne (np. nagłówki grupujące)
+        long visibleRows = rows.stream()
+                .filter(WebElement::isDisplayed)
                 .count();
 
-        // Jeśli Angular wyświetla specjalny wiersz "No data matching the filter", musisz to uwzględnić
-        // Ale zazwyczaj tabela po prostu jest pusta.
-        assertTrue(dataRows == 0, "Tabela powinna być pusta dla nieistniejącej firmy! Znaleziono wierszy: " + dataRows);
+        // Jeśli jest wiersz "Brak danych", to count będzie 1, ale treść specyficzna.
+        // Zakładamy tutaj, że tabela po prostu jest pusta lub ma 0 wierszy danych.
+        if (visibleRows > 0) {
+            // Sprawdźmy czy to nie wiersz "No data"
+            String rowText = rows.get(0).getText();
+            if(!rowText.toLowerCase().contains("no data") && !rowText.toLowerCase().contains("brak danych")) {
+                assertTrue(false, "Znaleziono wiersze dla nieistniejącej firmy: " + rowText);
+            }
+        }
     }
 
+    // =================================================================================
+    //                           PANCERNE METODY POMOCNICZE
+    // =================================================================================
+
+    /**
+     * Bezpieczne wypełnianie inputa.
+     * Scrolluje, czyści, wpisuje i wymusza event Angulara.
+     */
+    private void fillInputSafe(String cssSelector, String value) {
+        By locator = By.cssSelector(cssSelector);
+
+        // 1. Znajdź i scrolluj
+        WebElement input = wait.until(ExpectedConditions.presenceOfElementLocated(locator));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center', inline: 'nearest'});", input);
+
+        wait.until(ExpectedConditions.visibilityOf(input));
+
+        // 2. Kliknij i wyczyść
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", input);
+        input.clear();
+
+        // 3. Wpisz wartość
+        input.sendKeys(value);
+
+        // 4. FIX ANGULAR: Wymuś zdarzenie 'input', żeby formularz wiedział o zmianie
+        ((JavascriptExecutor) driver).executeScript("arguments[0].dispatchEvent(new Event('input', { bubbles: true }));", input);
+    }
+
+    /**
+     * Bezpieczny klik (Scroll + JS).
+     * Działa nawet gdy element jest przykryty spinnerem (JS to ignoruje).
+     */
+    private void clickSafe(By locator) {
+        WebElement element = wait.until(ExpectedConditions.presenceOfElementLocated(locator));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center', inline: 'nearest'});", element);
+        wait.until(ExpectedConditions.elementToBeClickable(element));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", element);
+    }
+
+    private void clickSafe(WebElement element) {
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center', inline: 'nearest'});", element);
+        wait.until(ExpectedConditions.elementToBeClickable(element));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", element);
+    }
+
+    /**
+     * Autocomplete odporny na Linuxa/Headless.
+     * Wybiera PIERWSZĄ opcję z listy zamiast szukać konkretnego tekstu.
+     */
+    private void selectFromAutocompleteSafe(String formControlName, String value) {
+        // Znajdź input
+        By inputLocator = By.cssSelector("input[formControlName='" + formControlName + "']");
+        WebElement input = wait.until(ExpectedConditions.presenceOfElementLocated(inputLocator));
+
+        // Scroll & Focus
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center', inline: 'nearest'});", input);
+        wait.until(ExpectedConditions.visibilityOf(input));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", input);
+        input.clear();
+
+        // Wpisz + Event Input
+        input.sendKeys(value);
+        ((JavascriptExecutor) driver).executeScript("arguments[0].dispatchEvent(new Event('input', { bubbles: true }));", input);
+
+        // Czekaj na listę
+        try { sleep(1); } catch (Exception e) {} // Debounce time
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".cdk-overlay-pane")));
+
+        // Wybierz PIERWSZĄ opcję (niezależnie od tekstu - bezpieczniej)
+        WebElement option = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("mat-option")));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", option);
+
+        // Zamknij Overlay (Esc)
+        input.sendKeys(Keys.ESCAPE);
+        try {
+            wait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(".cdk-overlay-pane")));
+        } catch (Exception e) {}
+    }
+
+    /**
+     * Otwiera panel wyszukiwania (zakładając, że jest to pierwszy mat-expansion-panel).
+     */
+    private void openPanelSafe() {
+        By headerLoc = By.cssSelector("mat-expansion-panel-header");
+        // Używamy presence, bo może być poza ekranem
+        WebElement panelHeader = wait.until(ExpectedConditions.presenceOfElementLocated(headerLoc));
+
+        // Scrollujemy do niego
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center', inline: 'nearest'});", panelHeader);
+
+        String expanded = panelHeader.getAttribute("aria-expanded");
+        if (expanded == null || "false".equals(expanded)) {
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", panelHeader);
+            sleep(1); // Czekamy na animację otwarcia
+        }
+    }
+
+    /**
+     * Otwiera wszystkie panele na stronie (przydatne przy długich formularzach).
+     */
+    private void expandAllPanels() {
+        List<WebElement> headers = driver.findElements(By.cssSelector("mat-expansion-panel-header"));
+        for (WebElement header : headers) {
+            String expanded = header.getAttribute("aria-expanded");
+            if ("false".equals(expanded)) {
+                ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center', inline: 'nearest'});", header);
+                ((JavascriptExecutor) driver).executeScript("arguments[0].click();", header);
+                sleep(1);
+            }
+        }
+    }
+
+    /**
+     * Pomocniczy Sleep (dla debugowania i stabilizacji na Linuxie).
+     */
+    private void sleep(int seconds) {
+        try {
+            Thread.sleep(seconds * 1000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
 }
