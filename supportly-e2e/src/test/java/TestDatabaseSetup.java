@@ -1,5 +1,6 @@
 import org.example.BaseE2ETest;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 
 import java.sql.*;
 import java.time.LocalDate;
@@ -15,8 +16,8 @@ public class TestDatabaseSetup extends BaseE2ETest {
     private static final String USER = "supportly";
     private static final String PASS = "Qwerty.1";
 
-    @BeforeAll
-    static void setupDatabase() {
+    @BeforeEach
+    void setupDatabase() {
 
         if(PROFILE.toLowerCase().equals("mssql")) {
             URL=URL+";databaseName=supportly;encrypt=false";
