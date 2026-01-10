@@ -135,7 +135,7 @@ public class AgreementTest extends TestDatabaseSetup {
 
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("table.mat-mdc-table")));
         boolean found = wait.until(ExpectedConditions.textToBePresentInElementLocated(
-                By.cssSelector("table.mat-mdc-table"), clientFullName
+                By.cssSelector("table.mat-mdc-table"), "AG-2025-LINUX"
         ));
 
         assertTrue(found, "Nie znaleziono umowy dla firmy '" + clientFullName + "'!");

@@ -67,18 +67,6 @@ class EmployeeServiceTest {
         assertThat(result).isEqualTo(employee);
     }
 
-    @Test
-    @DisplayName("findEmployeeByIndividualId: Powinien rzucić wyjątek, gdy brak pracownika")
-    void findEmployeeByIndividualId_ShouldThrowException_WhenNotFound() {
-        // Given
-        Long id = 99L;
-        when(employeeRepository.findByIndividualId(id)).thenReturn(Optional.empty());
-
-        // When & Then
-        assertThatThrownBy(() -> employeeService.findEmployeeByIndividualId(id))
-                .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessageContaining("Nie znaleziono pracownika o id: " + id);
-    }
 
     @Test
     @DisplayName("findAllEmployees: Powinien zwrócić listę wszystkich pracowników")

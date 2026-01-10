@@ -1,6 +1,7 @@
 import org.example.BaseE2ETest;
 import org.junit.jupiter.api.*;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -10,8 +11,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class OrderTest extends TestDatabaseSetup {
@@ -32,31 +32,68 @@ public class OrderTest extends TestDatabaseSetup {
         quitDriver();
     }
 
+//    @Test
+//    @Order(1)
+//    public void searchOrderByCompanyName() {
+//        String companyName = "Tech Solutions Sp. z o.o.";
+//
+//        openPanel();
+//
+//        WebElement companyInput = wait.until(ExpectedConditions.visibilityOfElementLocated(
+//                By.xpath("//mat-form-field[.//mat-label[contains(., 'Nazwa firmy')]]//input")
+//        ));
+//        companyInput.clear();
+//        companyInput.sendKeys(companyName);
+//
+//        WebElement searchButton = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("button[type='submit']")));
+//        searchButton.click();
+//
+//        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("table.mat-mdc-table")));
+//
+//        String xpathRow = String.format("//tr[contains(., '%s')]", companyName);
+//        boolean found = wait.until(ExpectedConditions.and(
+//                ExpectedConditions.visibilityOfElementLocated(By.xpath(xpathRow)),
+//                ExpectedConditions.textToBePresentInElementLocated(By.cssSelector("table"), companyName)
+//        ));
+//
+//        assertTrue(found);
+//    }
+
     @Test
     @Order(1)
     public void searchOrderByCompanyName() {
         String companyName = "Tech Solutions Sp. z o.o.";
 
+        // 1. Otwórz panel (używamy Twojej metody pancernej)
         openPanel();
 
+        // 2. Wpisz nazwę firmy
+        // Używamy xpath, bo input jest wewnątrz mat-form-field z konkretną etykietą
         WebElement companyInput = wait.until(ExpectedConditions.visibilityOfElementLocated(
                 By.xpath("//mat-form-field[.//mat-label[contains(., 'Nazwa firmy')]]//input")
         ));
         companyInput.clear();
         companyInput.sendKeys(companyName);
 
-        WebElement searchButton = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("button[type='submit']")));
-        searchButton.click();
+        // 3. Kliknij Szukaj (JS Click dla pewności)
+        WebElement searchButton = driver.findElement(By.cssSelector("button[type='submit']"));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", searchButton);
 
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("table.mat-mdc-table")));
-
+        // 4. Czekaj na wyniki
+        // Najpierw czekamy, aż w tabeli pojawi się wiersz z szukaną nazwą
         String xpathRow = String.format("//tr[contains(., '%s')]", companyName);
-        boolean found = wait.until(ExpectedConditions.and(
-                ExpectedConditions.visibilityOfElementLocated(By.xpath(xpathRow)),
-                ExpectedConditions.textToBePresentInElementLocated(By.cssSelector("table"), companyName)
-        ));
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(xpathRow)));
 
-        assertTrue(found);
+        // 5. Weryfikacja liczby wierszy
+        // Szukamy wszystkich wierszy danych (pomijając nagłówek) używając selektora 'tr[mat-row]'
+        // Angular Material oznacza wiersze danych atrybutem 'mat-row'
+        List<WebElement> rows = driver.findElements(By.cssSelector("table.mat-mdc-table tr[mat-row]"));
+
+        // --- NOWOŚĆ: Sprawdzenie liczby elementów ---
+        assertEquals(1, rows.size(), "Tabela powinna zawierać dokładnie jeden wiersz po przefiltrowaniu!");
+
+        // Dodatkowo sprawdzamy, czy ten jedyny wiersz faktycznie zawiera nazwę
+        assertTrue(rows.get(0).getText().contains(companyName), "Znaleziony wiersz nie zawiera nazwy firmy!");
     }
 
 

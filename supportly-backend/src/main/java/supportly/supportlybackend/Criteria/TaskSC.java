@@ -11,7 +11,7 @@ import supportly.supportlybackend.Model.Order;
 public class TaskSC {
 
     private String name;
-    @SpecField(path = "client.companys.name")
+    @SpecField(path = "client.company.name")
     private String companyName;
     @SpecField(path = "employee.firstName")
     private String firstName;
