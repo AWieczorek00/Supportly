@@ -252,4 +252,578 @@ public class TaskServiceTest {
         assertThat(result.get(0).getName()).isEqualTo("Task 1");
     }
 
+    @Test
+    @DisplayName("search: Powinien filtrować po statusie done")
+    void shouldSearchTasksByDoneStatus2() {
+        // Given
+        Task t1 = new Task();
+        t1.setName("Task 1");
+        t1.setDone(true);
+        taskRepository.save(t1);
+
+        Task t2 = new Task();
+        t2.setName("Task 2");
+        t2.setDone(false);
+        taskRepository.save(t2);
+
+        TaskSC criteria = new TaskSC();
+        criteria.setDone(true);
+
+        // When
+        List<TaskDto> result = taskService.search(criteria);
+
+        // Then
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getName()).isEqualTo("Task 1");
+    }
+
+    @Test
+    @DisplayName("search: Powinien filtrować po statusie done")
+    void shouldSearchTasksByDoneStatus3() {
+        // Given
+        Task t1 = new Task();
+        t1.setName("Task 1");
+        t1.setDone(true);
+        taskRepository.save(t1);
+
+        Task t2 = new Task();
+        t2.setName("Task 2");
+        t2.setDone(false);
+        taskRepository.save(t2);
+
+        TaskSC criteria = new TaskSC();
+        criteria.setDone(true);
+
+        // When
+        List<TaskDto> result = taskService.search(criteria);
+
+        // Then
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getName()).isEqualTo("Task 1");
+    }
+
+    @Test
+    @DisplayName("search: Powinien filtrować po statusie done")
+    void shouldSearchTasksByDoneStatus4() {
+        // Given
+        Task t1 = new Task();
+        t1.setName("Task 1");
+        t1.setDone(true);
+        taskRepository.save(t1);
+
+        Task t2 = new Task();
+        t2.setName("Task 2");
+        t2.setDone(false);
+        taskRepository.save(t2);
+
+        TaskSC criteria = new TaskSC();
+        criteria.setDone(true);
+
+        // When
+        List<TaskDto> result = taskService.search(criteria);
+
+        // Then
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getName()).isEqualTo("Task 1");
+    }
+
+    @Test
+    @DisplayName("search: Powinien filtrować po statusie done")
+    void shouldSearchTasksByDoneStatus5() {
+        // Given
+        Task t1 = new Task();
+        t1.setName("Task 1");
+        t1.setDone(true);
+        taskRepository.save(t1);
+
+        Task t2 = new Task();
+        t2.setName("Task 2");
+        t2.setDone(false);
+        taskRepository.save(t2);
+
+        TaskSC criteria = new TaskSC();
+        criteria.setDone(true);
+
+        // When
+        List<TaskDto> result = taskService.search(criteria);
+
+        // Then
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getName()).isEqualTo("Task 1");
+    }
+
+    @Test
+    @DisplayName("search: Powinien filtrować po statusie done")
+    void shouldSearchTasksByDoneStatus6() {
+        // Given
+        Task t1 = new Task();
+        t1.setName("Task 1");
+        t1.setDone(true);
+        taskRepository.save(t1);
+
+        Task t2 = new Task();
+        t2.setName("Task 2");
+        t2.setDone(false);
+        taskRepository.save(t2);
+
+        TaskSC criteria = new TaskSC();
+        criteria.setDone(true);
+
+        // When
+        List<TaskDto> result = taskService.search(criteria);
+
+        // Then
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getName()).isEqualTo("Task 1");
+    }
+
+    @Test
+    @DisplayName("search: Powinien filtrować po statusie done")
+    void shouldSearchTasksByDoneStatus7() {
+        // Given
+        Task t1 = new Task();
+        t1.setName("Task 1");
+        t1.setDone(true);
+        taskRepository.save(t1);
+
+        Task t2 = new Task();
+        t2.setName("Task 2");
+        t2.setDone(false);
+        taskRepository.save(t2);
+
+        TaskSC criteria = new TaskSC();
+        criteria.setDone(true);
+
+        // When
+        List<TaskDto> result = taskService.search(criteria);
+
+        // Then
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getName()).isEqualTo("Task 1");
+    }
+
+    @Test
+    @DisplayName("search: Powinien filtrować po statusie done")
+    void shouldSearchTasksByDoneStatus8() {
+        // Given
+        Task t1 = new Task();
+        t1.setName("Task 1");
+        t1.setDone(true);
+        taskRepository.save(t1);
+
+        Task t2 = new Task();
+        t2.setName("Task 2");
+        t2.setDone(false);
+        taskRepository.save(t2);
+
+        TaskSC criteria = new TaskSC();
+        criteria.setDone(true);
+
+        // When
+        List<TaskDto> result = taskService.search(criteria);
+
+        // Then
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getName()).isEqualTo("Task 1");
+    }
+
+    @Test
+    @DisplayName("search: Powinien filtrować po statusie done")
+    void shouldSearchTasksByDoneStatus9() {
+        // Given
+        Task t1 = new Task();
+        t1.setName("Task 1");
+        t1.setDone(true);
+        taskRepository.save(t1);
+
+        Task t2 = new Task();
+        t2.setName("Task 2");
+        t2.setDone(false);
+        taskRepository.save(t2);
+
+        TaskSC criteria = new TaskSC();
+        criteria.setDone(true);
+
+        // When
+        List<TaskDto> result = taskService.search(criteria);
+
+        // Then
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getName()).isEqualTo("Task 1");
+    }
+
+    @Test
+    @DisplayName("search: Powinien filtrować po statusie done")
+    void shouldSearchTasksByDoneStatus10() {
+        // Given
+        Task t1 = new Task();
+        t1.setName("Task 1");
+        t1.setDone(true);
+        taskRepository.save(t1);
+
+        Task t2 = new Task();
+        t2.setName("Task 2");
+        t2.setDone(false);
+        taskRepository.save(t2);
+
+        TaskSC criteria = new TaskSC();
+        criteria.setDone(true);
+
+        // When
+        List<TaskDto> result = taskService.search(criteria);
+
+        // Then
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getName()).isEqualTo("Task 1");
+    }
+
+    @Test
+    @DisplayName("search: Powinien filtrować po statusie done")
+    void shouldSearchTasksByDoneStatus11() {
+        // Given
+        Task t1 = new Task();
+        t1.setName("Task 1");
+        t1.setDone(true);
+        taskRepository.save(t1);
+
+        Task t2 = new Task();
+        t2.setName("Task 2");
+        t2.setDone(false);
+        taskRepository.save(t2);
+
+        TaskSC criteria = new TaskSC();
+        criteria.setDone(true);
+
+        // When
+        List<TaskDto> result = taskService.search(criteria);
+
+        // Then
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getName()).isEqualTo("Task 1");
+    }
+
+    @Test
+    @DisplayName("search: Powinien filtrować po statusie done")
+    void shouldSearchTasksByDoneStatus12() {
+        // Given
+        Task t1 = new Task();
+        t1.setName("Task 1");
+        t1.setDone(true);
+        taskRepository.save(t1);
+
+        Task t2 = new Task();
+        t2.setName("Task 2");
+        t2.setDone(false);
+        taskRepository.save(t2);
+
+        TaskSC criteria = new TaskSC();
+        criteria.setDone(true);
+
+        // When
+        List<TaskDto> result = taskService.search(criteria);
+
+        // Then
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getName()).isEqualTo("Task 1");
+    }
+
+    @Test
+    @DisplayName("search: Powinien filtrować po statusie done")
+    void shouldSearchTasksByDoneStatus13() {
+        // Given
+        Task t1 = new Task();
+        t1.setName("Task 1");
+        t1.setDone(true);
+        taskRepository.save(t1);
+
+        Task t2 = new Task();
+        t2.setName("Task 2");
+        t2.setDone(false);
+        taskRepository.save(t2);
+
+        TaskSC criteria = new TaskSC();
+        criteria.setDone(true);
+
+        // When
+        List<TaskDto> result = taskService.search(criteria);
+
+        // Then
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getName()).isEqualTo("Task 1");
+    }
+
+    @Test
+    @DisplayName("search: Powinien filtrować po statusie done")
+    void shouldSearchTasksByDoneStatus14() {
+        // Given
+        Task t1 = new Task();
+        t1.setName("Task 1");
+        t1.setDone(true);
+        taskRepository.save(t1);
+
+        Task t2 = new Task();
+        t2.setName("Task 2");
+        t2.setDone(false);
+        taskRepository.save(t2);
+
+        TaskSC criteria = new TaskSC();
+        criteria.setDone(true);
+
+        // When
+        List<TaskDto> result = taskService.search(criteria);
+
+        // Then
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getName()).isEqualTo("Task 1");
+    }
+
+    @Test
+    @DisplayName("search: Powinien filtrować po statusie done")
+    void shouldSearchTasksByDoneStatus15() {
+        // Given
+        Task t1 = new Task();
+        t1.setName("Task 1");
+        t1.setDone(true);
+        taskRepository.save(t1);
+
+        Task t2 = new Task();
+        t2.setName("Task 2");
+        t2.setDone(false);
+        taskRepository.save(t2);
+
+        TaskSC criteria = new TaskSC();
+        criteria.setDone(true);
+
+        // When
+        List<TaskDto> result = taskService.search(criteria);
+
+        // Then
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getName()).isEqualTo("Task 1");
+    }
+
+    @Test
+    @DisplayName("search: Powinien filtrować po statusie done")
+    void shouldSearchTasksByDoneStatus16() {
+        // Given
+        Task t1 = new Task();
+        t1.setName("Task 1");
+        t1.setDone(true);
+        taskRepository.save(t1);
+
+        Task t2 = new Task();
+        t2.setName("Task 2");
+        t2.setDone(false);
+        taskRepository.save(t2);
+
+        TaskSC criteria = new TaskSC();
+        criteria.setDone(true);
+
+        // When
+        List<TaskDto> result = taskService.search(criteria);
+
+        // Then
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getName()).isEqualTo("Task 1");
+    }
+
+    @Test
+    @DisplayName("search: Powinien filtrować po statusie done")
+    void shouldSearchTasksByDoneStatus17() {
+        // Given
+        Task t1 = new Task();
+        t1.setName("Task 1");
+        t1.setDone(true);
+        taskRepository.save(t1);
+
+        Task t2 = new Task();
+        t2.setName("Task 2");
+        t2.setDone(false);
+        taskRepository.save(t2);
+
+        TaskSC criteria = new TaskSC();
+        criteria.setDone(true);
+
+        // When
+        List<TaskDto> result = taskService.search(criteria);
+
+        // Then
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getName()).isEqualTo("Task 1");
+    }
+
+    @Test
+    @DisplayName("search: Powinien filtrować po statusie done")
+    void shouldSearchTasksByDoneStatus18() {
+        // Given
+        Task t1 = new Task();
+        t1.setName("Task 1");
+        t1.setDone(true);
+        taskRepository.save(t1);
+
+        Task t2 = new Task();
+        t2.setName("Task 2");
+        t2.setDone(false);
+        taskRepository.save(t2);
+
+        TaskSC criteria = new TaskSC();
+        criteria.setDone(true);
+
+        // When
+        List<TaskDto> result = taskService.search(criteria);
+
+        // Then
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getName()).isEqualTo("Task 1");
+    }
+
+    @Test
+    @DisplayName("search: Powinien filtrować po statusie done")
+    void shouldSearchTasksByDoneStatus19() {
+        // Given
+        Task t1 = new Task();
+        t1.setName("Task 1");
+        t1.setDone(true);
+        taskRepository.save(t1);
+
+        Task t2 = new Task();
+        t2.setName("Task 2");
+        t2.setDone(false);
+        taskRepository.save(t2);
+
+        TaskSC criteria = new TaskSC();
+        criteria.setDone(true);
+
+        // When
+        List<TaskDto> result = taskService.search(criteria);
+
+        // Then
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getName()).isEqualTo("Task 1");
+    }
+
+    @Test
+    @DisplayName("search: Powinien filtrować po statusie done")
+    void shouldSearchTasksByDoneStatus20() {
+        // Given
+        Task t1 = new Task();
+        t1.setName("Task 1");
+        t1.setDone(true);
+        taskRepository.save(t1);
+
+        Task t2 = new Task();
+        t2.setName("Task 2");
+        t2.setDone(false);
+        taskRepository.save(t2);
+
+        TaskSC criteria = new TaskSC();
+        criteria.setDone(true);
+
+        // When
+        List<TaskDto> result = taskService.search(criteria);
+
+        // Then
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getName()).isEqualTo("Task 1");
+    }
+
+    @Test
+    @DisplayName("search: Powinien filtrować po statusie done")
+    void shouldSearchTasksByDoneStatus21() {
+        // Given
+        Task t1 = new Task();
+        t1.setName("Task 1");
+        t1.setDone(true);
+        taskRepository.save(t1);
+
+        Task t2 = new Task();
+        t2.setName("Task 2");
+        t2.setDone(false);
+        taskRepository.save(t2);
+
+        TaskSC criteria = new TaskSC();
+        criteria.setDone(true);
+
+        // When
+        List<TaskDto> result = taskService.search(criteria);
+
+        // Then
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getName()).isEqualTo("Task 1");
+    }
+
+    @Test
+    @DisplayName("search: Powinien filtrować po statusie done")
+    void shouldSearchTasksByDoneStatus22() {
+        // Given
+        Task t1 = new Task();
+        t1.setName("Task 1");
+        t1.setDone(true);
+        taskRepository.save(t1);
+
+        Task t2 = new Task();
+        t2.setName("Task 2");
+        t2.setDone(false);
+        taskRepository.save(t2);
+
+        TaskSC criteria = new TaskSC();
+        criteria.setDone(true);
+
+        // When
+        List<TaskDto> result = taskService.search(criteria);
+
+        // Then
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getName()).isEqualTo("Task 1");
+    }
+
+    @Test
+    @DisplayName("search: Powinien filtrować po statusie done")
+    void shouldSearchTasksByDoneStatus23() {
+        // Given
+        Task t1 = new Task();
+        t1.setName("Task 1");
+        t1.setDone(true);
+        taskRepository.save(t1);
+
+        Task t2 = new Task();
+        t2.setName("Task 2");
+        t2.setDone(false);
+        taskRepository.save(t2);
+
+        TaskSC criteria = new TaskSC();
+        criteria.setDone(true);
+
+        // When
+        List<TaskDto> result = taskService.search(criteria);
+
+        // Then
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getName()).isEqualTo("Task 1");
+    }
+
+    @Test
+    @DisplayName("search: Powinien filtrować po statusie done")
+    void shouldSearchTasksByDoneStatus24() {
+        // Given
+        Task t1 = new Task();
+        t1.setName("Task 1");
+        t1.setDone(true);
+        taskRepository.save(t1);
+
+        Task t2 = new Task();
+        t2.setName("Task 2");
+        t2.setDone(false);
+        taskRepository.save(t2);
+
+        TaskSC criteria = new TaskSC();
+        criteria.setDone(true);
+
+        // When
+        List<TaskDto> result = taskService.search(criteria);
+
+        // Then
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getName()).isEqualTo("Task 1");
+    }
 }

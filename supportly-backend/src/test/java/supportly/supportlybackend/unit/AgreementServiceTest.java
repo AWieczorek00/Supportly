@@ -32,6 +32,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+//sh "mvn verify -Dtest=**/supportlybackend/** -Dspring.profiles.active=posgres -Dmaven.test.failure.ignore=true"
+//sh "mvn verify -Dtest=**/integration/** -Dspring.profiles.active=posgres -Dmaven.test.failure.ignore=true"
+//sh "mvn verify -Dtest=**/unit/** -Dspring.profiles.active=posgres -Dmaven.test.failure.ignore=true"
 
 @ExtendWith(MockitoExtension.class)
 class AgreementServiceTest {
@@ -109,6 +112,759 @@ class AgreementServiceTest {
         LocalDate expectedDate = signedDate.plusMonths(periodMonths);
         assertThat(savedAgreement.getNextServiceDate()).isEqualTo(expectedDate);
     }
+
+    @Test
+    @DisplayName("add: Powinien obliczyć datę serwisu, przypisać firmę i zapisać umowę")
+    void add_ShouldCalculateDateAndLinkCompany_ThenSave2() {
+        // Given
+        String nip = "1234567890";
+        LocalDate signedDate = LocalDate.of(2023, 1, 15);
+        int periodMonths = 12; // np. okres roczny
+
+        // Tworzymy DTO
+        CompanyDto companyDto = new CompanyDto();
+        companyDto.setNip(nip);
+
+        AgreementDto agreementDto = new AgreementDto();
+        agreementDto.setCompany(companyDto);
+        agreementDto.setSignedDate(signedDate);
+
+        // Mockowanie obiektu Period (zakładam, że to Enum lub obiekt z metodą getMonth())
+        // Tutaj symuluję, że getPeriod() zwraca obiekt, który ma metodę getMonth() zwracającą int
+        Period periodMock = mock(Period.class);
+        when(periodMock.getMonth()).thenReturn(periodMonths);
+        agreementDto.setPeriod(periodMock);
+
+        // Tworzymy encje
+        Company companyEntity = new Company();
+        companyEntity.setNip(nip);
+
+        Agreement agreementEntity = new Agreement();
+        // Obiekt czysty przed modyfikacjami w serwisie
+
+        // Mockowanie zależności
+        when(companyService.findByNip(nip)).thenReturn(companyEntity);
+        mapperMock.when(() -> Mapper.toEntity(agreementDto)).thenReturn(agreementEntity);
+
+        // When
+        agreementService.add(agreementDto);
+
+        // Then
+        // Przechwytujemy to, co trafiło do save()
+        verify(agreementRepository).save(agreementCaptor.capture());
+        Agreement savedAgreement = agreementCaptor.getValue();
+
+        // 1. Sprawdzamy czy przypisano firmę
+        assertThat(savedAgreement.getCompany()).isEqualTo(companyEntity);
+
+        // 2. Sprawdzamy kluczową logikę biznesową: czy data została obliczona poprawnie
+        // signedDate (2023-01-15) + 12 miesięcy = 2024-01-15
+        LocalDate expectedDate = signedDate.plusMonths(periodMonths);
+        assertThat(savedAgreement.getNextServiceDate()).isEqualTo(expectedDate);
+    }
+
+    @Test
+    @DisplayName("add: Powinien obliczyć datę serwisu, przypisać firmę i zapisać umowę")
+    void add_ShouldCalculateDateAndLinkCompany_ThenSave3() {
+        // Given
+        String nip = "1234567890";
+        LocalDate signedDate = LocalDate.of(2023, 1, 15);
+        int periodMonths = 12; // np. okres roczny
+
+        // Tworzymy DTO
+        CompanyDto companyDto = new CompanyDto();
+        companyDto.setNip(nip);
+
+        AgreementDto agreementDto = new AgreementDto();
+        agreementDto.setCompany(companyDto);
+        agreementDto.setSignedDate(signedDate);
+
+        // Mockowanie obiektu Period (zakładam, że to Enum lub obiekt z metodą getMonth())
+        // Tutaj symuluję, że getPeriod() zwraca obiekt, który ma metodę getMonth() zwracającą int
+        Period periodMock = mock(Period.class);
+        when(periodMock.getMonth()).thenReturn(periodMonths);
+        agreementDto.setPeriod(periodMock);
+
+        // Tworzymy encje
+        Company companyEntity = new Company();
+        companyEntity.setNip(nip);
+
+        Agreement agreementEntity = new Agreement();
+        // Obiekt czysty przed modyfikacjami w serwisie
+
+        // Mockowanie zależności
+        when(companyService.findByNip(nip)).thenReturn(companyEntity);
+        mapperMock.when(() -> Mapper.toEntity(agreementDto)).thenReturn(agreementEntity);
+
+        // When
+        agreementService.add(agreementDto);
+
+        // Then
+        // Przechwytujemy to, co trafiło do save()
+        verify(agreementRepository).save(agreementCaptor.capture());
+        Agreement savedAgreement = agreementCaptor.getValue();
+
+        // 1. Sprawdzamy czy przypisano firmę
+        assertThat(savedAgreement.getCompany()).isEqualTo(companyEntity);
+
+        // 2. Sprawdzamy kluczową logikę biznesową: czy data została obliczona poprawnie
+        // signedDate (2023-01-15) + 12 miesięcy = 2024-01-15
+        LocalDate expectedDate = signedDate.plusMonths(periodMonths);
+        assertThat(savedAgreement.getNextServiceDate()).isEqualTo(expectedDate);
+    }
+
+    @Test
+    @DisplayName("add: Powinien obliczyć datę serwisu, przypisać firmę i zapisać umowę")
+    void add_ShouldCalculateDateAndLinkCompany_ThenSave4() {
+        // Given
+        String nip = "1234567890";
+        LocalDate signedDate = LocalDate.of(2023, 1, 15);
+        int periodMonths = 12; // np. okres roczny
+
+        // Tworzymy DTO
+        CompanyDto companyDto = new CompanyDto();
+        companyDto.setNip(nip);
+
+        AgreementDto agreementDto = new AgreementDto();
+        agreementDto.setCompany(companyDto);
+        agreementDto.setSignedDate(signedDate);
+
+        // Mockowanie obiektu Period (zakładam, że to Enum lub obiekt z metodą getMonth())
+        // Tutaj symuluję, że getPeriod() zwraca obiekt, który ma metodę getMonth() zwracającą int
+        Period periodMock = mock(Period.class);
+        when(periodMock.getMonth()).thenReturn(periodMonths);
+        agreementDto.setPeriod(periodMock);
+
+        // Tworzymy encje
+        Company companyEntity = new Company();
+        companyEntity.setNip(nip);
+
+        Agreement agreementEntity = new Agreement();
+        // Obiekt czysty przed modyfikacjami w serwisie
+
+        // Mockowanie zależności
+        when(companyService.findByNip(nip)).thenReturn(companyEntity);
+        mapperMock.when(() -> Mapper.toEntity(agreementDto)).thenReturn(agreementEntity);
+
+        // When
+        agreementService.add(agreementDto);
+
+        // Then
+        // Przechwytujemy to, co trafiło do save()
+        verify(agreementRepository).save(agreementCaptor.capture());
+        Agreement savedAgreement = agreementCaptor.getValue();
+
+        // 1. Sprawdzamy czy przypisano firmę
+        assertThat(savedAgreement.getCompany()).isEqualTo(companyEntity);
+
+        // 2. Sprawdzamy kluczową logikę biznesową: czy data została obliczona poprawnie
+        // signedDate (2023-01-15) + 12 miesięcy = 2024-01-15
+        LocalDate expectedDate = signedDate.plusMonths(periodMonths);
+        assertThat(savedAgreement.getNextServiceDate()).isEqualTo(expectedDate);
+    }
+
+    @Test
+    @DisplayName("add: Powinien obliczyć datę serwisu, przypisać firmę i zapisać umowę")
+    void add_ShouldCalculateDateAndLinkCompany_ThenSave5() {
+        // Given
+        String nip = "1234567890";
+        LocalDate signedDate = LocalDate.of(2023, 1, 15);
+        int periodMonths = 12; // np. okres roczny
+
+        // Tworzymy DTO
+        CompanyDto companyDto = new CompanyDto();
+        companyDto.setNip(nip);
+
+        AgreementDto agreementDto = new AgreementDto();
+        agreementDto.setCompany(companyDto);
+        agreementDto.setSignedDate(signedDate);
+
+        // Mockowanie obiektu Period (zakładam, że to Enum lub obiekt z metodą getMonth())
+        // Tutaj symuluję, że getPeriod() zwraca obiekt, który ma metodę getMonth() zwracającą int
+        Period periodMock = mock(Period.class);
+        when(periodMock.getMonth()).thenReturn(periodMonths);
+        agreementDto.setPeriod(periodMock);
+
+        // Tworzymy encje
+        Company companyEntity = new Company();
+        companyEntity.setNip(nip);
+
+        Agreement agreementEntity = new Agreement();
+        // Obiekt czysty przed modyfikacjami w serwisie
+
+        // Mockowanie zależności
+        when(companyService.findByNip(nip)).thenReturn(companyEntity);
+        mapperMock.when(() -> Mapper.toEntity(agreementDto)).thenReturn(agreementEntity);
+
+        // When
+        agreementService.add(agreementDto);
+
+        // Then
+        // Przechwytujemy to, co trafiło do save()
+        verify(agreementRepository).save(agreementCaptor.capture());
+        Agreement savedAgreement = agreementCaptor.getValue();
+
+        // 1. Sprawdzamy czy przypisano firmę
+        assertThat(savedAgreement.getCompany()).isEqualTo(companyEntity);
+
+        // 2. Sprawdzamy kluczową logikę biznesową: czy data została obliczona poprawnie
+        // signedDate (2023-01-15) + 12 miesięcy = 2024-01-15
+        LocalDate expectedDate = signedDate.plusMonths(periodMonths);
+        assertThat(savedAgreement.getNextServiceDate()).isEqualTo(expectedDate);
+    }
+
+    @Test
+    @DisplayName("add: Powinien obliczyć datę serwisu, przypisać firmę i zapisać umowę")
+    void add_ShouldCalculateDateAndLinkCompany_ThenSave6() {
+        // Given
+        String nip = "1234567890";
+        LocalDate signedDate = LocalDate.of(2023, 1, 15);
+        int periodMonths = 12; // np. okres roczny
+
+        // Tworzymy DTO
+        CompanyDto companyDto = new CompanyDto();
+        companyDto.setNip(nip);
+
+        AgreementDto agreementDto = new AgreementDto();
+        agreementDto.setCompany(companyDto);
+        agreementDto.setSignedDate(signedDate);
+
+        // Mockowanie obiektu Period (zakładam, że to Enum lub obiekt z metodą getMonth())
+        // Tutaj symuluję, że getPeriod() zwraca obiekt, który ma metodę getMonth() zwracającą int
+        Period periodMock = mock(Period.class);
+        when(periodMock.getMonth()).thenReturn(periodMonths);
+        agreementDto.setPeriod(periodMock);
+
+        // Tworzymy encje
+        Company companyEntity = new Company();
+        companyEntity.setNip(nip);
+
+        Agreement agreementEntity = new Agreement();
+        // Obiekt czysty przed modyfikacjami w serwisie
+
+        // Mockowanie zależności
+        when(companyService.findByNip(nip)).thenReturn(companyEntity);
+        mapperMock.when(() -> Mapper.toEntity(agreementDto)).thenReturn(agreementEntity);
+
+        // When
+        agreementService.add(agreementDto);
+
+        // Then
+        // Przechwytujemy to, co trafiło do save()
+        verify(agreementRepository).save(agreementCaptor.capture());
+        Agreement savedAgreement = agreementCaptor.getValue();
+
+        // 1. Sprawdzamy czy przypisano firmę
+        assertThat(savedAgreement.getCompany()).isEqualTo(companyEntity);
+
+        // 2. Sprawdzamy kluczową logikę biznesową: czy data została obliczona poprawnie
+        // signedDate (2023-01-15) + 12 miesięcy = 2024-01-15
+        LocalDate expectedDate = signedDate.plusMonths(periodMonths);
+        assertThat(savedAgreement.getNextServiceDate()).isEqualTo(expectedDate);
+    }
+
+    @Test
+    @DisplayName("add: Powinien obliczyć datę serwisu, przypisać firmę i zapisać umowę")
+    void add_ShouldCalculateDateAndLinkCompany_ThenSave7() {
+        // Given
+        String nip = "1234567890";
+        LocalDate signedDate = LocalDate.of(2023, 1, 15);
+        int periodMonths = 12; // np. okres roczny
+
+        // Tworzymy DTO
+        CompanyDto companyDto = new CompanyDto();
+        companyDto.setNip(nip);
+
+        AgreementDto agreementDto = new AgreementDto();
+        agreementDto.setCompany(companyDto);
+        agreementDto.setSignedDate(signedDate);
+
+        // Mockowanie obiektu Period (zakładam, że to Enum lub obiekt z metodą getMonth())
+        // Tutaj symuluję, że getPeriod() zwraca obiekt, który ma metodę getMonth() zwracającą int
+        Period periodMock = mock(Period.class);
+        when(periodMock.getMonth()).thenReturn(periodMonths);
+        agreementDto.setPeriod(periodMock);
+
+        // Tworzymy encje
+        Company companyEntity = new Company();
+        companyEntity.setNip(nip);
+
+        Agreement agreementEntity = new Agreement();
+        // Obiekt czysty przed modyfikacjami w serwisie
+
+        // Mockowanie zależności
+        when(companyService.findByNip(nip)).thenReturn(companyEntity);
+        mapperMock.when(() -> Mapper.toEntity(agreementDto)).thenReturn(agreementEntity);
+
+        // When
+        agreementService.add(agreementDto);
+
+        // Then
+        // Przechwytujemy to, co trafiło do save()
+        verify(agreementRepository).save(agreementCaptor.capture());
+        Agreement savedAgreement = agreementCaptor.getValue();
+
+        // 1. Sprawdzamy czy przypisano firmę
+        assertThat(savedAgreement.getCompany()).isEqualTo(companyEntity);
+
+        // 2. Sprawdzamy kluczową logikę biznesową: czy data została obliczona poprawnie
+        // signedDate (2023-01-15) + 12 miesięcy = 2024-01-15
+        LocalDate expectedDate = signedDate.plusMonths(periodMonths);
+        assertThat(savedAgreement.getNextServiceDate()).isEqualTo(expectedDate);
+    }
+
+    @Test
+    @DisplayName("add: Powinien obliczyć datę serwisu, przypisać firmę i zapisać umowę")
+    void add_ShouldCalculateDateAndLinkCompany_ThenSave8() {
+        // Given
+        String nip = "1234567890";
+        LocalDate signedDate = LocalDate.of(2023, 1, 15);
+        int periodMonths = 12; // np. okres roczny
+
+        // Tworzymy DTO
+        CompanyDto companyDto = new CompanyDto();
+        companyDto.setNip(nip);
+
+        AgreementDto agreementDto = new AgreementDto();
+        agreementDto.setCompany(companyDto);
+        agreementDto.setSignedDate(signedDate);
+
+        // Mockowanie obiektu Period (zakładam, że to Enum lub obiekt z metodą getMonth())
+        // Tutaj symuluję, że getPeriod() zwraca obiekt, który ma metodę getMonth() zwracającą int
+        Period periodMock = mock(Period.class);
+        when(periodMock.getMonth()).thenReturn(periodMonths);
+        agreementDto.setPeriod(periodMock);
+
+        // Tworzymy encje
+        Company companyEntity = new Company();
+        companyEntity.setNip(nip);
+
+        Agreement agreementEntity = new Agreement();
+        // Obiekt czysty przed modyfikacjami w serwisie
+
+        // Mockowanie zależności
+        when(companyService.findByNip(nip)).thenReturn(companyEntity);
+        mapperMock.when(() -> Mapper.toEntity(agreementDto)).thenReturn(agreementEntity);
+
+        // When
+        agreementService.add(agreementDto);
+
+        // Then
+        // Przechwytujemy to, co trafiło do save()
+        verify(agreementRepository).save(agreementCaptor.capture());
+        Agreement savedAgreement = agreementCaptor.getValue();
+
+        // 1. Sprawdzamy czy przypisano firmę
+        assertThat(savedAgreement.getCompany()).isEqualTo(companyEntity);
+
+        // 2. Sprawdzamy kluczową logikę biznesową: czy data została obliczona poprawnie
+        // signedDate (2023-01-15) + 12 miesięcy = 2024-01-15
+        LocalDate expectedDate = signedDate.plusMonths(periodMonths);
+        assertThat(savedAgreement.getNextServiceDate()).isEqualTo(expectedDate);
+    }
+
+    @Test
+    @DisplayName("add: Powinien obliczyć datę serwisu, przypisać firmę i zapisać umowę")
+    void add_ShouldCalculateDateAndLinkCompany_ThenSave9() {
+        // Given
+        String nip = "1234567890";
+        LocalDate signedDate = LocalDate.of(2023, 1, 15);
+        int periodMonths = 12; // np. okres roczny
+
+        // Tworzymy DTO
+        CompanyDto companyDto = new CompanyDto();
+        companyDto.setNip(nip);
+
+        AgreementDto agreementDto = new AgreementDto();
+        agreementDto.setCompany(companyDto);
+        agreementDto.setSignedDate(signedDate);
+
+        // Mockowanie obiektu Period (zakładam, że to Enum lub obiekt z metodą getMonth())
+        // Tutaj symuluję, że getPeriod() zwraca obiekt, który ma metodę getMonth() zwracającą int
+        Period periodMock = mock(Period.class);
+        when(periodMock.getMonth()).thenReturn(periodMonths);
+        agreementDto.setPeriod(periodMock);
+
+        // Tworzymy encje
+        Company companyEntity = new Company();
+        companyEntity.setNip(nip);
+
+        Agreement agreementEntity = new Agreement();
+        // Obiekt czysty przed modyfikacjami w serwisie
+
+        // Mockowanie zależności
+        when(companyService.findByNip(nip)).thenReturn(companyEntity);
+        mapperMock.when(() -> Mapper.toEntity(agreementDto)).thenReturn(agreementEntity);
+
+        // When
+        agreementService.add(agreementDto);
+
+        // Then
+        // Przechwytujemy to, co trafiło do save()
+        verify(agreementRepository).save(agreementCaptor.capture());
+        Agreement savedAgreement = agreementCaptor.getValue();
+
+        // 1. Sprawdzamy czy przypisano firmę
+        assertThat(savedAgreement.getCompany()).isEqualTo(companyEntity);
+
+        // 2. Sprawdzamy kluczową logikę biznesową: czy data została obliczona poprawnie
+        // signedDate (2023-01-15) + 12 miesięcy = 2024-01-15
+        LocalDate expectedDate = signedDate.plusMonths(periodMonths);
+        assertThat(savedAgreement.getNextServiceDate()).isEqualTo(expectedDate);
+    }
+
+    @Test
+    @DisplayName("add: Powinien obliczyć datę serwisu, przypisać firmę i zapisać umowę")
+    void add_ShouldCalculateDateAndLinkCompany_ThenSave10() {
+        // Given
+        String nip = "1234567890";
+        LocalDate signedDate = LocalDate.of(2023, 1, 15);
+        int periodMonths = 12; // np. okres roczny
+
+        // Tworzymy DTO
+        CompanyDto companyDto = new CompanyDto();
+        companyDto.setNip(nip);
+
+        AgreementDto agreementDto = new AgreementDto();
+        agreementDto.setCompany(companyDto);
+        agreementDto.setSignedDate(signedDate);
+
+        // Mockowanie obiektu Period (zakładam, że to Enum lub obiekt z metodą getMonth())
+        // Tutaj symuluję, że getPeriod() zwraca obiekt, który ma metodę getMonth() zwracającą int
+        Period periodMock = mock(Period.class);
+        when(periodMock.getMonth()).thenReturn(periodMonths);
+        agreementDto.setPeriod(periodMock);
+
+        // Tworzymy encje
+        Company companyEntity = new Company();
+        companyEntity.setNip(nip);
+
+        Agreement agreementEntity = new Agreement();
+        // Obiekt czysty przed modyfikacjami w serwisie
+
+        // Mockowanie zależności
+        when(companyService.findByNip(nip)).thenReturn(companyEntity);
+        mapperMock.when(() -> Mapper.toEntity(agreementDto)).thenReturn(agreementEntity);
+
+        // When
+        agreementService.add(agreementDto);
+
+        // Then
+        // Przechwytujemy to, co trafiło do save()
+        verify(agreementRepository).save(agreementCaptor.capture());
+        Agreement savedAgreement = agreementCaptor.getValue();
+
+        // 1. Sprawdzamy czy przypisano firmę
+        assertThat(savedAgreement.getCompany()).isEqualTo(companyEntity);
+
+        // 2. Sprawdzamy kluczową logikę biznesową: czy data została obliczona poprawnie
+        // signedDate (2023-01-15) + 12 miesięcy = 2024-01-15
+        LocalDate expectedDate = signedDate.plusMonths(periodMonths);
+        assertThat(savedAgreement.getNextServiceDate()).isEqualTo(expectedDate);
+    }
+
+    @Test
+    @DisplayName("add: Powinien obliczyć datę serwisu, przypisać firmę i zapisać umowę")
+    void add_ShouldCalculateDateAndLinkCompany_ThenSave11() {
+        // Given
+        String nip = "1234567890";
+        LocalDate signedDate = LocalDate.of(2023, 1, 15);
+        int periodMonths = 12; // np. okres roczny
+
+        // Tworzymy DTO
+        CompanyDto companyDto = new CompanyDto();
+        companyDto.setNip(nip);
+
+        AgreementDto agreementDto = new AgreementDto();
+        agreementDto.setCompany(companyDto);
+        agreementDto.setSignedDate(signedDate);
+
+        // Mockowanie obiektu Period (zakładam, że to Enum lub obiekt z metodą getMonth())
+        // Tutaj symuluję, że getPeriod() zwraca obiekt, który ma metodę getMonth() zwracającą int
+        Period periodMock = mock(Period.class);
+        when(periodMock.getMonth()).thenReturn(periodMonths);
+        agreementDto.setPeriod(periodMock);
+
+        // Tworzymy encje
+        Company companyEntity = new Company();
+        companyEntity.setNip(nip);
+
+        Agreement agreementEntity = new Agreement();
+        // Obiekt czysty przed modyfikacjami w serwisie
+
+        // Mockowanie zależności
+        when(companyService.findByNip(nip)).thenReturn(companyEntity);
+        mapperMock.when(() -> Mapper.toEntity(agreementDto)).thenReturn(agreementEntity);
+
+        // When
+        agreementService.add(agreementDto);
+
+        // Then
+        // Przechwytujemy to, co trafiło do save()
+        verify(agreementRepository).save(agreementCaptor.capture());
+        Agreement savedAgreement = agreementCaptor.getValue();
+
+        // 1. Sprawdzamy czy przypisano firmę
+        assertThat(savedAgreement.getCompany()).isEqualTo(companyEntity);
+
+        // 2. Sprawdzamy kluczową logikę biznesową: czy data została obliczona poprawnie
+        // signedDate (2023-01-15) + 12 miesięcy = 2024-01-15
+        LocalDate expectedDate = signedDate.plusMonths(periodMonths);
+        assertThat(savedAgreement.getNextServiceDate()).isEqualTo(expectedDate);
+    }
+
+    @Test
+    @DisplayName("add: Powinien obliczyć datę serwisu, przypisać firmę i zapisać umowę")
+    void add_ShouldCalculateDateAndLinkCompany_ThenSave12() {
+        // Given
+        String nip = "1234567890";
+        LocalDate signedDate = LocalDate.of(2023, 1, 15);
+        int periodMonths = 12; // np. okres roczny
+
+        // Tworzymy DTO
+        CompanyDto companyDto = new CompanyDto();
+        companyDto.setNip(nip);
+
+        AgreementDto agreementDto = new AgreementDto();
+        agreementDto.setCompany(companyDto);
+        agreementDto.setSignedDate(signedDate);
+
+        // Mockowanie obiektu Period (zakładam, że to Enum lub obiekt z metodą getMonth())
+        // Tutaj symuluję, że getPeriod() zwraca obiekt, który ma metodę getMonth() zwracającą int
+        Period periodMock = mock(Period.class);
+        when(periodMock.getMonth()).thenReturn(periodMonths);
+        agreementDto.setPeriod(periodMock);
+
+        // Tworzymy encje
+        Company companyEntity = new Company();
+        companyEntity.setNip(nip);
+
+        Agreement agreementEntity = new Agreement();
+        // Obiekt czysty przed modyfikacjami w serwisie
+
+        // Mockowanie zależności
+        when(companyService.findByNip(nip)).thenReturn(companyEntity);
+        mapperMock.when(() -> Mapper.toEntity(agreementDto)).thenReturn(agreementEntity);
+
+        // When
+        agreementService.add(agreementDto);
+
+        // Then
+        // Przechwytujemy to, co trafiło do save()
+        verify(agreementRepository).save(agreementCaptor.capture());
+        Agreement savedAgreement = agreementCaptor.getValue();
+
+        // 1. Sprawdzamy czy przypisano firmę
+        assertThat(savedAgreement.getCompany()).isEqualTo(companyEntity);
+
+        // 2. Sprawdzamy kluczową logikę biznesową: czy data została obliczona poprawnie
+        // signedDate (2023-01-15) + 12 miesięcy = 2024-01-15
+        LocalDate expectedDate = signedDate.plusMonths(periodMonths);
+        assertThat(savedAgreement.getNextServiceDate()).isEqualTo(expectedDate);
+    }
+
+    @Test
+    @DisplayName("add: Powinien obliczyć datę serwisu, przypisać firmę i zapisać umowę")
+    void add_ShouldCalculateDateAndLinkCompany_ThenSave13() {
+        // Given
+        String nip = "1234567890";
+        LocalDate signedDate = LocalDate.of(2023, 1, 15);
+        int periodMonths = 12; // np. okres roczny
+
+        // Tworzymy DTO
+        CompanyDto companyDto = new CompanyDto();
+        companyDto.setNip(nip);
+
+        AgreementDto agreementDto = new AgreementDto();
+        agreementDto.setCompany(companyDto);
+        agreementDto.setSignedDate(signedDate);
+
+        // Mockowanie obiektu Period (zakładam, że to Enum lub obiekt z metodą getMonth())
+        // Tutaj symuluję, że getPeriod() zwraca obiekt, który ma metodę getMonth() zwracającą int
+        Period periodMock = mock(Period.class);
+        when(periodMock.getMonth()).thenReturn(periodMonths);
+        agreementDto.setPeriod(periodMock);
+
+        // Tworzymy encje
+        Company companyEntity = new Company();
+        companyEntity.setNip(nip);
+
+        Agreement agreementEntity = new Agreement();
+        // Obiekt czysty przed modyfikacjami w serwisie
+
+        // Mockowanie zależności
+        when(companyService.findByNip(nip)).thenReturn(companyEntity);
+        mapperMock.when(() -> Mapper.toEntity(agreementDto)).thenReturn(agreementEntity);
+
+        // When
+        agreementService.add(agreementDto);
+
+        // Then
+        // Przechwytujemy to, co trafiło do save()
+        verify(agreementRepository).save(agreementCaptor.capture());
+        Agreement savedAgreement = agreementCaptor.getValue();
+
+        // 1. Sprawdzamy czy przypisano firmę
+        assertThat(savedAgreement.getCompany()).isEqualTo(companyEntity);
+
+        // 2. Sprawdzamy kluczową logikę biznesową: czy data została obliczona poprawnie
+        // signedDate (2023-01-15) + 12 miesięcy = 2024-01-15
+        LocalDate expectedDate = signedDate.plusMonths(periodMonths);
+        assertThat(savedAgreement.getNextServiceDate()).isEqualTo(expectedDate);
+    }
+
+    @Test
+    @DisplayName("add: Powinien obliczyć datę serwisu, przypisać firmę i zapisać umowę")
+    void add_ShouldCalculateDateAndLinkCompany_ThenSave14() {
+        // Given
+        String nip = "1234567890";
+        LocalDate signedDate = LocalDate.of(2023, 1, 15);
+        int periodMonths = 12; // np. okres roczny
+
+        // Tworzymy DTO
+        CompanyDto companyDto = new CompanyDto();
+        companyDto.setNip(nip);
+
+        AgreementDto agreementDto = new AgreementDto();
+        agreementDto.setCompany(companyDto);
+        agreementDto.setSignedDate(signedDate);
+
+        // Mockowanie obiektu Period (zakładam, że to Enum lub obiekt z metodą getMonth())
+        // Tutaj symuluję, że getPeriod() zwraca obiekt, który ma metodę getMonth() zwracającą int
+        Period periodMock = mock(Period.class);
+        when(periodMock.getMonth()).thenReturn(periodMonths);
+        agreementDto.setPeriod(periodMock);
+
+        // Tworzymy encje
+        Company companyEntity = new Company();
+        companyEntity.setNip(nip);
+
+        Agreement agreementEntity = new Agreement();
+        // Obiekt czysty przed modyfikacjami w serwisie
+
+        // Mockowanie zależności
+        when(companyService.findByNip(nip)).thenReturn(companyEntity);
+        mapperMock.when(() -> Mapper.toEntity(agreementDto)).thenReturn(agreementEntity);
+
+        // When
+        agreementService.add(agreementDto);
+
+        // Then
+        // Przechwytujemy to, co trafiło do save()
+        verify(agreementRepository).save(agreementCaptor.capture());
+        Agreement savedAgreement = agreementCaptor.getValue();
+
+        // 1. Sprawdzamy czy przypisano firmę
+        assertThat(savedAgreement.getCompany()).isEqualTo(companyEntity);
+
+        // 2. Sprawdzamy kluczową logikę biznesową: czy data została obliczona poprawnie
+        // signedDate (2023-01-15) + 12 miesięcy = 2024-01-15
+        LocalDate expectedDate = signedDate.plusMonths(periodMonths);
+        assertThat(savedAgreement.getNextServiceDate()).isEqualTo(expectedDate);
+    }
+//    mvn surefire:test -Dtest=*.unit.* -Pposgres -Dspring.profiles.active=posgres -Dmaven.test.failure.ignore=true
+    @Test
+    @DisplayName("add: Powinien obliczyć datę serwisu, przypisać firmę i zapisać umowę")
+    void add_ShouldCalculateDateAndLinkCompany_ThenSave15() throws InterruptedException {
+        Thread.sleep(15);
+        // Given
+        String nip = "1234567890";
+        LocalDate signedDate = LocalDate.of(2023, 1, 15);
+        int periodMonths = 12; // np. okres roczny
+
+        // Tworzymy DTO
+        CompanyDto companyDto = new CompanyDto();
+        companyDto.setNip(nip);
+
+        AgreementDto agreementDto = new AgreementDto();
+        agreementDto.setCompany(companyDto);
+        agreementDto.setSignedDate(signedDate);
+
+        // Mockowanie obiektu Period (zakładam, że to Enum lub obiekt z metodą getMonth())
+        // Tutaj symuluję, że getPeriod() zwraca obiekt, który ma metodę getMonth() zwracającą int
+        Period periodMock = mock(Period.class);
+        when(periodMock.getMonth()).thenReturn(periodMonths);
+        agreementDto.setPeriod(periodMock);
+
+        // Tworzymy encje
+        Company companyEntity = new Company();
+        companyEntity.setNip(nip);
+
+        Agreement agreementEntity = new Agreement();
+        // Obiekt czysty przed modyfikacjami w serwisie
+
+        // Mockowanie zależności
+        when(companyService.findByNip(nip)).thenReturn(companyEntity);
+        mapperMock.when(() -> Mapper.toEntity(agreementDto)).thenReturn(agreementEntity);
+
+        // When
+        agreementService.add(agreementDto);
+
+        // Then
+        // Przechwytujemy to, co trafiło do save()
+        verify(agreementRepository).save(agreementCaptor.capture());
+        Agreement savedAgreement = agreementCaptor.getValue();
+
+        // 1. Sprawdzamy czy przypisano firmę
+        assertThat(savedAgreement.getCompany()).isEqualTo(companyEntity);
+
+        // 2. Sprawdzamy kluczową logikę biznesową: czy data została obliczona poprawnie
+        // signedDate (2023-01-15) + 12 miesięcy = 2024-01-15
+        LocalDate expectedDate = signedDate.plusMonths(periodMonths);
+        assertThat(savedAgreement.getNextServiceDate()).isEqualTo(expectedDate);
+    }
+
+    @Test
+    @DisplayName("add: Powinien obliczyć datę serwisu, przypisać firmę i zapisać umowę")
+    void add_ShouldCalculateDateAndLinkCompany_ThenSave16() throws InterruptedException {
+        Thread.sleep(10);
+        // Given
+        String nip = "1234567890";
+        LocalDate signedDate = LocalDate.of(2023, 1, 15);
+        int periodMonths = 12; // np. okres roczny
+
+        // Tworzymy DTO
+        CompanyDto companyDto = new CompanyDto();
+        companyDto.setNip(nip);
+
+        AgreementDto agreementDto = new AgreementDto();
+        agreementDto.setCompany(companyDto);
+        agreementDto.setSignedDate(signedDate);
+
+        // Mockowanie obiektu Period (zakładam, że to Enum lub obiekt z metodą getMonth())
+        // Tutaj symuluję, że getPeriod() zwraca obiekt, który ma metodę getMonth() zwracającą int
+        Period periodMock = mock(Period.class);
+        when(periodMock.getMonth()).thenReturn(periodMonths);
+        agreementDto.setPeriod(periodMock);
+
+        // Tworzymy encje
+        Company companyEntity = new Company();
+        companyEntity.setNip(nip);
+
+        Agreement agreementEntity = new Agreement();
+        // Obiekt czysty przed modyfikacjami w serwisie
+
+        // Mockowanie zależności
+        when(companyService.findByNip(nip)).thenReturn(companyEntity);
+        mapperMock.when(() -> Mapper.toEntity(agreementDto)).thenReturn(agreementEntity);
+
+        // When
+        agreementService.add(agreementDto);
+
+        // Then
+        // Przechwytujemy to, co trafiło do save()
+        verify(agreementRepository).save(agreementCaptor.capture());
+        Agreement savedAgreement = agreementCaptor.getValue();
+
+        // 1. Sprawdzamy czy przypisano firmę
+        assertThat(savedAgreement.getCompany()).isEqualTo(companyEntity);
+
+        // 2. Sprawdzamy kluczową logikę biznesową: czy data została obliczona poprawnie
+        // signedDate (2023-01-15) + 12 miesięcy = 2024-01-15
+        LocalDate expectedDate = signedDate.plusMonths(periodMonths);
+        assertThat(savedAgreement.getNextServiceDate()).isEqualTo(expectedDate);
+    }
+
 
 
     @Test

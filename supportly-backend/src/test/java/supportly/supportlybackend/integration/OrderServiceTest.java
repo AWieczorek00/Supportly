@@ -185,7 +185,572 @@ public class OrderServiceTest {
         assertThat(generatedOrder.getClient().getId()).isEqualTo(client.getId());
         assertThat(generatedOrder.getPriority()).isEqualTo(Priority.NORMAL);
     }
+    @Test
+    @DisplayName("createOrderFromSchedule: Powinien wygenerować zamówienia z umów na podstawie daty")
+    void shouldGenerateOrdersFromSchedule2() {
+        // Given
+        // 1. Firma nr 1 (dla umowy, która MA wygenerować zamówienie)
+        Company company1 = createValidCompany("Tech Sp. z o.o.");
+        // Musimy upewnić się, że dane są unikalne
+        company1.setNip("1111111111111");
+        company1.setRegon("111111111");
+        company1.setEmail("tech@test.pl");
+        companyRepository.save(company1);
 
+        // 2. Klient dla Firmy nr 1
+        Client client = new Client();
+        client.setCompany(company1);
+        client.setFirstName("Adam");
+        client.setLastName("Admin");
+        client.setPhoneNumber("123456789");
+        client.setEmail("admin@tech.pl");
+        client.setType("Client");
+        clientRepository.save(client);
+
+        // 3. Umowa dla Firmy nr 1 (poprawna data - za 10 dni)
+        Agreement agreement = new Agreement();
+        agreement.setCompany(company1);
+        agreement.setAgreementNumber("AGR-SCHEDULED-1");
+        agreement.setNextServiceDate(LocalDate.now().plusDays(10));
+        agreement.setPeriod(Period.MONTHLY); // Zakładam, że Period to Enum
+        agreement.setSignedDate(LocalDate.now().minusDays(10));
+        agreementRepository.save(agreement);
+
+        // 4. Firma nr 2 (dla umowy, która NIE powinna generować zamówienia)
+        // Tworzymy nową firmę, aby uniknąć błędu "Unique index on COMPANY_ID" w tabeli Agreement
+        Company company2 = createValidCompany("Other Corp.");
+        company2.setNip("2222222222222"); // Inny NIP
+        company2.setRegon("222222222");   // Inny Regon
+        company2.setEmail("other@corp.pl");
+        companyRepository.save(company2);
+
+        // 5. Umowa dla Firmy nr 2 (zła data - za 20 dni)
+        Agreement otherAgreement = new Agreement();
+        otherAgreement.setCompany(company2); // Przypisujemy do DRUGIEJ firmy
+        otherAgreement.setAgreementNumber("AGR-FUTURE");
+        otherAgreement.setNextServiceDate(LocalDate.now().plusDays(20));
+        otherAgreement.setPeriod(Period.YEARLY);
+        otherAgreement.setSignedDate(LocalDate.now().minusDays(10));
+        agreementRepository.save(otherAgreement);
+
+        // When
+        orderService.createOrderFromSchedule();
+
+        // Then
+        List<Order> orders = orderRepository.findAll();
+
+        assertThat(orders).hasSize(1); // Powinno być tylko jedno zamówienie (od firmy 1)
+
+        Order generatedOrder = orders.get(0);
+        assertThat(generatedOrder.getAgreementNumber()).isEqualTo("AGR-SCHEDULED-1");
+        // Upewniamy się, że zamówienie jest przypisane do klienta pierwszej firmy
+        assertThat(generatedOrder.getClient().getId()).isEqualTo(client.getId());
+        assertThat(generatedOrder.getPriority()).isEqualTo(Priority.NORMAL);
+    }
+
+    @Test
+    @DisplayName("createOrderFromSchedule: Powinien wygenerować zamówienia z umów na podstawie daty")
+    void shouldGenerateOrdersFromSchedule4() {
+        // Given
+        // 1. Firma nr 1 (dla umowy, która MA wygenerować zamówienie)
+        Company company1 = createValidCompany("Tech Sp. z o.o.");
+        // Musimy upewnić się, że dane są unikalne
+        company1.setNip("1111111111111");
+        company1.setRegon("111111111");
+        company1.setEmail("tech@test.pl");
+        companyRepository.save(company1);
+
+        // 2. Klient dla Firmy nr 1
+        Client client = new Client();
+        client.setCompany(company1);
+        client.setFirstName("Adam");
+        client.setLastName("Admin");
+        client.setPhoneNumber("123456789");
+        client.setEmail("admin@tech.pl");
+        client.setType("Client");
+        clientRepository.save(client);
+
+        // 3. Umowa dla Firmy nr 1 (poprawna data - za 10 dni)
+        Agreement agreement = new Agreement();
+        agreement.setCompany(company1);
+        agreement.setAgreementNumber("AGR-SCHEDULED-1");
+        agreement.setNextServiceDate(LocalDate.now().plusDays(10));
+        agreement.setPeriod(Period.MONTHLY); // Zakładam, że Period to Enum
+        agreement.setSignedDate(LocalDate.now().minusDays(10));
+        agreementRepository.save(agreement);
+
+        // 4. Firma nr 2 (dla umowy, która NIE powinna generować zamówienia)
+        // Tworzymy nową firmę, aby uniknąć błędu "Unique index on COMPANY_ID" w tabeli Agreement
+        Company company2 = createValidCompany("Other Corp.");
+        company2.setNip("2222222222222"); // Inny NIP
+        company2.setRegon("222222222");   // Inny Regon
+        company2.setEmail("other@corp.pl");
+        companyRepository.save(company2);
+
+        // 5. Umowa dla Firmy nr 2 (zła data - za 20 dni)
+        Agreement otherAgreement = new Agreement();
+        otherAgreement.setCompany(company2); // Przypisujemy do DRUGIEJ firmy
+        otherAgreement.setAgreementNumber("AGR-FUTURE");
+        otherAgreement.setNextServiceDate(LocalDate.now().plusDays(20));
+        otherAgreement.setPeriod(Period.YEARLY);
+        otherAgreement.setSignedDate(LocalDate.now().minusDays(10));
+        agreementRepository.save(otherAgreement);
+
+        // When
+        orderService.createOrderFromSchedule();
+
+        // Then
+        List<Order> orders = orderRepository.findAll();
+
+        assertThat(orders).hasSize(1); // Powinno być tylko jedno zamówienie (od firmy 1)
+
+        Order generatedOrder = orders.get(0);
+        assertThat(generatedOrder.getAgreementNumber()).isEqualTo("AGR-SCHEDULED-1");
+        // Upewniamy się, że zamówienie jest przypisane do klienta pierwszej firmy
+        assertThat(generatedOrder.getClient().getId()).isEqualTo(client.getId());
+        assertThat(generatedOrder.getPriority()).isEqualTo(Priority.NORMAL);
+    }
+
+    @Test
+    @DisplayName("createOrderFromSchedule: Powinien wygenerować zamówienia z umów na podstawie daty")
+    void shouldGenerateOrdersFromSchedule5() {
+        // Given
+        // 1. Firma nr 1 (dla umowy, która MA wygenerować zamówienie)
+        Company company1 = createValidCompany("Tech Sp. z o.o.");
+        // Musimy upewnić się, że dane są unikalne
+        company1.setNip("1111111111111");
+        company1.setRegon("111111111");
+        company1.setEmail("tech@test.pl");
+        companyRepository.save(company1);
+
+        // 2. Klient dla Firmy nr 1
+        Client client = new Client();
+        client.setCompany(company1);
+        client.setFirstName("Adam");
+        client.setLastName("Admin");
+        client.setPhoneNumber("123456789");
+        client.setEmail("admin@tech.pl");
+        client.setType("Client");
+        clientRepository.save(client);
+
+        // 3. Umowa dla Firmy nr 1 (poprawna data - za 10 dni)
+        Agreement agreement = new Agreement();
+        agreement.setCompany(company1);
+        agreement.setAgreementNumber("AGR-SCHEDULED-1");
+        agreement.setNextServiceDate(LocalDate.now().plusDays(10));
+        agreement.setPeriod(Period.MONTHLY); // Zakładam, że Period to Enum
+        agreement.setSignedDate(LocalDate.now().minusDays(10));
+        agreementRepository.save(agreement);
+
+        // 4. Firma nr 2 (dla umowy, która NIE powinna generować zamówienia)
+        // Tworzymy nową firmę, aby uniknąć błędu "Unique index on COMPANY_ID" w tabeli Agreement
+        Company company2 = createValidCompany("Other Corp.");
+        company2.setNip("2222222222222"); // Inny NIP
+        company2.setRegon("222222222");   // Inny Regon
+        company2.setEmail("other@corp.pl");
+        companyRepository.save(company2);
+
+        // 5. Umowa dla Firmy nr 2 (zła data - za 20 dni)
+        Agreement otherAgreement = new Agreement();
+        otherAgreement.setCompany(company2); // Przypisujemy do DRUGIEJ firmy
+        otherAgreement.setAgreementNumber("AGR-FUTURE");
+        otherAgreement.setNextServiceDate(LocalDate.now().plusDays(20));
+        otherAgreement.setPeriod(Period.YEARLY);
+        otherAgreement.setSignedDate(LocalDate.now().minusDays(10));
+        agreementRepository.save(otherAgreement);
+
+        // When
+        orderService.createOrderFromSchedule();
+
+        // Then
+        List<Order> orders = orderRepository.findAll();
+
+        assertThat(orders).hasSize(1); // Powinno być tylko jedno zamówienie (od firmy 1)
+
+        Order generatedOrder = orders.get(0);
+        assertThat(generatedOrder.getAgreementNumber()).isEqualTo("AGR-SCHEDULED-1");
+        // Upewniamy się, że zamówienie jest przypisane do klienta pierwszej firmy
+        assertThat(generatedOrder.getClient().getId()).isEqualTo(client.getId());
+        assertThat(generatedOrder.getPriority()).isEqualTo(Priority.NORMAL);
+    }
+
+    @Test
+    @DisplayName("createOrderFromSchedule: Powinien wygenerować zamówienia z umów na podstawie daty")
+    void shouldGenerateOrdersFromSchedule6() {
+        // Given
+        // 1. Firma nr 1 (dla umowy, która MA wygenerować zamówienie)
+        Company company1 = createValidCompany("Tech Sp. z o.o.");
+        // Musimy upewnić się, że dane są unikalne
+        company1.setNip("1111111111111");
+        company1.setRegon("111111111");
+        company1.setEmail("tech@test.pl");
+        companyRepository.save(company1);
+
+        // 2. Klient dla Firmy nr 1
+        Client client = new Client();
+        client.setCompany(company1);
+        client.setFirstName("Adam");
+        client.setLastName("Admin");
+        client.setPhoneNumber("123456789");
+        client.setEmail("admin@tech.pl");
+        client.setType("Client");
+        clientRepository.save(client);
+
+        // 3. Umowa dla Firmy nr 1 (poprawna data - za 10 dni)
+        Agreement agreement = new Agreement();
+        agreement.setCompany(company1);
+        agreement.setAgreementNumber("AGR-SCHEDULED-1");
+        agreement.setNextServiceDate(LocalDate.now().plusDays(10));
+        agreement.setPeriod(Period.MONTHLY); // Zakładam, że Period to Enum
+        agreement.setSignedDate(LocalDate.now().minusDays(10));
+        agreementRepository.save(agreement);
+
+        // 4. Firma nr 2 (dla umowy, która NIE powinna generować zamówienia)
+        // Tworzymy nową firmę, aby uniknąć błędu "Unique index on COMPANY_ID" w tabeli Agreement
+        Company company2 = createValidCompany("Other Corp.");
+        company2.setNip("2222222222222"); // Inny NIP
+        company2.setRegon("222222222");   // Inny Regon
+        company2.setEmail("other@corp.pl");
+        companyRepository.save(company2);
+
+        // 5. Umowa dla Firmy nr 2 (zła data - za 20 dni)
+        Agreement otherAgreement = new Agreement();
+        otherAgreement.setCompany(company2); // Przypisujemy do DRUGIEJ firmy
+        otherAgreement.setAgreementNumber("AGR-FUTURE");
+        otherAgreement.setNextServiceDate(LocalDate.now().plusDays(20));
+        otherAgreement.setPeriod(Period.YEARLY);
+        otherAgreement.setSignedDate(LocalDate.now().minusDays(10));
+        agreementRepository.save(otherAgreement);
+
+        // When
+        orderService.createOrderFromSchedule();
+
+        // Then
+        List<Order> orders = orderRepository.findAll();
+
+        assertThat(orders).hasSize(1); // Powinno być tylko jedno zamówienie (od firmy 1)
+
+        Order generatedOrder = orders.get(0);
+        assertThat(generatedOrder.getAgreementNumber()).isEqualTo("AGR-SCHEDULED-1");
+        // Upewniamy się, że zamówienie jest przypisane do klienta pierwszej firmy
+        assertThat(generatedOrder.getClient().getId()).isEqualTo(client.getId());
+        assertThat(generatedOrder.getPriority()).isEqualTo(Priority.NORMAL);
+    }
+
+    @Test
+    @DisplayName("createOrderFromSchedule: Powinien wygenerować zamówienia z umów na podstawie daty")
+    void shouldGenerateOrdersFromSchedule7() {
+        // Given
+        // 1. Firma nr 1 (dla umowy, która MA wygenerować zamówienie)
+        Company company1 = createValidCompany("Tech Sp. z o.o.");
+        // Musimy upewnić się, że dane są unikalne
+        company1.setNip("1111111111111");
+        company1.setRegon("111111111");
+        company1.setEmail("tech@test.pl");
+        companyRepository.save(company1);
+
+        // 2. Klient dla Firmy nr 1
+        Client client = new Client();
+        client.setCompany(company1);
+        client.setFirstName("Adam");
+        client.setLastName("Admin");
+        client.setPhoneNumber("123456789");
+        client.setEmail("admin@tech.pl");
+        client.setType("Client");
+        clientRepository.save(client);
+
+        // 3. Umowa dla Firmy nr 1 (poprawna data - za 10 dni)
+        Agreement agreement = new Agreement();
+        agreement.setCompany(company1);
+        agreement.setAgreementNumber("AGR-SCHEDULED-1");
+        agreement.setNextServiceDate(LocalDate.now().plusDays(10));
+        agreement.setPeriod(Period.MONTHLY); // Zakładam, że Period to Enum
+        agreement.setSignedDate(LocalDate.now().minusDays(10));
+        agreementRepository.save(agreement);
+
+        // 4. Firma nr 2 (dla umowy, która NIE powinna generować zamówienia)
+        // Tworzymy nową firmę, aby uniknąć błędu "Unique index on COMPANY_ID" w tabeli Agreement
+        Company company2 = createValidCompany("Other Corp.");
+        company2.setNip("2222222222222"); // Inny NIP
+        company2.setRegon("222222222");   // Inny Regon
+        company2.setEmail("other@corp.pl");
+        companyRepository.save(company2);
+
+        // 5. Umowa dla Firmy nr 2 (zła data - za 20 dni)
+        Agreement otherAgreement = new Agreement();
+        otherAgreement.setCompany(company2); // Przypisujemy do DRUGIEJ firmy
+        otherAgreement.setAgreementNumber("AGR-FUTURE");
+        otherAgreement.setNextServiceDate(LocalDate.now().plusDays(20));
+        otherAgreement.setPeriod(Period.YEARLY);
+        otherAgreement.setSignedDate(LocalDate.now().minusDays(10));
+        agreementRepository.save(otherAgreement);
+
+        // When
+        orderService.createOrderFromSchedule();
+
+        // Then
+        List<Order> orders = orderRepository.findAll();
+
+        assertThat(orders).hasSize(1); // Powinno być tylko jedno zamówienie (od firmy 1)
+
+        Order generatedOrder = orders.get(0);
+        assertThat(generatedOrder.getAgreementNumber()).isEqualTo("AGR-SCHEDULED-1");
+        // Upewniamy się, że zamówienie jest przypisane do klienta pierwszej firmy
+        assertThat(generatedOrder.getClient().getId()).isEqualTo(client.getId());
+        assertThat(generatedOrder.getPriority()).isEqualTo(Priority.NORMAL);
+    }
+
+    @Test
+    @DisplayName("createOrderFromSchedule: Powinien wygenerować zamówienia z umów na podstawie daty")
+    void shouldGenerateOrdersFromSchedule8() {
+        // Given
+        // 1. Firma nr 1 (dla umowy, która MA wygenerować zamówienie)
+        Company company1 = createValidCompany("Tech Sp. z o.o.");
+        // Musimy upewnić się, że dane są unikalne
+        company1.setNip("1111111111111");
+        company1.setRegon("111111111");
+        company1.setEmail("tech@test.pl");
+        companyRepository.save(company1);
+
+        // 2. Klient dla Firmy nr 1
+        Client client = new Client();
+        client.setCompany(company1);
+        client.setFirstName("Adam");
+        client.setLastName("Admin");
+        client.setPhoneNumber("123456789");
+        client.setEmail("admin@tech.pl");
+        client.setType("Client");
+        clientRepository.save(client);
+
+        // 3. Umowa dla Firmy nr 1 (poprawna data - za 10 dni)
+        Agreement agreement = new Agreement();
+        agreement.setCompany(company1);
+        agreement.setAgreementNumber("AGR-SCHEDULED-1");
+        agreement.setNextServiceDate(LocalDate.now().plusDays(10));
+        agreement.setPeriod(Period.MONTHLY); // Zakładam, że Period to Enum
+        agreement.setSignedDate(LocalDate.now().minusDays(10));
+        agreementRepository.save(agreement);
+
+        // 4. Firma nr 2 (dla umowy, która NIE powinna generować zamówienia)
+        // Tworzymy nową firmę, aby uniknąć błędu "Unique index on COMPANY_ID" w tabeli Agreement
+        Company company2 = createValidCompany("Other Corp.");
+        company2.setNip("2222222222222"); // Inny NIP
+        company2.setRegon("222222222");   // Inny Regon
+        company2.setEmail("other@corp.pl");
+        companyRepository.save(company2);
+
+        // 5. Umowa dla Firmy nr 2 (zła data - za 20 dni)
+        Agreement otherAgreement = new Agreement();
+        otherAgreement.setCompany(company2); // Przypisujemy do DRUGIEJ firmy
+        otherAgreement.setAgreementNumber("AGR-FUTURE");
+        otherAgreement.setNextServiceDate(LocalDate.now().plusDays(20));
+        otherAgreement.setPeriod(Period.YEARLY);
+        otherAgreement.setSignedDate(LocalDate.now().minusDays(10));
+        agreementRepository.save(otherAgreement);
+
+        // When
+        orderService.createOrderFromSchedule();
+
+        // Then
+        List<Order> orders = orderRepository.findAll();
+
+        assertThat(orders).hasSize(1); // Powinno być tylko jedno zamówienie (od firmy 1)
+
+        Order generatedOrder = orders.get(0);
+        assertThat(generatedOrder.getAgreementNumber()).isEqualTo("AGR-SCHEDULED-1");
+        // Upewniamy się, że zamówienie jest przypisane do klienta pierwszej firmy
+        assertThat(generatedOrder.getClient().getId()).isEqualTo(client.getId());
+        assertThat(generatedOrder.getPriority()).isEqualTo(Priority.NORMAL);
+    }
+
+    @Test
+    @DisplayName("createOrderFromSchedule: Powinien wygenerować zamówienia z umów na podstawie daty")
+    void shouldGenerateOrdersFromSchedule9() {
+        // Given
+        // 1. Firma nr 1 (dla umowy, która MA wygenerować zamówienie)
+        Company company1 = createValidCompany("Tech Sp. z o.o.");
+        // Musimy upewnić się, że dane są unikalne
+        company1.setNip("1111111111111");
+        company1.setRegon("111111111");
+        company1.setEmail("tech@test.pl");
+        companyRepository.save(company1);
+
+        // 2. Klient dla Firmy nr 1
+        Client client = new Client();
+        client.setCompany(company1);
+        client.setFirstName("Adam");
+        client.setLastName("Admin");
+        client.setPhoneNumber("123456789");
+        client.setEmail("admin@tech.pl");
+        client.setType("Client");
+        clientRepository.save(client);
+
+        // 3. Umowa dla Firmy nr 1 (poprawna data - za 10 dni)
+        Agreement agreement = new Agreement();
+        agreement.setCompany(company1);
+        agreement.setAgreementNumber("AGR-SCHEDULED-1");
+        agreement.setNextServiceDate(LocalDate.now().plusDays(10));
+        agreement.setPeriod(Period.MONTHLY); // Zakładam, że Period to Enum
+        agreement.setSignedDate(LocalDate.now().minusDays(10));
+        agreementRepository.save(agreement);
+
+        // 4. Firma nr 2 (dla umowy, która NIE powinna generować zamówienia)
+        // Tworzymy nową firmę, aby uniknąć błędu "Unique index on COMPANY_ID" w tabeli Agreement
+        Company company2 = createValidCompany("Other Corp.");
+        company2.setNip("2222222222222"); // Inny NIP
+        company2.setRegon("222222222");   // Inny Regon
+        company2.setEmail("other@corp.pl");
+        companyRepository.save(company2);
+
+        // 5. Umowa dla Firmy nr 2 (zła data - za 20 dni)
+        Agreement otherAgreement = new Agreement();
+        otherAgreement.setCompany(company2); // Przypisujemy do DRUGIEJ firmy
+        otherAgreement.setAgreementNumber("AGR-FUTURE");
+        otherAgreement.setNextServiceDate(LocalDate.now().plusDays(20));
+        otherAgreement.setPeriod(Period.YEARLY);
+        otherAgreement.setSignedDate(LocalDate.now().minusDays(10));
+        agreementRepository.save(otherAgreement);
+
+        // When
+        orderService.createOrderFromSchedule();
+
+        // Then
+        List<Order> orders = orderRepository.findAll();
+
+        assertThat(orders).hasSize(1); // Powinno być tylko jedno zamówienie (od firmy 1)
+
+        Order generatedOrder = orders.get(0);
+        assertThat(generatedOrder.getAgreementNumber()).isEqualTo("AGR-SCHEDULED-1");
+        // Upewniamy się, że zamówienie jest przypisane do klienta pierwszej firmy
+        assertThat(generatedOrder.getClient().getId()).isEqualTo(client.getId());
+        assertThat(generatedOrder.getPriority()).isEqualTo(Priority.NORMAL);
+    }
+
+    @Test
+    @DisplayName("createOrderFromSchedule: Powinien wygenerować zamówienia z umów na podstawie daty")
+    void shouldGenerateOrdersFromSchedule10() {
+        // Given
+        // 1. Firma nr 1 (dla umowy, która MA wygenerować zamówienie)
+        Company company1 = createValidCompany("Tech Sp. z o.o.");
+        // Musimy upewnić się, że dane są unikalne
+        company1.setNip("1111111111111");
+        company1.setRegon("111111111");
+        company1.setEmail("tech@test.pl");
+        companyRepository.save(company1);
+
+        // 2. Klient dla Firmy nr 1
+        Client client = new Client();
+        client.setCompany(company1);
+        client.setFirstName("Adam");
+        client.setLastName("Admin");
+        client.setPhoneNumber("123456789");
+        client.setEmail("admin@tech.pl");
+        client.setType("Client");
+        clientRepository.save(client);
+
+        // 3. Umowa dla Firmy nr 1 (poprawna data - za 10 dni)
+        Agreement agreement = new Agreement();
+        agreement.setCompany(company1);
+        agreement.setAgreementNumber("AGR-SCHEDULED-1");
+        agreement.setNextServiceDate(LocalDate.now().plusDays(10));
+        agreement.setPeriod(Period.MONTHLY); // Zakładam, że Period to Enum
+        agreement.setSignedDate(LocalDate.now().minusDays(10));
+        agreementRepository.save(agreement);
+
+        // 4. Firma nr 2 (dla umowy, która NIE powinna generować zamówienia)
+        // Tworzymy nową firmę, aby uniknąć błędu "Unique index on COMPANY_ID" w tabeli Agreement
+        Company company2 = createValidCompany("Other Corp.");
+        company2.setNip("2222222222222"); // Inny NIP
+        company2.setRegon("222222222");   // Inny Regon
+        company2.setEmail("other@corp.pl");
+        companyRepository.save(company2);
+
+        // 5. Umowa dla Firmy nr 2 (zła data - za 20 dni)
+        Agreement otherAgreement = new Agreement();
+        otherAgreement.setCompany(company2); // Przypisujemy do DRUGIEJ firmy
+        otherAgreement.setAgreementNumber("AGR-FUTURE");
+        otherAgreement.setNextServiceDate(LocalDate.now().plusDays(20));
+        otherAgreement.setPeriod(Period.YEARLY);
+        otherAgreement.setSignedDate(LocalDate.now().minusDays(10));
+        agreementRepository.save(otherAgreement);
+
+        // When
+        orderService.createOrderFromSchedule();
+
+        // Then
+        List<Order> orders = orderRepository.findAll();
+
+        assertThat(orders).hasSize(1); // Powinno być tylko jedno zamówienie (od firmy 1)
+
+        Order generatedOrder = orders.get(0);
+        assertThat(generatedOrder.getAgreementNumber()).isEqualTo("AGR-SCHEDULED-1");
+        // Upewniamy się, że zamówienie jest przypisane do klienta pierwszej firmy
+        assertThat(generatedOrder.getClient().getId()).isEqualTo(client.getId());
+        assertThat(generatedOrder.getPriority()).isEqualTo(Priority.NORMAL);
+    }
+
+    @Test
+    @DisplayName("createOrderFromSchedule: Powinien wygenerować zamówienia z umów na podstawie daty")
+    void shouldGenerateOrdersFromSchedule11() {
+        // Given
+        // 1. Firma nr 1 (dla umowy, która MA wygenerować zamówienie)
+        Company company1 = createValidCompany("Tech Sp. z o.o.");
+        // Musimy upewnić się, że dane są unikalne
+        company1.setNip("1111111111111");
+        company1.setRegon("111111111");
+        company1.setEmail("tech@test.pl");
+        companyRepository.save(company1);
+
+        // 2. Klient dla Firmy nr 1
+        Client client = new Client();
+        client.setCompany(company1);
+        client.setFirstName("Adam");
+        client.setLastName("Admin");
+        client.setPhoneNumber("123456789");
+        client.setEmail("admin@tech.pl");
+        client.setType("Client");
+        clientRepository.save(client);
+
+        // 3. Umowa dla Firmy nr 1 (poprawna data - za 10 dni)
+        Agreement agreement = new Agreement();
+        agreement.setCompany(company1);
+        agreement.setAgreementNumber("AGR-SCHEDULED-1");
+        agreement.setNextServiceDate(LocalDate.now().plusDays(10));
+        agreement.setPeriod(Period.MONTHLY); // Zakładam, że Period to Enum
+        agreement.setSignedDate(LocalDate.now().minusDays(10));
+        agreementRepository.save(agreement);
+
+        // 4. Firma nr 2 (dla umowy, która NIE powinna generować zamówienia)
+        // Tworzymy nową firmę, aby uniknąć błędu "Unique index on COMPANY_ID" w tabeli Agreement
+        Company company2 = createValidCompany("Other Corp.");
+        company2.setNip("2222222222222"); // Inny NIP
+        company2.setRegon("222222222");   // Inny Regon
+        company2.setEmail("other@corp.pl");
+        companyRepository.save(company2);
+
+        // 5. Umowa dla Firmy nr 2 (zła data - za 20 dni)
+        Agreement otherAgreement = new Agreement();
+        otherAgreement.setCompany(company2); // Przypisujemy do DRUGIEJ firmy
+        otherAgreement.setAgreementNumber("AGR-FUTURE");
+        otherAgreement.setNextServiceDate(LocalDate.now().plusDays(20));
+        otherAgreement.setPeriod(Period.YEARLY);
+        otherAgreement.setSignedDate(LocalDate.now().minusDays(10));
+        agreementRepository.save(otherAgreement);
+
+        // When
+        orderService.createOrderFromSchedule();
+
+        // Then
+        List<Order> orders = orderRepository.findAll();
+
+        assertThat(orders).hasSize(1); // Powinno być tylko jedno zamówienie (od firmy 1)
+
+        Order generatedOrder = orders.get(0);
+        assertThat(generatedOrder.getAgreementNumber()).isEqualTo("AGR-SCHEDULED-1");
+        // Upewniamy się, że zamówienie jest przypisane do klienta pierwszej firmy
+        assertThat(generatedOrder.getClient().getId()).isEqualTo(client.getId());
+        assertThat(generatedOrder.getPriority()).isEqualTo(Priority.NORMAL);
+    }
 
     @Test
     @DisplayName("createOrderFromSchedule: Powinien wygenerować zamówienia z umów na podstawie daty")

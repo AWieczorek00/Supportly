@@ -119,6 +119,411 @@ void setUp() {
         assertThat(fromDb.getLastName()).isEqualTo("Nowy");
     }
 
+    @Test
+    @DisplayName("updateEmployee: Powinien zaktualizować dane pracownika")
+    void shouldUpdateEmployeeData3() {
+        // Given
+        Employee original = createAndSaveEmployee("Tomasz", "Stary", "111222333");
+
+        // Obiekt z nowymi danymi (musi mieć to samo ID co oryginał)
+        Employee updateData = new Employee();
+        updateData.setIndividualId(original.getIndividualId());
+        updateData.setFirstName("Tomasz");
+        updateData.setLastName("Nowy"); // Zmiana nazwiska
+        updateData.setSecondName("Adam");
+        updateData.setPhoneNumber("999888777"); // Zmiana telefonu
+
+        // When
+        Employee updated = employeeService.updateEmployee(updateData);
+
+        // Then
+        // Sprawdź czy zwrócony obiekt jest zaktualizowany
+        assertThat(updated.getLastName()).isEqualTo("Nowy");
+        assertThat(updated.getPhoneNumber()).isEqualTo("999888777");
+
+        // Sprawdź czy w bazie faktycznie się zmieniło
+        Employee fromDb = employeeRepository.findById(original.getIndividualId()).orElseThrow();
+        assertThat(fromDb.getLastName()).isEqualTo("Nowy");
+    }
+
+
+    @Test
+    @DisplayName("updateEmployee: Powinien zaktualizować dane pracownika")
+    void shouldUpdateEmployeeData4() {
+        // Given
+        Employee original = createAndSaveEmployee("Tomasz", "Stary", "111222333");
+
+        // Obiekt z nowymi danymi (musi mieć to samo ID co oryginał)
+        Employee updateData = new Employee();
+        updateData.setIndividualId(original.getIndividualId());
+        updateData.setFirstName("Tomasz");
+        updateData.setLastName("Nowy"); // Zmiana nazwiska
+        updateData.setSecondName("Adam");
+        updateData.setPhoneNumber("999888777"); // Zmiana telefonu
+
+        // When
+        Employee updated = employeeService.updateEmployee(updateData);
+
+        // Then
+        // Sprawdź czy zwrócony obiekt jest zaktualizowany
+        assertThat(updated.getLastName()).isEqualTo("Nowy");
+        assertThat(updated.getPhoneNumber()).isEqualTo("999888777");
+
+        // Sprawdź czy w bazie faktycznie się zmieniło
+        Employee fromDb = employeeRepository.findById(original.getIndividualId()).orElseThrow();
+        assertThat(fromDb.getLastName()).isEqualTo("Nowy");
+    }
+
+    @Test
+    @DisplayName("updateEmployee: Powinien zaktualizować dane pracownika")
+    void shouldUpdateEmployeeData5() {
+        // Given
+        Employee original = createAndSaveEmployee("Tomasz", "Stary", "111222333");
+
+        // Obiekt z nowymi danymi (musi mieć to samo ID co oryginał)
+        Employee updateData = new Employee();
+        updateData.setIndividualId(original.getIndividualId());
+        updateData.setFirstName("Tomasz");
+        updateData.setLastName("Nowy"); // Zmiana nazwiska
+        updateData.setSecondName("Adam");
+        updateData.setPhoneNumber("999888777"); // Zmiana telefonu
+
+        // When
+        Employee updated = employeeService.updateEmployee(updateData);
+
+        // Then
+        // Sprawdź czy zwrócony obiekt jest zaktualizowany
+        assertThat(updated.getLastName()).isEqualTo("Nowy");
+        assertThat(updated.getPhoneNumber()).isEqualTo("999888777");
+
+        // Sprawdź czy w bazie faktycznie się zmieniło
+        Employee fromDb = employeeRepository.findById(original.getIndividualId()).orElseThrow();
+        assertThat(fromDb.getLastName()).isEqualTo("Nowy");
+    }
+
+    @Test
+    @DisplayName("updateEmployee: Powinien zaktualizować dane pracownika")
+    void shouldUpdateEmployeeData6() {
+        // Given
+        Employee original = createAndSaveEmployee("Tomasz", "Stary", "111222333");
+
+        // Obiekt z nowymi danymi (musi mieć to samo ID co oryginał)
+        Employee updateData = new Employee();
+        updateData.setIndividualId(original.getIndividualId());
+        updateData.setFirstName("Tomasz");
+        updateData.setLastName("Nowy"); // Zmiana nazwiska
+        updateData.setSecondName("Adam");
+        updateData.setPhoneNumber("999888777"); // Zmiana telefonu
+
+        // When
+        Employee updated = employeeService.updateEmployee(updateData);
+
+        // Then
+        // Sprawdź czy zwrócony obiekt jest zaktualizowany
+        assertThat(updated.getLastName()).isEqualTo("Nowy");
+        assertThat(updated.getPhoneNumber()).isEqualTo("999888777");
+
+        // Sprawdź czy w bazie faktycznie się zmieniło
+        Employee fromDb = employeeRepository.findById(original.getIndividualId()).orElseThrow();
+        assertThat(fromDb.getLastName()).isEqualTo("Nowy");
+    }
+
+    @Test
+    @DisplayName("updateEmployee: Powinien zaktualizować dane pracownika")
+    void shouldUpdateEmployeeData7() {
+        // Given
+        Employee original = createAndSaveEmployee("Tomasz", "Stary", "111222333");
+
+        // Obiekt z nowymi danymi (musi mieć to samo ID co oryginał)
+        Employee updateData = new Employee();
+        updateData.setIndividualId(original.getIndividualId());
+        updateData.setFirstName("Tomasz");
+        updateData.setLastName("Nowy"); // Zmiana nazwiska
+        updateData.setSecondName("Adam");
+        updateData.setPhoneNumber("999888777"); // Zmiana telefonu
+
+        // When
+        Employee updated = employeeService.updateEmployee(updateData);
+
+        // Then
+        // Sprawdź czy zwrócony obiekt jest zaktualizowany
+        assertThat(updated.getLastName()).isEqualTo("Nowy");
+        assertThat(updated.getPhoneNumber()).isEqualTo("999888777");
+
+        // Sprawdź czy w bazie faktycznie się zmieniło
+        Employee fromDb = employeeRepository.findById(original.getIndividualId()).orElseThrow();
+        assertThat(fromDb.getLastName()).isEqualTo("Nowy");
+    }
+
+    @Test
+    @DisplayName("updateEmployee: Powinien zaktualizować dane pracownika")
+    void shouldUpdateEmployeeData8() {
+        // Given
+        Employee original = createAndSaveEmployee("Tomasz", "Stary", "111222333");
+
+        // Obiekt z nowymi danymi (musi mieć to samo ID co oryginał)
+        Employee updateData = new Employee();
+        updateData.setIndividualId(original.getIndividualId());
+        updateData.setFirstName("Tomasz");
+        updateData.setLastName("Nowy"); // Zmiana nazwiska
+        updateData.setSecondName("Adam");
+        updateData.setPhoneNumber("999888777"); // Zmiana telefonu
+
+        // When
+        Employee updated = employeeService.updateEmployee(updateData);
+
+        // Then
+        // Sprawdź czy zwrócony obiekt jest zaktualizowany
+        assertThat(updated.getLastName()).isEqualTo("Nowy");
+        assertThat(updated.getPhoneNumber()).isEqualTo("999888777");
+
+        // Sprawdź czy w bazie faktycznie się zmieniło
+        Employee fromDb = employeeRepository.findById(original.getIndividualId()).orElseThrow();
+        assertThat(fromDb.getLastName()).isEqualTo("Nowy");
+    }
+
+    @Test
+    @DisplayName("updateEmployee: Powinien zaktualizować dane pracownika")
+    void shouldUpdateEmployeeData9() {
+        // Given
+        Employee original = createAndSaveEmployee("Tomasz", "Stary", "111222333");
+
+        // Obiekt z nowymi danymi (musi mieć to samo ID co oryginał)
+        Employee updateData = new Employee();
+        updateData.setIndividualId(original.getIndividualId());
+        updateData.setFirstName("Tomasz");
+        updateData.setLastName("Nowy"); // Zmiana nazwiska
+        updateData.setSecondName("Adam");
+        updateData.setPhoneNumber("999888777"); // Zmiana telefonu
+
+        // When
+        Employee updated = employeeService.updateEmployee(updateData);
+
+        // Then
+        // Sprawdź czy zwrócony obiekt jest zaktualizowany
+        assertThat(updated.getLastName()).isEqualTo("Nowy");
+        assertThat(updated.getPhoneNumber()).isEqualTo("999888777");
+
+        // Sprawdź czy w bazie faktycznie się zmieniło
+        Employee fromDb = employeeRepository.findById(original.getIndividualId()).orElseThrow();
+        assertThat(fromDb.getLastName()).isEqualTo("Nowy");
+    }
+
+    @Test
+    @DisplayName("updateEmployee: Powinien zaktualizować dane pracownika")
+    void shouldUpdateEmployeeData10() {
+        // Given
+        Employee original = createAndSaveEmployee("Tomasz", "Stary", "111222333");
+
+        // Obiekt z nowymi danymi (musi mieć to samo ID co oryginał)
+        Employee updateData = new Employee();
+        updateData.setIndividualId(original.getIndividualId());
+        updateData.setFirstName("Tomasz");
+        updateData.setLastName("Nowy"); // Zmiana nazwiska
+        updateData.setSecondName("Adam");
+        updateData.setPhoneNumber("999888777"); // Zmiana telefonu
+
+        // When
+        Employee updated = employeeService.updateEmployee(updateData);
+
+        // Then
+        // Sprawdź czy zwrócony obiekt jest zaktualizowany
+        assertThat(updated.getLastName()).isEqualTo("Nowy");
+        assertThat(updated.getPhoneNumber()).isEqualTo("999888777");
+
+        // Sprawdź czy w bazie faktycznie się zmieniło
+        Employee fromDb = employeeRepository.findById(original.getIndividualId()).orElseThrow();
+        assertThat(fromDb.getLastName()).isEqualTo("Nowy");
+    }
+
+    @Test
+    @DisplayName("updateEmployee: Powinien zaktualizować dane pracownika")
+    void shouldUpdateEmployeeData11() {
+        // Given
+        Employee original = createAndSaveEmployee("Tomasz", "Stary", "111222333");
+
+        // Obiekt z nowymi danymi (musi mieć to samo ID co oryginał)
+        Employee updateData = new Employee();
+        updateData.setIndividualId(original.getIndividualId());
+        updateData.setFirstName("Tomasz");
+        updateData.setLastName("Nowy"); // Zmiana nazwiska
+        updateData.setSecondName("Adam");
+        updateData.setPhoneNumber("999888777"); // Zmiana telefonu
+
+        // When
+        Employee updated = employeeService.updateEmployee(updateData);
+
+        // Then
+        // Sprawdź czy zwrócony obiekt jest zaktualizowany
+        assertThat(updated.getLastName()).isEqualTo("Nowy");
+        assertThat(updated.getPhoneNumber()).isEqualTo("999888777");
+
+        // Sprawdź czy w bazie faktycznie się zmieniło
+        Employee fromDb = employeeRepository.findById(original.getIndividualId()).orElseThrow();
+        assertThat(fromDb.getLastName()).isEqualTo("Nowy");
+    }
+
+    @Test
+    @DisplayName("updateEmployee: Powinien zaktualizować dane pracownika")
+    void shouldUpdateEmployeeData12() {
+        // Given
+        Employee original = createAndSaveEmployee("Tomasz", "Stary", "111222333");
+
+        // Obiekt z nowymi danymi (musi mieć to samo ID co oryginał)
+        Employee updateData = new Employee();
+        updateData.setIndividualId(original.getIndividualId());
+        updateData.setFirstName("Tomasz");
+        updateData.setLastName("Nowy"); // Zmiana nazwiska
+        updateData.setSecondName("Adam");
+        updateData.setPhoneNumber("999888777"); // Zmiana telefonu
+
+        // When
+        Employee updated = employeeService.updateEmployee(updateData);
+
+        // Then
+        // Sprawdź czy zwrócony obiekt jest zaktualizowany
+        assertThat(updated.getLastName()).isEqualTo("Nowy");
+        assertThat(updated.getPhoneNumber()).isEqualTo("999888777");
+
+        // Sprawdź czy w bazie faktycznie się zmieniło
+        Employee fromDb = employeeRepository.findById(original.getIndividualId()).orElseThrow();
+        assertThat(fromDb.getLastName()).isEqualTo("Nowy");
+    }
+
+    @Test
+    @DisplayName("updateEmployee: Powinien zaktualizować dane pracownika")
+    void shouldUpdateEmployeeData13() {
+        // Given
+        Employee original = createAndSaveEmployee("Tomasz", "Stary", "111222333");
+
+        // Obiekt z nowymi danymi (musi mieć to samo ID co oryginał)
+        Employee updateData = new Employee();
+        updateData.setIndividualId(original.getIndividualId());
+        updateData.setFirstName("Tomasz");
+        updateData.setLastName("Nowy"); // Zmiana nazwiska
+        updateData.setSecondName("Adam");
+        updateData.setPhoneNumber("999888777"); // Zmiana telefonu
+
+        // When
+        Employee updated = employeeService.updateEmployee(updateData);
+
+        // Then
+        // Sprawdź czy zwrócony obiekt jest zaktualizowany
+        assertThat(updated.getLastName()).isEqualTo("Nowy");
+        assertThat(updated.getPhoneNumber()).isEqualTo("999888777");
+
+        // Sprawdź czy w bazie faktycznie się zmieniło
+        Employee fromDb = employeeRepository.findById(original.getIndividualId()).orElseThrow();
+        assertThat(fromDb.getLastName()).isEqualTo("Nowy");
+    }
+
+    @Test
+    @DisplayName("updateEmployee: Powinien zaktualizować dane pracownika")
+    void shouldUpdateEmployeeData14() {
+        // Given
+        Employee original = createAndSaveEmployee("Tomasz", "Stary", "111222333");
+
+        // Obiekt z nowymi danymi (musi mieć to samo ID co oryginał)
+        Employee updateData = new Employee();
+        updateData.setIndividualId(original.getIndividualId());
+        updateData.setFirstName("Tomasz");
+        updateData.setLastName("Nowy"); // Zmiana nazwiska
+        updateData.setSecondName("Adam");
+        updateData.setPhoneNumber("999888777"); // Zmiana telefonu
+
+        // When
+        Employee updated = employeeService.updateEmployee(updateData);
+
+        // Then
+        // Sprawdź czy zwrócony obiekt jest zaktualizowany
+        assertThat(updated.getLastName()).isEqualTo("Nowy");
+        assertThat(updated.getPhoneNumber()).isEqualTo("999888777");
+
+        // Sprawdź czy w bazie faktycznie się zmieniło
+        Employee fromDb = employeeRepository.findById(original.getIndividualId()).orElseThrow();
+        assertThat(fromDb.getLastName()).isEqualTo("Nowy");
+    }
+
+    @Test
+    @DisplayName("updateEmployee: Powinien zaktualizować dane pracownika")
+    void shouldUpdateEmployeeData15() {
+        // Given
+        Employee original = createAndSaveEmployee("Tomasz", "Stary", "111222333");
+
+        // Obiekt z nowymi danymi (musi mieć to samo ID co oryginał)
+        Employee updateData = new Employee();
+        updateData.setIndividualId(original.getIndividualId());
+        updateData.setFirstName("Tomasz");
+        updateData.setLastName("Nowy"); // Zmiana nazwiska
+        updateData.setSecondName("Adam");
+        updateData.setPhoneNumber("999888777"); // Zmiana telefonu
+
+        // When
+        Employee updated = employeeService.updateEmployee(updateData);
+
+        // Then
+        // Sprawdź czy zwrócony obiekt jest zaktualizowany
+        assertThat(updated.getLastName()).isEqualTo("Nowy");
+        assertThat(updated.getPhoneNumber()).isEqualTo("999888777");
+
+        // Sprawdź czy w bazie faktycznie się zmieniło
+        Employee fromDb = employeeRepository.findById(original.getIndividualId()).orElseThrow();
+        assertThat(fromDb.getLastName()).isEqualTo("Nowy");
+    }
+
+    @Test
+    @DisplayName("updateEmployee: Powinien zaktualizować dane pracownika")
+    void shouldUpdateEmployeeData16() {
+        // Given
+        Employee original = createAndSaveEmployee("Tomasz", "Stary", "111222333");
+
+        // Obiekt z nowymi danymi (musi mieć to samo ID co oryginał)
+        Employee updateData = new Employee();
+        updateData.setIndividualId(original.getIndividualId());
+        updateData.setFirstName("Tomasz");
+        updateData.setLastName("Nowy"); // Zmiana nazwiska
+        updateData.setSecondName("Adam");
+        updateData.setPhoneNumber("999888777"); // Zmiana telefonu
+
+        // When
+        Employee updated = employeeService.updateEmployee(updateData);
+
+        // Then
+        // Sprawdź czy zwrócony obiekt jest zaktualizowany
+        assertThat(updated.getLastName()).isEqualTo("Nowy");
+        assertThat(updated.getPhoneNumber()).isEqualTo("999888777");
+
+        // Sprawdź czy w bazie faktycznie się zmieniło
+        Employee fromDb = employeeRepository.findById(original.getIndividualId()).orElseThrow();
+        assertThat(fromDb.getLastName()).isEqualTo("Nowy");
+    }
+
+    @Test
+    @DisplayName("updateEmployee: Powinien zaktualizować dane pracownika")
+    void shouldUpdateEmployeeData17() {
+        // Given
+        Employee original = createAndSaveEmployee("Tomasz", "Stary", "111222333");
+
+        // Obiekt z nowymi danymi (musi mieć to samo ID co oryginał)
+        Employee updateData = new Employee();
+        updateData.setIndividualId(original.getIndividualId());
+        updateData.setFirstName("Tomasz");
+        updateData.setLastName("Nowy"); // Zmiana nazwiska
+        updateData.setSecondName("Adam");
+        updateData.setPhoneNumber("999888777"); // Zmiana telefonu
+
+        // When
+        Employee updated = employeeService.updateEmployee(updateData);
+
+        // Then
+        // Sprawdź czy zwrócony obiekt jest zaktualizowany
+        assertThat(updated.getLastName()).isEqualTo("Nowy");
+        assertThat(updated.getPhoneNumber()).isEqualTo("999888777");
+
+        // Sprawdź czy w bazie faktycznie się zmieniło
+        Employee fromDb = employeeRepository.findById(original.getIndividualId()).orElseThrow();
+        assertThat(fromDb.getLastName()).isEqualTo("Nowy");
+    }
 
     @Test
     @DisplayName("updateEmployee: Powinien zaktualizować dane pracownika")
