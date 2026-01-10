@@ -43,18 +43,18 @@ public class OrderService {
             orderUpdate.setEmployeeList(orderBody.getEmployeeList());
 //            orderUpdate.setPartList(partService.updatePartList(orderBody.getPartList(), orderUpdate.getPartList()));
             orderUpdate.setPeriod(orderBody.getPeriod());
-            orderUpdate.setStatus(orderBody.getStatus());
+            orderUpdate.setStatus(null);
             orderUpdate.setPriority(orderBody.getPriority());
             orderUpdate.setDateOfAdmission(orderBody.getDateOfAdmission());
             orderUpdate.setDateOfExecution(orderBody.getDateOfExecution());
             orderUpdate.setNote(orderBody.getNote());
             return orderRepository.save(orderUpdate);
-        }).orElseThrow(() -> new ResourceNotFoundException("nie znaleziono"));
+        }).orElseThrow(() -> new ResourceNotFoundException("nie znalezionos"));
     }
 
     public List<OrderDto> search(OrderSC criteria) {
         GenericSpecificationBuilder<Order> builder = new GenericSpecificationBuilder<>();
-        Specification<Order> spec = null;
+        Specification<Order> spec = builder.build(criteria);
         return orderRepository.findAll(spec).stream().map(Mapper::toDto).collect(Collectors.toList());
     }
 

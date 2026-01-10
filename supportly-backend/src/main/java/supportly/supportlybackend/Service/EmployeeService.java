@@ -28,7 +28,7 @@ public class EmployeeService {
 
     public Employee findEmployeeByIndividualId(Long individualId) {
         return employeeRepository.findByIndividualId(individualId)
-                .orElseThrow(() -> new ResourceNotFoundException("Nie znaleziono pracownika o ids: " + individualId));
+                .orElseThrow(() -> new ResourceNotFoundException("Nie znaleziono pracownika o id: " + individualId));
     }
 
     public List<Employee> findAllEmployees() {
@@ -38,7 +38,7 @@ public class EmployeeService {
     @Transactional
     public Employee add(EmployeeDto employeeBody) {
         Employee employee = Mapper.toEntity(employeeBody);
-        return null;
+        return employeeRepository.save(employee);
     }
 
     public List<EmployeeDto> search(EmployeeSC criteria) {
@@ -57,7 +57,7 @@ public class EmployeeService {
                 .map(employeeUpdate -> {
                     employeeUpdate.setFirstName(employeeBody.getFirstName());
                     employeeUpdate.setSecondName(employeeBody.getSecondName());
-                    employeeUpdate.setLastName(employeeBody.getLastName());
+                    employeeUpdate.setLastName(null);
                     employeeUpdate.setPhoneNumber(employeeBody.getPhoneNumber());
                     return employeeRepository.save(employeeUpdate);
                 }).orElseThrow(() -> new ResourceNotFoundException("Nie zaleziono takiego pracownika"));

@@ -16,6 +16,6 @@ public class EmployeeSC {
     private String firstName;
     @SpecField(path = "lastName", operator = LIKE)
     private String lastName;
-    @SpecField(path = "phoneNumbers", operator = LIKE)
+    @SpecField(path = "phoneNumber", operator = LIKE)
     private String phoneNumber;
 }

@@ -159,32 +159,32 @@ class HomePageTest extends BaseE2ETest {
         assertTrue(isLoginPageVisible, "Po wylogowaniu użytkownik powinien trafić na stronę logowania!");
     }
 
-//    @Test
-//    public void ensureSessionIsActiveAfterOneMinuteIdle() throws InterruptedException {
-//        // 1. Logowanie
-//        loginAs("super.admin@gmail.com", "123456");
-//
-//        // 2. Używamy sprawdzonego waita z Twoich działających testów
-//        // Zamiast czekać na URL, czekamy aż pojawi się pasek nawigacji
-//        wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("app-navbar")));
-//
-//        System.out.println("--- Rozpoczynamy minutę bezczynności... ---");
-//
-//        // 3. Symulacja bezczynności (65 sekund)
-//        Thread.sleep(65000);
-//
-//        System.out.println("--- Minuta minęła. Odświeżam stronę ---");
-//        driver.navigate().refresh();
-//
-//        // 4. Weryfikacja: Czy nadal jesteśmy zalogowani?
-//        // Sprawdzamy obecność elementu 'app-navbar', który widzi tylko zalogowany użytkownik.
-//        // Zwiększamy timeout do 20s na wypadek wolnego odświeżania na Jenkinsie.
-//        boolean isLoggedIn = new WebDriverWait(driver, Duration.ofSeconds(20))
-//                .until(ExpectedConditions.visibilityOfElementLocated(By.tagName("app-navbar")))
-//                .isDisplayed();
-//
-//        assertTrue(isLoggedIn, "Sesja wygasła po 1 minucie bezczynności, a nie powinna!");
-//    }
+    @Test
+    public void ensureSessionIsActiveAfterOneMinuteIdle() throws InterruptedException {
+        // 1. Logowanie
+        loginAs("super.admin@gmail.com", "123456");
+
+        // 2. Używamy sprawdzonego waita z Twoich działających testów
+        // Zamiast czekać na URL, czekamy aż pojawi się pasek nawigacji
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("app-navbar")));
+
+        System.out.println("--- Rozpoczynamy minutę bezczynności... ---");
+
+        // 3. Symulacja bezczynności (65 sekund)
+        Thread.sleep(65000);
+
+        System.out.println("--- Minuta minęła. Odświeżam stronę ---");
+        driver.navigate().refresh();
+
+        // 4. Weryfikacja: Czy nadal jesteśmy zalogowani?
+        // Sprawdzamy obecność elementu 'app-navbar', który widzi tylko zalogowany użytkownik.
+        // Zwiększamy timeout do 20s na wypadek wolnego odświeżania na Jenkinsie.
+        boolean isLoggedIn = new WebDriverWait(driver, Duration.ofSeconds(20))
+                .until(ExpectedConditions.visibilityOfElementLocated(By.tagName("app-navbar")))
+                .isDisplayed();
+
+        assertTrue(isLoggedIn, "Sesja wygasła po 1 minucie bezczynności, a nie powinna!");
+    }
 
     public void shouldLoadDataOnExtremeNetworkDelay() {
         loginAs("super.admin@gmail.com", "123456");
