@@ -49,7 +49,7 @@ public class OrderService {
             orderUpdate.setDateOfExecution(orderBody.getDateOfExecution());
             orderUpdate.setNote(orderBody.getNote());
             return orderRepository.save(orderUpdate);
-        }).orElseThrow(() -> new ResourceNotFoundException("nie znalezionos"));
+        }).orElseThrow(() -> new ResourceNotFoundException("nie znaleziono"));
     }
 
     public List<OrderDto> search(OrderSC criteria) {
