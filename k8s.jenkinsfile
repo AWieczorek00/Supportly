@@ -6,26 +6,80 @@ final String pipelineConfig = '''
     "ports":{
         "app":{
             "postgres-master":1000,            
+            "postgres-master-1":1000,            
+            "postgres-master-2":1001,            
+            "postgres-master-3":1002,            
+            "postgres-master-4":1003,            
+            "postgres-master-5":1004,            
+            "postgres-master-6":1005,            
             "postgres_lt-master":1001,            
             "mssql-master":1100,           
+            "mssql-master-1":1100,           
+            "mssql-master-2":1101,           
+            "mssql-master-3":1102,           
+            "mssql-master-4":1103,           
+            "mssql-master-5":1104,           
+            "mssql-master-6":1105,           
             "mssql_lt-master":1101,           
             "oracle-master":1200,            
+            "oracle-master-1":1200,            
+            "oracle-master-2":1201,            
+            "oracle-master-3":1202,            
+            "oracle-master-4":1203,            
+            "oracle-master-5":1204,            
+            "oracle-master-6":1205,            
             "oracle_lt-master":1201            
         },
         "db":{
             "postgres-master":1010,            
+            "postgres-master-1":1010,            
+            "postgres-master-2":1011,
+            "postgres-master-3":1012,            
+            "postgres-master-4":1013,            
+            "postgres-master-5":1014,            
+            "postgres-master-6":1015,            
             "postgres_lt-master":1011,            
-            "mssql-master":1110,           
+            "mssql-master":1110,
+            "mssql-master-1":1110,           
+            "mssql-master-2":1111,           
+            "mssql-master-3":1112,           
+            "mssql-master-4":1113,           
+            "mssql-master-5":1114,           
+            "mssql-master-6":1115,           
             "mssql_lt-master":1111,           
             "oracle-master":1210,
+            "oracle-master-1":1210,            
+            "oracle-master-2":1211,            
+            "oracle-master-3":1212,            
+            "oracle-master-4":1213,            
+            "oracle-master-5":1214,            
+            "oracle-master-6":1215,
             "oracle_lt-master":1211
         },
         "front":{
             "postgres-master":1020,            
+            "postgres-master-1":1020,            
+            "postgres-master-2":1021,
+            "postgres-master-3":1022,            
+            "postgres-master-4":1023,            
+            "postgres-master-5":1024,            
+            "postgres-master-6":1025,            
             "postgres_lt-master":1021,            
-            "mssql-master":1120,           
+            "mssql-master":1120,
+            "mssql-master-1":1120,           
+            "mssql-master-2":1121,           
+            "mssql-master-3":1122,           
+            "mssql-master-4":1123,           
+            "mssql-master-5":1124,           
+            "mssql-master-6":1125,           
             "mssql_lt-master":1121,           
             "oracle-master":1220,
+            "oracle-master-1":1220,            
+            "oracle-master-2":1221,            
+            "oracle-master-3":1222,            
+            "oracle-master-4":1223,            
+            "oracle-master-5":1224,            
+            "oracle-master-6":1225,
             "oracle_lt-master":1221
         }
     }
@@ -56,11 +110,21 @@ pipeline {
         string(name: 'NUMER_PROBY', defaultValue: '1', description: 'Wpisz numer próby')
     }
 
+
+
     options {
         timestamps()
         timeout(time: 5, unit: 'HOURS')
         buildDiscarder(logRotator(numToKeepStr: '30'))
-        disableConcurrentBuilds()
+        throttleJobProperty(
+                categories: [],
+                limitOneJobWithMatchingParams: false,
+                maxConcurrentPerNode: 6,
+                maxConcurrentTotal: 6,
+                paramsToUseForLimit: '',
+                throttleEnabled: true,
+                throttleOption: 'project'
+        )
         skipDefaultCheckout()
     }
     stages {
@@ -85,21 +149,19 @@ pipeline {
                     },
                             'Build & Test Frontend': {
                                 dir('supportly-frontend') {
-//                                    replaceInFile('http://localhost:8080', "http://${env.PROJECT_NAME}-backend-${env.PROFILE}-1:${env.PORT_BACKEND}", "src/assets/config.json")
                                     echo ">>>[BUDOWANIE FRONTENDU]<<<"
                                     sh "yes | ng version"
                                     sh script: "npm install --force", label: "npm install"
                                     sh script: "ng build --output-path=../conf/frontend/supportly-frontend", label: "ng build"
                                 }
-                            })
+                            }
+                    )
 
-//                    replaceInFile('localhost', '192.168.0.81', "conf/docker-compose-${env.PROFILE}.yml")
                     replaceInFile('PORT_DB', env.PORT_DB, "conf/docker-compose-${env.PROFILE}.yml")
                     replaceInFile('PORT_BACKEND', env.PORT_BACKEND, "conf/docker-compose-${env.PROFILE}.yml")
                     replaceInFile('latest', env.BUILDTAG, "conf/docker-compose-${env.PROFILE}.yml")
                     replaceInFile('latest', env.BUILDTAG, "conf/kube/k8s-deployment.yaml")
                     replaceInFile('PORT_FRONTEND', env.PORT_FRONT, "conf/docker-compose-${env.PROFILE}.yml")
-//                    replaceInFile('URL_BACKEND', "${env.PROJECT_NAME}-backend-${env.PROFILE}-1/${env.PORT_BACKEND}/", "src/assets/nginx.conf")
                     replaceInFile('http://localhost:8080', "http://${env.E2E_DOCKER_HOST}:${env.PORT_BACKEND}", "conf/frontend/supportly-frontend/browser/assets/config.json")
                     replaceInFile('1009', env.PORT_DB, 'conf/backend/backend.env')
                     replaceInFile('localhost', '192.168.0.81', 'conf/backend/backend.env')
@@ -115,154 +177,6 @@ pipeline {
                 }
             }
         }
-
-//        stage('Build & Test') {
-//            steps {
-//                script {
-//
-//                    parallel('Build & Test Backend': {
-////                        dir('supportly-backend') {
-////                            echo ">>>[TESTY BACKENDU]<<<"
-////                            sh "mvn verify -Dspring.profiles.active=${env.PROFILE.replace('_lt', '')} -Dmaven.test.failure.ignore=true"
-////                            junit 'target/surefire-reports/*.xml'
-////                            echo ">>>[BUDOWANIE BACKENDU]<<<"
-////                            sh "mvn clean package spring-boot:repackage -P${env.PROFILE.replace('_lt', '')} -Dspring.profiles.active=${env.PROFILE.replace('_lt', '')}  -DskipTests"
-////                        }
-//                        dir('supportly-backend') {
-//                            echo ">>>[TESTY BACKENDU]<<<"
-//
-//                            parallel {
-//                                stage('Testy Część 1') {
-//                                    steps {
-//                                        // Uruchamia testy, których nazwa zaczyna się na litery A-M
-//                                        sh "mvn verify -Dtest=[A-M]* -Dspring.profiles.active=${env.PROFILE.replace('_lt', '')} -Dmaven.test.failure.ignore=true"
-//                                    }
-//                                }
-//                                stage('Testy Część 2') {
-//                                    steps {
-//                                        // Uruchamia testy, których nazwa zaczyna się na litery N-Z
-//                                        sh "mvn verify -Dtest=[N-Z]* -Dspring.profiles.active=${env.PROFILE.replace('_lt', '')} -Dmaven.test.failure.ignore=true"
-//                                    }
-//                                }
-//                            }
-//
-//                            // Raportowanie po zakończeniu obu wątków
-//                            junit 'target/surefire-reports/*.xml'
-//
-//                            echo ">>>[BUDOWANIE BACKENDU]<<<"
-//                            // Budowanie wykonujemy raz, po testach
-//                            sh "mvn clean package spring-boot:repackage -P${env.PROFILE.replace('_lt', '')} -Dspring.profiles.active=${env.PROFILE.replace('_lt', '')} -DskipTests"
-//                        }
-//                    },
-//                            'Build & Test Frontend': {
-//                                dir('supportly-frontend') {
-////                                    replaceInFile('http://localhost:8080', "http://${env.PROJECT_NAME}-backend-${env.PROFILE}-1:${env.PORT_BACKEND}", "src/assets/config.json")
-//                                    echo ">>>[BUDOWANIE FRONTENDU]<<<"
-//                                    sh "yes | ng version"
-//                                    sh script: "npm install --force", label: "npm install"
-//                                    sh script: "ng build --output-path=../conf/frontend/supportly-frontend", label: "ng build"
-//                                }
-//                            })
-//
-////                    replaceInFile('localhost', '192.168.0.81', "conf/docker-compose-${env.PROFILE}.yml")
-////                    replaceInFile('PORT_DB', env.PORT_DB, "conf/docker-compose-${env.PROFILE}.yml")
-//                    replaceInFile('PORT_DB', env.PORT_DB, "conf/docker-compose-${env.PROFILE}.yml")
-//                    replaceInFile('PORT_BACKEND', env.PORT_BACKEND, "conf/docker-compose-${env.PROFILE}.yml")
-//                    replaceInFile('latest', env.BUILDTAG, "conf/docker-compose-${env.PROFILE}.yml")
-//                    replaceInFile('latest', env.BUILDTAG, "conf/kube/k8s-deployment.yaml")
-//                    replaceInFile('PORT_FRONTEND', env.PORT_FRONT, "conf/docker-compose-${env.PROFILE}.yml")
-////                    replaceInFile('URL_BACKEND', "${env.PROJECT_NAME}-backend-${env.PROFILE}-1/${env.PORT_BACKEND}/", "src/assets/nginx.conf")
-//                    replaceInFile('http://localhost:8080', "http://${env.E2E_DOCKER_HOST}:${env.PORT_BACKEND}", "conf/frontend/supportly-frontend/browser/assets/config.json")
-//                    replaceInFile('1009', env.PORT_DB, 'conf/backend/backend.env')
-//                    replaceInFile('localhost', '192.168.0.81', 'conf/backend/backend.env')
-//                    replaceInFile('API', "http://192.168.0.81:${env.PORT_FRONT}", 'conf/backend/backend.env')
-//                    replaceInFile('default', "${env.PROFILE.replace('_lt', '')}", 'conf/backend/Dockerfile')
-//
-//                    sh "cat conf/docker-compose-${env.PROFILE}.yml"
-//                    sh 'cat conf/backend/backend.env'
-//
-//                    stash name: 'supportly', includes: 'conf/**', useDefaultExcludes: false
-//                    stash name: 'supportly-e2e', includes: 'supportly-e2e/**', useDefaultExcludes: false
-//
-//                }
-//            }
-//        }
-//        stage('Build & Test') {
-//            steps {
-//                script {
-//                    parallel('Build & Test Backend': {
-////                        dir('supportly-backend') {
-////                            echo ">>>[KOMPILACJA WSTĘPNA (Aby przygotować klasy dla obu wątków)]<<<"
-////                            // 1. Czyścimy i kompilujemy kod oraz testy RAZ.
-////                            // Dzięki temu w bloku parallel Maven korzysta już z gotowych plików .class
-////                            sh "mvn clean test-compile -P${env.PROFILE.replace('_lt', '')} -Dspring.profiles.active=${env.PROFILE.replace('_lt', '')}"
-////
-////                            echo ">>>[TESTY BACKENDU (RÓWNOLEGŁE: UNIT vs IT)]<<<"
-////
-////                            // 2. Uruchamiamy testy równolegle.
-////                            // WAŻNE: Nie używamy tu 'clean' ani 'compile', tylko same cele testowe.
-////                            parallel(
-////                                    "Unit Tests": {
-////                                        echo "Start: Testy Jednostkowe (*Test.java)"
-////                                        // surefire:test -> Uruchamia tylko testy jednostkowe
-////                                        sh "mvn verify -Dtest=**/unit/** -Dspring.profiles.active=${env.PROFILE.replace('_lt', '')} -Dmaven.test.failure.ignore=true"
-////                                    },
-////                                    "Integration Tests": {
-////                                        echo "Start: Testy Integracyjne (*IT.java)"
-////                                        // failsafe:integration-test -> Uruchamia tylko testy integracyjne (dzięki Twojej naprawie w pom.xml)
-////                                        sh "mvn verify -Dtest=**/integration/** -Dspring.profiles.active=${env.PROFILE.replace('_lt', '')} -Dmaven.test.failure.ignore=true"
-////                                    }
-////                            )
-////
-////                            // 3. Zbieramy raporty (Surefire generuje je w surefire-reports, Failsafe w failsafe-reports)
-////                            junit '**/target/*-reports/*.xml'
-////
-////                            echo ">>>[BUDOWANIE PACZKI JAR]<<<"
-////                            // 4. Pakujemy aplikację. Używamy -DskipTests, bo testy przeszły już wyżej.
-////                            // Faza package automatycznie zawiera w sobie budowanie, więc nie musimy kompilować od nowa.
-////                            sh "mvn package -DskipTests -P${env.PROFILE.replace('_lt', '')} -Dspring.profiles.active=${env.PROFILE.replace('_lt', '')}"
-////                        }
-//
-//                        dir('supportly-backend') {
-//                            echo ">>>[URUCHAMIANIE TESTÓW I BUDOWANIE (SEKWENCYJNIE)]<<<"
-//
-////                            sh "mvn clean test failsafe:integration-test -P${env.PROFILE.replace('_lt', '')} -Dspring.profiles.active=${env.PROFILE.replace('_lt', '')} -Dmaven.test.failure.ignore=true && mvn package -DskipTests -P${env.PROFILE.replace('_lt', '')} -Dspring.profiles.active=${env.PROFILE.replace('_lt', '')}"
-//
-//                            sh "mvn clean verify -Dtest=**/supportlybackend/** -Dspring.profiles.active=${env.PROFILE.replace('_lt', '')} -Dmaven.test.failure.ignore=true"
-//
-//                            // Zbieramy wyniki
-//                            junit '**/target/*-reports/*.xml'
-//                        }
-//                    },
-//                            'Build & Test Frontend': {
-//                                dir('supportly-frontend') {
-//                                    echo ">>>[BUDOWANIE FRONTENDU]<<<"
-//                                    sh "yes | ng version"
-//                                    sh script: "npm install --force", label: "npm install"
-//                                    sh script: "ng build --output-path=../conf/frontend/supportly-frontend", label: "ng build"
-//                                }
-//                            })
-//
-//                    // --- Reszta Twojego skryptu bez zmian ---
-//                    replaceInFile('PORT_DB', env.PORT_DB, "conf/docker-compose-${env.PROFILE}.yml")
-//                    replaceInFile('PORT_BACKEND', env.PORT_BACKEND, "conf/docker-compose-${env.PROFILE}.yml")
-//                    replaceInFile('latest', env.BUILDTAG, "conf/docker-compose-${env.PROFILE}.yml")
-//                    replaceInFile('latest', env.BUILDTAG, "conf/kube/k8s-deployment.yaml")
-//                    replaceInFile('PORT_FRONTEND', env.PORT_FRONT, "conf/docker-compose-${env.PROFILE}.yml")
-//                    replaceInFile('http://localhost:8080', "http://${env.E2E_DOCKER_HOST}:${env.PORT_BACKEND}", "conf/frontend/supportly-frontend/browser/assets/config.json")
-//                    replaceInFile('1009', env.PORT_DB, 'conf/backend/backend.env')
-//                    replaceInFile('localhost', '192.168.0.81', 'conf/backend/backend.env')
-//                    replaceInFile('API', "http://192.168.0.81:${env.PORT_FRONT}", 'conf/backend/backend.env')
-//                    replaceInFile('default', "${env.PROFILE.replace('_lt', '')}", 'conf/backend/Dockerfile')
-//
-//                    sh "cat conf/docker-compose-${env.PROFILE}.yml"
-//                    sh 'cat conf/backend/backend.env'
-//
-//                    stash name: 'supportly', includes: 'conf/**', useDefaultExcludes: false
-//                    stash name: 'supportly-e2e', includes: 'supportly-e2e/**', useDefaultExcludes: false
-//                }
-//            }
-//        }
         stage('Build & Push Images') {
             when {
                 expression { params.E2E_TESTS }
@@ -349,50 +263,6 @@ pipeline {
         }
 
 
-//        stage('E2E') {
-//            when {
-//                expression { params.E2E_TESTS && params.E2E_TESTS_RUN }
-//            }
-//            steps {
-//                script {
-//                    echo ">>> Running Selenium E2E tests..."
-//
-//                    unstash 'supportly-e2e'
-//
-//                    def databaseUrl = ""
-//
-//                    if (env.PROFILE.replace('_lt', '') == "postgres") {
-//                        databaseUrl = "jdbc:postgresql://192.168.0.81:${env.PORT_DB}/postgres"
-//                    }
-//
-//                    if (env.PROFILE.replace('_lt', '') == "mssql") {
-//                        databaseUrl = """jdbc:sqlserver://192.168.0.81:${env.PORT_DB};databaseName=supportly;encrypt=false"""
-//                    }
-//
-//                    if (env.PROFILE.replace('_lt', '') == "oracle") {
-//                        databaseUrl = "jdbc:postgresql://192.168.0.81:${env.PORT_DB}/postgres"
-//                    }
-//
-//                    echo "${env.E2E_DOCKER_HOST_URL}${env.PORT_FRONT}"
-//                    echo "${databaseUrl}"
-//
-//
-//                    dir('supportly-e2e') {
-//                        // Jeśli testy się nie powiodą, stage będzie czerwony,
-//                        // ale pipeline pójdzie dalej i raporty się opublikują.
-//                        catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
-//                            sh """
-//                        export BASE_URL=${env.E2E_DOCKER_HOST_URL}${env.PORT_FRONT}
-//                        export BASE_URL_DATABASE=${databaseUrl}
-//                        export PROFILE=${env.PROFILE}
-//                        mvn clean test
-//                    """
-//                        }
-//                    }
-//                }
-//            }
-//        }
-
         stage('E2E') {
             when {
                 expression { params.E2E_TESTS && params.E2E_TESTS_RUN }
@@ -412,7 +282,6 @@ pipeline {
                         databaseUrl = "jdbc:postgresql://192.168.0.81:${env.PORT_DB}/postgres"
                     }
 
-                    // Definicja zmiennych
                     def e2eEnvVars = """
                 export BASE_URL=${env.E2E_DOCKER_HOST_URL}${env.PORT_FRONT}
                 export BASE_URL_DATABASE=${databaseUrl}
@@ -420,41 +289,42 @@ pipeline {
             """
 
                     dir('supportly-e2e') {
-                        // 1. Kompilujemy RAZ we wspólnym folderze (żeby nie tracić czasu w wątkach)
+                        // Czyścimy główny katalog przed kompilacją
                         sh "mvn clean test-compile -DskipTests"
                     }
 
                     catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
                         parallel(
                                 "E2E Group 1": {
-                                    // Tworzymy unikalny katalog dla grupy 1 i kopiujemy tam skompilowany projekt
-                                    sh "mkdir -p e2e_work_1 && cp -r supportly-e2e/* e2e_work_1/"
+                                    // POPRAWKA: Najpierw usuwamy stary folder (rm -rf), potem tworzymy nowy.
+                                    // To gwarantuje, że nie ma tam starych raportów XML.
+                                    sh "rm -rf e2e_work_1 && mkdir -p e2e_work_1 && cp -r supportly-e2e/* e2e_work_1/"
 
                                     dir("e2e_work_1") {
                                         echo "Start: Agreement, Employee"
                                         sh """
                                 ${e2eEnvVars}
-                                mvn surefire:test -Dtest=AgreementTest,EmployeeTest -Dmaven.test.failure.ignore=true
+                                mvn surefire:test -Dtest=AgreementTest,EmployeeTest,LoginTest,TaskTest,OrderTest -Dmaven.test.failure.ignore=true
                             """
                                     }
                                 },
                                 "E2E Group 2": {
-                                    // Tworzymy unikalny katalog dla grupy 2 i kopiujemy tam skompilowany projekt
-                                    sh "mkdir -p e2e_work_2 && cp -r supportly-e2e/* e2e_work_2/"
+                                    // POPRAWKA: To samo dla grupy 2 - czyszczenie przed kopiowaniem.
+                                    sh "rm -rf e2e_work_2 && mkdir -p e2e_work_2 && cp -r supportly-e2e/* e2e_work_2/"
 
                                     dir("e2e_work_2") {
                                         echo "Start: HomePage, Login, Task"
                                         sh """
                                 ${e2eEnvVars}
-                                mvn surefire:test -Dtest=HomePageTest,LoginTest,TaskTest -Dmaven.test.failure.ignore=true
+                                mvn surefire:test -Dtest=HomePageTest -Dmaven.test.failure.ignore=true
                             """
                                     }
                                 }
                         )
                     }
 
-                    // Opcjonalnie: Scalanie raportów z obu folderów (jeśli potrzebne)
-                    // junit 'e2e_work_*/target/surefire-reports/*.xml'
+                    // Raportowanie
+                    junit 'e2e_work_*/target/surefire-reports/*.xml'
                 }
             }
         }
@@ -477,8 +347,6 @@ pipeline {
                         dockerStop("${env.PROJECT_NAME}-database-${env.PROFILE}-1")
                     }
 
-
-//                docker compose -f conf/docker-compose-${env.PROFILE}-lt.yml -p ${env.PROJECT_NAME} down --volumes --remove-orphans
                     sh """
                 # Usuwamy tylko kontenery i sieci dla tego project name
                 docker compose -f conf/docker-compose-${env.PROFILE}.yml -p ${env.PROJECT_NAME}  down --volumes 
@@ -490,78 +358,6 @@ pipeline {
                 }
             }
         }
-//        stage('Deploy to kube') {
-//            when {
-//                expression { params.DEPLOY_TO_KUBE }
-//            }
-//            steps {
-//                dir('conf') {
-//                    script {
-//                        // 1. Sprawdzanie gotowości API serwera MicroK8s
-//                        // Używamy """ aby móc escape'ować znaki $
-//                        def checkHealthz = remoteMicrok8s("""
-//                    for i in {1..10}; do
-//                        echo ">>> Próba \$i: sprawdzanie /healthz..."
-//                        microk8s kubectl get --raw=/healthz && break
-//                        echo ">>> API jeszcze nie gotowe, czekam 5s..."
-//                        sleep 5
-//                    done
-//                """)
-//
-//                        // 2. Komenda wdrażania
-//                        def deployCommand = """
-//                    echo ">>> Wdrażanie do zdalnego MicroK8s ..."
-//                    cat kube/k8s-deployment.yaml | ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no jenkins@192.168.0.81 'microk8s kubectl apply --validate=false -f -'
-//                """
-//
-//                        // 3. Weryfikacja wdrożenia (POPRAWIONA)
-//                        // Używamy """ (cudzysłów podwójny), aby w środku użyć ' (pojedynczego) dla awk.
-//                        // Wszystkie zmienne bashowe ($TIMEOUT, $NOT_READY, $2) muszą mieć przed sobą backslash (\$).
-//                        def verifyDeployment = remoteMicrok8s("""
-//                    echo ">>> Weryfikacja wdrożenia (maks. 5 minut)..."
-//
-//                    TIMEOUT=60   # 60 x 5s = 300s = 5 minut
-//                    INTERVAL=5
-//
-//                    for i in \$(seq 1 \$TIMEOUT); do
-//                        # ZMIANA: Używamy tr i cut zamiast awk.
-//                        # grep -v "1/1" -> odrzuca gotowe pody
-//                        # tr -s ' '     -> usuwa nadmiarowe spacje (formatowanie tabeli)
-//                        # cut -d ' ' -f 1 -> bierze pierwszą kolumnę (nazwę)
-//
-//                        NOT_READY=\$(microk8s kubectl get pods -n my-app --no-headers | grep -v "1/1" | tr -s ' ' | cut -d ' ' -f 1)
-//
-//                        if [ -z "\$NOT_READY" ]; then
-//                            echo ">>> Wszystkie pody osiągnęły stan Ready."
-//                            microk8s kubectl get pods -n my-app
-//                            exit 0
-//                        fi
-//
-//                        echo ">>> Pody jeszcze nie gotowe: \$NOT_READY (\$i/\$TIMEOUT)"
-//                        sleep \$INTERVAL
-//                    done
-//
-//                    echo "Nie wszystkie pody osiągnęły stan Ready w czasie 5 minut."
-//                    microk8s kubectl get pods -n my-app
-//                    echo ">>> Debug (describe):"
-//                    microk8s kubectl describe pods -n my-app
-//                    exit 1
-//                """)
-//
-//                        // Wykonanie całości
-//                        sh """
-//                    echo ">>> Sprawdzanie gotowości MicroK8s na hoście zdalnym..."
-//                    ${checkHealthz}
-//
-//                    ${deployCommand}
-//
-//                    echo ">>> Sprawdzanie, czy wdrożenie się powiodło..."
-//                    ${verifyDeployment}
-//                """
-//                    }
-//                }
-//            }
-//        }
         stage('Deploy to kube') {
             when {
                 expression { params.DEPLOY_TO_KUBE }
@@ -590,7 +386,7 @@ pipeline {
                         }
 
                         if (!apiReady) {
-                            error "❌ BŁĄD: API MicroK8s nie wstało po ${maxHealthRetries} próbach."
+                            error "BŁĄD: API MicroK8s nie wstało po ${maxHealthRetries} próbach."
                         }
 
                         // --- KROK 2: Deploy ---
@@ -625,7 +421,7 @@ pipeline {
                         }
 
                         if (!podsReady) {
-                            echo "❌ BŁĄD: Timeout weryfikacji podów."
+                            echo "BŁĄD: Timeout weryfikacji podów."
                             def debugInfo = sh(script: remoteMicrok8s("microk8s kubectl describe pods -n my-app"), returnStdout: true)
                             echo ">>> DEBUG INFO:\n${debugInfo}"
                             error "Wdrożenie nieudane: pody nie wstały w zadanym czasie."
@@ -645,7 +441,9 @@ pipeline {
                 // Bezpieczna konwersja na boolean i sprawdzenie warunku
                 if (params.E2E_TESTS_RUN.toBoolean()) {
                     // Zmieniona ścieżka, aby łapała wyniki z folderów tymczasowych
-                    junit 'e2e_work_*/target/surefire-reports/*.xml'
+//                    junit 'supportly-e2e/target/surefire-reports/*.xml'
+//                    junit 'e2e_work_*/target/surefire-reports/*.xml'
+
                 }
             }
             echo "Build duration: ${currentBuild.durationString}"
@@ -755,12 +553,11 @@ void prepareNames(String branch) {
 
     echo "Prepare environment variables | branch: ${branch}"
 
-
+    def wsSuffix = getWorkspaceSuffix()
     def props = readJSON text: pipelineConfig
-    def name = "${env.PROFILE}-${branch}"
+    def name = "${env.PROFILE}-${branch}-${wsSuffix}"
     echo "Nazwa proffilu parametru ${name}"
 
-    def wsSuffix = getWorkspaceSuffix()
     env.PROJECT_NAME = "supportly-${wsSuffix}"
     def projectName = "supportly-${wsSuffix}"
 
