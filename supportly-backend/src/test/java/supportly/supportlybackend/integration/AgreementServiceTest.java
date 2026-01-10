@@ -105,69 +105,7 @@ class AgreementServiceTest {
         assertThat(savedAgreement.getNextServiceDate()).isEqualTo(LocalDate.of(2024, 1, 1));
     }
 
-    @Test
-    @DisplayName("add: Powinien zapisać umowę w bazie i poprawnie obliczyć datę serwisu")
-    void shouldSaveAgreementToDatabase2() {
-        // Given
-        AgreementDto dto = new AgreementDto();
-        dto.setSignedDate(LocalDate.of(2023, 1, 1));
-        dto.setAgreementNumber("1234567890123/01012023");
-        // Zakładam, że Period to Enum. Jeśli to klasa, ustaw ją odpowiednio.
-        dto.setPeriod(Period.YEARLY); // Zakładam, że .getMonth() zwraca np. 12
 
-        // Tworzymy DTO firmy tylko z NIPem, po którym serwis szuka istniejącej firmy
-        CompanyDto companyDto = new CompanyDto();
-        companyDto.setNip("1234567890123"); // Ten sam NIP co w setUp()
-        dto.setCompany(companyDto);
-
-
-        // When
-        agreementService.add(dto);
-
-        // Then
-        List<Agreement> agreements = agreementRepository.findAll();
-        assertThat(agreements).hasSize(1);
-
-        Agreement savedAgreement = agreements.get(0);
-        // Sprawdzamy czy umowa została podpięta pod dobrą firmę
-        assertThat(savedAgreement.getCompany().getId()).isEqualTo(savedCompany.getId());
-        assertThat(savedAgreement.getCompany().getEmail()).isEqualTo("kontakt@testcompany.pl");
-
-        // Sprawdzenie daty (2023-01-01 + 12 miesięcy)
-        assertThat(savedAgreement.getNextServiceDate()).isEqualTo(LocalDate.of(2024, 1, 1));
-    }
-
-    @Test
-    @DisplayName("add: Powinien zapisać umowę w bazie i poprawnie obliczyć datę serwisu")
-    void shouldSaveAgreementToDatabase3() {
-        // Given
-        AgreementDto dto = new AgreementDto();
-        dto.setSignedDate(LocalDate.of(2023, 1, 1));
-        dto.setAgreementNumber("1234567890123/01012023");
-        // Zakładam, że Period to Enum. Jeśli to klasa, ustaw ją odpowiednio.
-        dto.setPeriod(Period.YEARLY); // Zakładam, że .getMonth() zwraca np. 12
-
-        // Tworzymy DTO firmy tylko z NIPem, po którym serwis szuka istniejącej firmy
-        CompanyDto companyDto = new CompanyDto();
-        companyDto.setNip("1234567890123"); // Ten sam NIP co w setUp()
-        dto.setCompany(companyDto);
-
-
-        // When
-        agreementService.add(dto);
-
-        // Then
-        List<Agreement> agreements = agreementRepository.findAll();
-        assertThat(agreements).hasSize(1);
-
-        Agreement savedAgreement = agreements.get(0);
-        // Sprawdzamy czy umowa została podpięta pod dobrą firmę
-        assertThat(savedAgreement.getCompany().getId()).isEqualTo(savedCompany.getId());
-        assertThat(savedAgreement.getCompany().getEmail()).isEqualTo("kontakt@testcompany.pl");
-
-        // Sprawdzenie daty (2023-01-01 + 12 miesięcy)
-        assertThat(savedAgreement.getNextServiceDate()).isEqualTo(LocalDate.of(2024, 1, 1));
-    }
 
 
 

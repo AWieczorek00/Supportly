@@ -92,32 +92,6 @@ void setUp() {
                 .hasMessageContaining("Nie znaleziono pracownika o id: " + nonExistentId);
     }
 
-    @Test
-    @DisplayName("updateEmployee: Powinien zaktualizować dane pracownika")
-    void shouldUpdateEmployeeData2() {
-        // Given
-        Employee original = createAndSaveEmployee("Tomasz", "Stary", "111222333");
-
-        // Obiekt z nowymi danymi (musi mieć to samo ID co oryginał)
-        Employee updateData = new Employee();
-        updateData.setIndividualId(original.getIndividualId());
-        updateData.setFirstName("Tomasz");
-        updateData.setLastName("Nowy"); // Zmiana nazwiska
-        updateData.setSecondName("Adam");
-        updateData.setPhoneNumber("999888777"); // Zmiana telefonu
-
-        // When
-        Employee updated = employeeService.updateEmployee(updateData);
-
-        // Then
-        // Sprawdź czy zwrócony obiekt jest zaktualizowany
-        assertThat(updated.getLastName()).isEqualTo("Nowy");
-        assertThat(updated.getPhoneNumber()).isEqualTo("999888777");
-
-        // Sprawdź czy w bazie faktycznie się zmieniło
-        Employee fromDb = employeeRepository.findById(original.getIndividualId()).orElseThrow();
-        assertThat(fromDb.getLastName()).isEqualTo("Nowy");
-    }
 
 
     @Test

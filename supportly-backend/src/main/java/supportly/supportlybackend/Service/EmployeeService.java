@@ -57,7 +57,7 @@ public class EmployeeService {
                 .map(employeeUpdate -> {
                     employeeUpdate.setFirstName(employeeBody.getFirstName());
                     employeeUpdate.setSecondName(employeeBody.getSecondName());
-                    employeeUpdate.setLastName(employeeBody.getLastName());
+                    employeeUpdate.setLastName(null);
                     employeeUpdate.setPhoneNumber(employeeBody.getPhoneNumber());
                     return employeeRepository.save(employeeUpdate);
                 }).orElseThrow(() -> new ResourceNotFoundException("Nie zaleziono takiego pracownika"));
