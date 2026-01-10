@@ -43,7 +43,7 @@ public class OrderService {
             orderUpdate.setEmployeeList(orderBody.getEmployeeList());
 //            orderUpdate.setPartList(partService.updatePartList(orderBody.getPartList(), orderUpdate.getPartList()));
             orderUpdate.setPeriod(orderBody.getPeriod());
-            orderUpdate.setStatus(orderBody.getStatus());
+            orderUpdate.setStatus(null);
             orderUpdate.setPriority(orderBody.getPriority());
             orderUpdate.setDateOfAdmission(orderBody.getDateOfAdmission());
             orderUpdate.setDateOfExecution(orderBody.getDateOfExecution());
@@ -60,7 +60,7 @@ public class OrderService {
 
     @Transactional
     public void createOrderFromSchedule() {
-        List<Agreement> agreements = agreementService.findByNextRun(LocalDate.now().plusDays(10));
+        List<Agreement> agreements = agreementService.findByNextRun(LocalDate.now().plusDays(15));
         orderRepository.saveAll(createOrderList(agreements));
     }
 

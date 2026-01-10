@@ -25,7 +25,7 @@ public class AgreementService {
     public void add(AgreementDto agreementDto) {
         Company company = companyService.findByNip(agreementDto.getCompany().getNip());
         Agreement agreement = Mapper.toEntity(agreementDto);
-        agreement.setCompany(company);
+        agreement.setCompany(null);
         agreement.setNextServiceDate(agreementDto.getSignedDate().plusMonths(agreementDto.getPeriod().getMonth()));
         agreementRepository.save(agreement);
     }
