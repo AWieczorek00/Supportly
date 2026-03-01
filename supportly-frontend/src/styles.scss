@@ -2,12 +2,71 @@
 //@import '@angular/material/prebuilt-themes/purple-green.css';
 @use "@angular/material" as mat;
 
-html {
-  @include mat.theme(
-      (
-        color: mat.$azure-palette
-      )
+@include mat.core();
+
+// 1. Definicja palety głównej - Granat PROMONT (#143b72)
+$promont-blue: (
+  50: #e3e7ee,
+  100: #b8c3d5,
+  200: #889bb9,
+  300: #58739d,
+  400: #345588,
+  500: #143b72, // GŁÓWNY KOLOR
+  600: #12356a,
+  700: #0e2d5f,
+  800: #0b2655,
+  900: #051a42,
+  A100: #7ba1ff,
+  A200: #487bff,
+  A400: #1555ff,
+  A700: #0045fa,
+  contrast: (
+    50: #000000, 100: #000000, 200: #000000,
+    300: #ffffff, 400: #ffffff, 500: #ffffff,
+    600: #ffffff, 700: #ffffff, 800: #ffffff, 900: #ffffff,
+    A100: #000000, A200: #ffffff, A400: #ffffff, A700: #ffffff,
   )
+);
+
+// 2. Definicja palety akcentu - Czerwień PROMONT (#e31e24)
+$promont-red: (
+  50: #fce4e5,
+  100: #f7b9bc,
+  200: #f18a8f,
+  300: #ea5b62,
+  400: #e63840,
+  500: #e31e24, // GŁÓWNY AKCENT
+  600: #df1a20,
+  700: #da151b,
+  800: #d51116,
+  900: #cc090d,
+  A100: #ffffff,
+  A200: #ffd7d8,
+  A400: #ffa4a6,
+  A700: #ff8b8d,
+  contrast: (
+    50: #000000, 100: #000000, 200: #000000, 300: #000000,
+    400: #ffffff, 500: #ffffff,
+    600: #ffffff, 700: #ffffff, 800: #ffffff, 900: #ffffff,
+    A100: #000000, A200: #000000, A400: #000000, A700: #000000,
+  )
+);
+
+// 3. Stworzenie zmiennych Material (ZMIANA: używamy przedrostka m2-)
+$promont-primary: mat.m2-define-palette($promont-blue, 500);
+$promont-accent: mat.m2-define-palette($promont-red, 500);
+
+// 4. Konfiguracja motywu (ZMIANA: używamy przedrostka m2-)
+$promont-theme: mat.m2-define-light-theme((
+  color: (
+    primary: $promont-primary,
+    accent: $promont-accent,
+  )
+));
+
+// 5. Aplikacja Twojego motywu do wszystkich komponentów
+html {
+  @include mat.all-component-themes($promont-theme);
 }
 
 html, body {
@@ -17,7 +76,10 @@ html, body {
 body {
   margin: 0;
   font-family: Roboto, "Helvetica Neue", sans-serif;
+  background-color: #f4f5f7;
 }
+
+/* --- RESZTA TWOICH STYLI TABELI PONIŻEJ (bez zmian) --- */
 
 .custom-table-container {
   background: #fafafa; /* Jasne tło jak w mat-expansion-panel */
