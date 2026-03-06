@@ -1,0 +1,57 @@
+/* Zerujemy domyślny padding dialogu, aby nagłówek dolegał do krawędzi */
+::ng-deep .mat-mdc-dialog-container .mdc-dialog__surface {
+  padding: 0 !important;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.custom-dialog-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.dialog-header {
+  padding: 16px 24px;
+  background-color: #143b72; /* Granat PROMONT */
+}
+
+.text-white {
+  color: white;
+  font-weight: 500;
+}
+
+.m-0 {
+  margin: 0;
+}
+
+.dialog-content {
+  padding: 24px !important;
+  background-color: #ffffff;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+/* Niektóre pola mogą zajmować dwie kolumny */
+.span-two-cols {
+  grid-column: span 2;
+}
+
+.checkbox-container {
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+.dialog-footer {
+  padding: 16px 24px !important;
+  background-color: #f8f9fa;
+  border-top: 1px solid #ebeeef;
+  margin-bottom: 0 !important;
+}

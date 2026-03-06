@@ -1,7 +1,7 @@
 import {Component} from '@angular/core';
 import {MatToolbar} from '@angular/material/toolbar';
 import {MatAnchor, MatIconButton} from '@angular/material/button';
-import {Router, RouterLink} from '@angular/router';
+import {Router, RouterLink, RouterLinkActive} from '@angular/router';
 import {MatMenu, MatMenuItem, MatMenuTrigger} from '@angular/material/menu';
 
 @Component({
@@ -13,7 +13,8 @@ import {MatMenu, MatMenuItem, MatMenuTrigger} from '@angular/material/menu';
     MatMenu,
     MatAnchor,
     RouterLink,
-    MatMenuItem
+    MatMenuItem,
+    RouterLinkActive
   ],
   templateUrl: './navbar.component.html',
   standalone: true,

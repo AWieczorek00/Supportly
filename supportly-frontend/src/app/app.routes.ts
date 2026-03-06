@@ -17,7 +17,7 @@ export const routes: Routes = [
     path: '',
     children: [
       { path: '', component: HomeComponent },
-      { path: 'login', component: LoginComponent }, // NIE chronimy logowania
+      { path: 'login', component: LoginComponent },
       { path: 'agreement/list', component: AgreementListComponent },
       { path: 'agreement/add', component: AgreementAddComponent },
       { path: 'order/list', component: OrderListComponent },

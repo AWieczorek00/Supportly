@@ -1,12 +1,87 @@
-form {
-  display: flex;
-  flex-direction: column;
-  align-items: center;  /* Wyrównanie na środku w poziomie */
-  //padding: 10px;
-  gap: 13px;
+/* Kontener całej strony, dodaje odstępy od krawędzi ekranu */
+.page-container {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
+/* --- STYLIZACJA PANELI (AKORDEONÓW) --- */
+::ng-deep .promont-panel.mat-expansion-panel {
+  border-radius: 12px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+  margin-bottom: 24px !important;
+  border: 1px solid #ebeeef;
+  background-color: #ffffff;
+  overflow: hidden; /* Zapobiega "wylewaniu" się nagłówka poza zaokrąglone rogi */
+}
+
+/* Nagłówek panelu z granatowym akcentem po lewej stronie */
+::ng-deep .promont-panel .mat-expansion-panel-header {
+  padding: 0 24px;
+  background-color: #fcfcfd;
+  border-bottom: 1px solid #f0f0f0;
+  border-left: 5px solid #143b72; /* Korporacyjny granat PROMONT */
+  height: 64px !important;
+}
+
+/* Tytuł panelu */
+::ng-deep .promont-panel .mat-expansion-panel-header-title {
+  color: #143b72;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+/* Zawartość wewnątrz panelu */
+::ng-deep .promont-panel .mat-expansion-panel-body {
+  padding: 24px !important;
+}
+
+/* --- SYSTEM SIATEK (GRID) DLA PÓL --- */
+
+/* Siatka 3-kolumnowa */
+.form-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+/* Siatka 2-kolumnowa */
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+/* Każde pole ma zajmować całą dostępną przestrzeń w swojej komórce siatki */
 mat-form-field {
-  width: 100%;  /* Opcjonalnie, aby formularz rozciągał się na pełną szerokość */
-  max-width: 500px;  /* Możesz dostosować szerokość formularza */
+  width: 100%;
+}
+
+/* Kontener przycisku zapisu */
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  margin-top: 24px;
+  padding-bottom: 40px;
+}
+
+.action-buttons button {
+  padding: 8px 48px;
+  font-size: 16px;
+}
+
+/* --- RESPONSYWNOŚĆ --- */
+
+/* Na mniejszych monitorach i tabletach zmień siatkę 3-kolumnową na 2-kolumnową */
+@media (max-width: 1024px) {
+  .form-grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Na telefonach wszystkie pola ułożą się jedno pod drugim */
+@media (max-width: 600px) {
+  .form-grid-3, .form-grid-2 {
+    grid-template-columns: 1fr;
+  }
 }

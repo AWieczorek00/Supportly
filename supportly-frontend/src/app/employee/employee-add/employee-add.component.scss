@@ -1,19 +1,69 @@
-.form-grid {
-  display: flex;
-  flex-direction: row;
-  gap: 14px;
-  flex-wrap: wrap;
-  width: 100%;
+/* ZEROWANIE PADDINGU I ZAOKRĄGLENIA DLA DIALOGU */
+::ng-deep .mat-mdc-dialog-container .mdc-dialog__surface {
+  padding: 0 !important;
+  border-radius: 12px;
+  overflow: hidden;
 }
 
-.form-column {
-  flex: 1;
-  min-width: 250px;
+.custom-dialog-container {
   display: flex;
   flex-direction: column;
-  gap: 10px;
 }
 
-mat-form-field {
+/* NAGŁÓWEK DIALOGU */
+.dialog-header {
+  padding: 16px 24px;
+  background-color: #143b72; /* Granat PROMONT */
+}
+
+.text-white {
+  color: white;
+  font-weight: 500;
+}
+
+.m-0 {
+  margin: 0;
+}
+
+/* ZAWARTOŚĆ FORMULARZA */
+.dialog-content {
+  padding: 24px !important;
+  background-color: #ffffff;
+}
+
+/* NASZ NOWY GRID 2x2 */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Dwie równe kolumny */
+  gap: 16px; /* Odstępy między polami */
+}
+
+/* Ujednolicenie szerokości wszystkich inputów Material */
+.full-width, mat-form-field {
   width: 100%;
+}
+
+/* Jeśli kiedyś będziesz chciał, żeby jakieś pole zajęło całą szerokość */
+.span-two-cols {
+  grid-column: span 2;
+}
+
+.checkbox-container {
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+/* STOPKA Z PRZYCISKAMI */
+.dialog-footer {
+  padding: 16px 24px !important;
+  background-color: #f8f9fa; /* Jasnoszare tło oddzielające przyciski */
+  border-top: 1px solid #ebeeef;
+  margin-bottom: 0 !important;
+}
+
+/* Responsywność - jedno pole pod drugim na małych ekranach (telefonach) */
+@media (max-width: 600px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
 }

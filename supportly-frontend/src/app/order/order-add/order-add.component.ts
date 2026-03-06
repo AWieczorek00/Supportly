@@ -265,5 +265,24 @@ export class OrderAddComponent implements OnInit {
 
     // Ewentualnie tylko części
     console.log('Części (z partTableLocal):', localParts);  }
+
+
+  getTotalCost(): number {
+    // Sprawdzamy, czy używasz zwykłej tablicy, czy MatTableDataSource
+    const data = this.partTableLocal.data || this.partTableLocal;
+
+    if (!data || data.length === 0) {
+      return 0;
+    }
+
+    // Sumujemy: (cena * ilość) dla każdego elementu
+    return data.reduce((suma, part) => {
+      // Upewniamy się, że wartości są liczbami (czasem z inputów wracają jako stringi)
+      const price = Number(part.price) || 0;
+      const quantity = Number(part.quantity) || 1;
+
+      return suma + (price * quantity);
+    }, 0);
+  }
 }
 

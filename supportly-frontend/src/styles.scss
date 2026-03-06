@@ -143,3 +143,80 @@ table.mat-table {
   padding: 12px;
   border-bottom: 1px solid #ddd;
 }
+/* 1. Wygląd samej karty rozwijanej */
+.search-criteria-panel.mat-expansion-panel {
+  border-radius: 12px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+  border: 1px solid #ebeeef;
+  margin-bottom: 24px !important;
+  background-color: #ffffff;
+  overflow: hidden;
+  /* Subtelny granatowy akcent na górze panelu */
+  border-top: 4px solid #143b72;
+}
+
+/* 2. Nagłówek panelu */
+.search-criteria-panel .mat-expansion-panel-header {
+  background-color: #fcfcfd;
+  height: 56px !important;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.search-criteria-panel .mat-expansion-panel-header-title {
+  color: #143b72;
+  font-weight: 600;
+  font-size: 15px;
+}
+/* 3. Globalna siatka dla pól wyszukiwania (Dynamiczna i elastyczna) */
+.search-grid {
+  display: grid;
+  /* MAGIA: auto-fit sprawia, że pola elastycznie wypełniają wiersz.
+     minmax(250px, 1fr) oznacza: pole musi mieć minimum 250px,
+     ale jeśli jest miejsce, rozciągnij je (1fr), aby wypełniło lukę. */
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+  padding-top: 16px;
+}
+
+/* Wymuszenie pełnej szerokości inputów wewnątrz komórek siatki */
+.search-grid mat-form-field {
+  width: 100%;
+}
+
+/* 4. Globalny układ przycisków na dole panelu */
+.search-actions {
+  display: flex;
+  justify-content: space-between; /* "Wyczyść" ląduje po lewej, reszta po prawej */
+  align-items: center;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #f0f0f0; /* Subtelna linia oddzielająca formularz od przycisków */
+}
+
+/* Kontener dla przycisków po prawej stronie (np. Szukaj, Dodaj) */
+.search-actions-right {
+  display: flex;
+  gap: 12px;
+}
+
+/* 5. Responsywność dla wyszukiwarek (Tylko dla przycisków na najmniejszych ekranach) */
+@media (max-width: 600px) {
+  /* Grid pól wyszukiwania sam zwinie się do 1 kolumny dzięki minmax(250px),
+     więc tu modyfikujemy tylko układ przycisków na telefonach */
+  .search-actions {
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+  }
+  .search-actions-right {
+    flex-direction: column;
+  }
+}
+
+/* Kontener wyrównujący checkboxy z polami tekstowymi w panelu wyszukiwania */
+.search-checkbox-container {
+  display: flex;
+  align-items: center; /* Środkowanie w pionie */
+  height: 56px; /* Standardowa wysokość pola mat-form-field (outline) */
+  padding-left: 8px; /* Lekki odstęp od lewej krawędzi komórki */
+}

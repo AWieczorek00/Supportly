@@ -17,6 +17,7 @@ import {MatButtonModule} from '@angular/material/button';
 import {HttpEmployeeService} from '../../employee/service/http-employee.service';
 import {HttpOrderService} from '../../order/service/http-order.service';
 import {HttpTaskService} from '../service/http-task.service';
+import {MatSelect} from '@angular/material/select';
 
 @Component({
   selector: 'app-task-add',
@@ -31,7 +32,9 @@ import {HttpTaskService} from '../service/http-task.service';
     MatButtonModule,
     MatCheckboxModule,
     MatDialogModule,
-    AsyncPipe      // <-- tutaj musi być
+    AsyncPipe,
+    MatSelect,
+    // <-- tutaj musi być
 
   ],
   templateUrl: './task-add.component.html',
@@ -41,20 +44,20 @@ import {HttpTaskService} from '../service/http-task.service';
 })
 export class TaskAddComponent implements OnInit {
 
-  form = new FormGroup({
-    name: new FormControl('', Validators.required),
-    employees: new FormControl<Employee[]>([]),
-    employeeSearch: new FormControl<Employee | null>(null),
-    order: new FormControl<Order | null>(null),
-    orderSearch: new FormControl<Order | null>(null),
-    done: new FormControl(false)
-  });
-
-  filteredEmployees$!: Observable<Employee[]>;
-  filteredOrders$!: Observable<Order[]>;
-
-  selectedEmployees: Employee[] = [];
-
+  // form = new FormGroup({
+  //   name: new FormControl('', Validators.required),
+  //   employees: new FormControl<Employee[]>([]),
+  //   employeeSearch: new FormControl<Employee | null>(null),
+  //   order: new FormControl<Order | null>(null),
+  //   orderSearch: new FormControl<Order | null>(null),
+  //   done: new FormControl(false)
+  // });
+  //
+  // filteredEmployees$!: Observable<Employee[]>;
+  // filteredOrders$!: Observable<Order[]>;
+  //
+  // selectedEmployees: Employee[] = [];
+  //
   constructor(
     private dialogRef: MatDialogRef<TaskAddComponent>,
     private employeeService: HttpEmployeeService,
@@ -62,111 +65,172 @@ export class TaskAddComponent implements OnInit {
     private service: HttpTaskService
   ) {
   }
-
-  ngOnInit(): void {
-    // Autocomplete pracowników
-    this.filteredEmployees$ = this.form.get('employeeSearch')!.valueChanges.pipe(
-      startWith(null),
-      debounceTime(300),
-      distinctUntilChanged(),
-      switchMap(value => {
-        if (!value) return of([]);
-        const query = typeof value === 'string' ? value : `${value.firstName} ${value.lastName}`;
-        return this.employeeService.searchEmployees(query);
-      })
-    );
-
-    // Autocomplete zamówień
-    this.filteredOrders$ = this.form.get('orderSearch')!.valueChanges.pipe(
-      startWith(null),
-      debounceTime(300),
-      distinctUntilChanged(),
-      switchMap(value => {
-        if (!value) return of([]);
-        const query = typeof value === 'string' ? value : value.client.company.name;
-        return this.orderService.searchOrders(query);
-      })
-    );
-  }
-
-  // Wyświetlanie wybranego pracownika w polu input
-  displayEmployee(emp: Employee | string | null): string {
-    if (!emp) return '';
-    console.log(emp)
-    return typeof emp === 'string' ? emp : `${emp.firstName} ${emp.lastName}`;
-  }
-
+  //
+  // ngOnInit(): void {
+  //   // Autocomplete pracowników
+  //   this.filteredEmployees$ = this.form.get('employeeSearch')!.valueChanges.pipe(
+  //     startWith(null),
+  //     debounceTime(300),
+  //     distinctUntilChanged(),
+  //     switchMap(value => {
+  //       if (!value) return of([]);
+  //       const query = typeof value === 'string' ? value : `${value.firstName} ${value.lastName}`;
+  //       return this.employeeService.searchEmployees(query);
+  //     })
+  //   );
+  //
+  //   // Autocomplete zamówień
+  //   this.filteredOrders$ = this.form.get('orderSearch')!.valueChanges.pipe(
+  //     startWith(null),
+  //     debounceTime(300),
+  //     distinctUntilChanged(),
+  //     switchMap(value => {
+  //       if (!value) return of([]);
+  //       const query = typeof value === 'string' ? value : value.client.company.name;
+  //       return this.orderService.searchOrders(query);
+  //     })
+  //   );
+  // }
+  //
+  // // Wyświetlanie wybranego pracownika w polu input
+  // displayEmployee(emp: Employee | string | null): string {
+  //   if (!emp) return '';
+  //   console.log(emp)
+  //   return typeof emp === 'string' ? emp : `${emp.firstName} ${emp.lastName}`;
+  // }
+  //
   // Wyświetlanie wybranego zamówienia w polu input
   displayOrder(order: Order | string | null): string {
     if (!order) return '';
     return typeof order === 'string' ? order : `${order.client.company.name} ${order.agreementNumber}`;
   }
-
-  // Wybór zamówienia
+  //
+  // // Wybór zamówienia
   onOrderSelected(order: Order) {
     this.form.patchValue({order});
   }
+  //
+  // // Dodanie pracownika do listy wybranych
+  // onEmployeeSelected(emp: Employee) {
+  //   if (!this.selectedEmployees.some(e => e.id === emp.id)) {
+  //     this.selectedEmployees.push(emp);
+  //     this.form.patchValue({employees: this.selectedEmployees});
+  //     this.form.get('employeeSearch')!.setValue(null);
+  //   }
+  // }
+  //
+  // onEmployeeSelectedFromInput(event: MatChipInputEvent) {
+  //   const value = event.value.trim();
+  //   if (value) {
+  //     const emp = this.filteredEmployees$.pipe(
+  //       map(arr => arr.find(e => `${e.firstName} ${e.lastName}` === value))
+  //     );
+  //     emp.subscribe(e => {
+  //       if (e) this.onEmployeeSelected(e);
+  //     });
+  //   }
+  //   event.chipInput!.clear();
+  // }
+  //
+  // // Usunięcie pracownika z listy
+  // removeEmployee(emp: Employee) {
+  //   this.selectedEmployees = this.selectedEmployees.filter(e => e.id !== emp.id);
+  //   this.form.patchValue({employees: this.selectedEmployees});
+  // }
+  //
+  // // Zamknięcie dialogu z przesłaniem danych
+  // submit() {
+  //   console.log(this.form.getRawValue())
+  //   if (this.form.valid) {
+  //     const formValue = this.form.value as {
+  //       id: number|null
+  //       name: string;
+  //       employees: Employee[];
+  //       order: Order;
+  //       done: boolean;
+  //     };
+  //
+  //     const task: Partial<Task> = {
+  //       id: null,
+  //       name: formValue.name,
+  //       employees: formValue.employees,
+  //       order: formValue.order,
+  //       done: formValue.done
+  //     };
+  //
+  //     this.service.add(task).subscribe({
+  //       next: (response) => {
+  //         // np. zamknięcie dialogu z wynikiem
+  //         this.dialogRef.close(response);
+  //       },
+  //       error: (err) => {
+  //         console.error('Błąd przy dodawaniu pracownika', err);
+  //         // możesz tu dodać np. snackbar z błędem
+  //       }
+  //     });
+  //
+  //     this.dialogRef.close(this.form.value as unknown as Task);
+  //   }
+  // }
+  //
+  // cancel() {
+  //   this.dialogRef.close();
+  // }
 
-  // Dodanie pracownika do listy wybranych
-  onEmployeeSelected(emp: Employee) {
-    if (!this.selectedEmployees.some(e => e.id === emp.id)) {
-      this.selectedEmployees.push(emp);
-      this.form.patchValue({employees: this.selectedEmployees});
-      this.form.get('employeeSearch')!.setValue(null);
-    }
+  form = new FormGroup({
+    name: new FormControl('', Validators.required),
+    employees: new FormControl<Employee[]>([]), // Tutaj teraz trzymamy wybrane wartości z MultiSelecta
+    order: new FormControl<Order | null>(null),
+    orderSearch: new FormControl<string | Order | null>(''), // do filtrowania
+    done: new FormControl(false)
+  });
+
+  // Nowa zmienna przechowująca całą listę pracowników dla <mat-select>
+  allEmployees: Employee[] = [];
+  filteredOrders$!: Observable<Order[]>;
+
+  // ... (konstruktor bez zmian)
+
+  ngOnInit(): void {
+    // 1. Pobieramy wszystkich pracowników do listy rozwijanej
+    this.employeeService.searchEmployees('').subscribe(emps => {
+      this.allEmployees = emps;
+    });
+
+    // 2. Autocomplete zamówień (zostaje bez większych zmian)
+    this.filteredOrders$ = this.form.get('orderSearch')!.valueChanges.pipe(
+      startWith(''),
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap(value => {
+        const query = typeof value === 'string' ? value : value?.client?.company?.name || '';
+        return this.orderService.searchOrders(query);
+      })
+    );
   }
 
-  onEmployeeSelectedFromInput(event: MatChipInputEvent) {
-    const value = event.value.trim();
-    if (value) {
-      const emp = this.filteredEmployees$.pipe(
-        map(arr => arr.find(e => `${e.firstName} ${e.lastName}` === value))
-      );
-      emp.subscribe(e => {
-        if (e) this.onEmployeeSelected(e);
-      });
-    }
-    event.chipInput!.clear();
-  }
+  // ... (displayOrder i onOrderSelected bez zmian)
 
-  // Usunięcie pracownika z listy
-  removeEmployee(emp: Employee) {
-    this.selectedEmployees = this.selectedEmployees.filter(e => e.id !== emp.id);
-    this.form.patchValue({employees: this.selectedEmployees});
-  }
-
-  // Zamknięcie dialogu z przesłaniem danych
   submit() {
-    console.log(this.form.getRawValue())
     if (this.form.valid) {
-      const formValue = this.form.value as {
-        id: number|null
-        name: string;
-        employees: Employee[];
-        order: Order;
-        done: boolean;
-      };
+      // Wyciągamy wartości. Zauważ, że 'employees' ma już od razu ładną tablicę wybranych obiektów
+      const formValue = this.form.value;
 
       const task: Partial<Task> = {
-        id: null,
-        name: formValue.name,
-        employees: formValue.employees,
-        order: formValue.order,
-        done: formValue.done
+        name: formValue.name as string,
+        employees: formValue.employees as Employee[],
+        order: formValue.order as Order,
+        done: formValue.done as boolean
       };
 
       this.service.add(task).subscribe({
         next: (response) => {
-          // np. zamknięcie dialogu z wynikiem
           this.dialogRef.close(response);
         },
         error: (err) => {
-          console.error('Błąd przy dodawaniu pracownika', err);
-          // możesz tu dodać np. snackbar z błędem
+          console.error('Błąd przy dodawaniu zadania', err);
         }
       });
-
-      this.dialogRef.close(this.form.value as unknown as Task);
     }
   }
 

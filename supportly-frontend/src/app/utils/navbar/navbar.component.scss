@@ -2,33 +2,47 @@
   display: flex;
   align-items: center;
   padding: 0 20px;
-  background-color: #b3b3b3 !important; /* Ciemnoszary */
-  color: white;
+  background-color: #ffffff !important; /* Czysta biel dla nowoczesnego wyglądu */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08); /* Subtelny cień oddzielający menu od tła */
+  color: #143b72; /* Główny granat PROMONT */
+  height: 64px; /* Zapewnia stałą, standardową wysokość paska */
 }
 
 .navbar-brand {
   font-size: 24px;
   font-weight: bold;
-  color: #BB86FC !important; /* Fioletowy Material Design */
+  color: #143b72 !important; /* Granat PROMONT (zamiast fioletowego) */
   text-decoration: none;
+  display: flex;
+  align-items: center;
 }
 
 .menu {
   display: flex;
-  gap: 20px;
+  gap: 10px; /* Lekko zmniejszony gap, wyrównany paddingiem z linków */
 }
 
 .menu a {
-  color: white;
+  color: #143b72; /* Granatowy tekst linków (zamiast białego) */
   text-decoration: none;
-  font-size: 18px;
+  font-size: 16px;
+  font-weight: 500;
   padding: 8px 16px;
   border-radius: 4px;
-  transition: background 0.3s;
+  transition: all 0.3s ease;
 }
 
 .menu a:hover {
-  background: #333333;
+  background: rgba(227, 30, 36, 0.08); /* Bardzo jasne, półprzezroczyste czerwone tło przy najechaniu */
+  color: #e31e24; /* Czerwony tekst PROMONT przy najechaniu */
+}
+
+/* Kiedy link jest aktywny (użytkownik jest na tej stronie) */
+.menu a.active-link {
+  color: #e31e24;
+  border-bottom: 3px solid #e31e24; /* Czerwone podkreślenie aktywnej zakładki */
+  border-radius: 4px 4px 0 0;
+  background: transparent;
 }
 
 .spacer {
@@ -37,9 +51,12 @@
 
 .profile-button img {
   border-radius: 50%;
-  transition: transform 0.2s;
+  transition: transform 0.2s, border-color 0.2s;
+  border: 2px solid transparent; /* Przygotowanie pod ramkę hover */
+  cursor: pointer;
 }
 
 .profile-button img:hover {
   transform: scale(1.1);
+  border-color: #e31e24; /* Pojawia się czerwona ramka przy najechaniu na profil */
 }

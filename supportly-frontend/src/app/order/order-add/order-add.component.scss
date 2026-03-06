@@ -18,3 +18,78 @@
 .full-width {
   width: 100%;
 }
+.parts-layout-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Dwie równe kolumny */
+  gap: 24px;
+  padding: 24px;
+  background-color: transparent;
+}
+
+.parts-card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid #ebeeef;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* Żeby rogi tabeli nie wystawały poza kartę */
+  min-height: 400px; /* Minimalna wysokość, żeby puste tabele nie wyglądały źle */
+}
+
+/* Kolorystyczne wyróżnienie kart */
+.warehouse-card {
+  border-top: 4px solid #143b72; /* Granatowy pasek dla magazynu */
+}
+
+.used-card {
+  border-top: 4px solid #e31e24; /* Czerwony pasek dla użytych części */
+}
+
+.parts-header {
+  padding: 16px 20px;
+  background-color: #f8f9fa; /* Bardzo jasny szary dla nagłówka */
+  border-bottom: 1px solid #ebeeef;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.parts-header h3 {
+  margin: 0;
+  font-size: 16px;
+  color: #143b72;
+  font-weight: 600;
+}
+
+.subtitle {
+  font-size: 13px;
+  color: #666;
+}
+
+.total-cost {
+  font-weight: bold;
+  color: #e31e24; /* Czerwona kwota przyciąga wzrok */
+  background: rgba(227, 30, 36, 0.1);
+  padding: 4px 12px;
+  border-radius: 16px;
+}
+
+.table-wrapper {
+  flex-grow: 1;
+  overflow-y: auto; /* Scrollowanie w pionie, jeśli części jest dużo */
+  max-height: 500px;
+}
+
+/* Dostosowanie samej tabeli Material, żeby ładnie leżała w karcie */
+.table-wrapper table {
+  width: 100%;
+  box-shadow: none; /* Usuwamy domyślny cień tabeli, bo karta ma już swój */
+}
+
+/* Responsywność - jedno pod drugim na małych ekranach */
+@media (max-width: 1200px) {
+  .parts-layout-container {
+    grid-template-columns: 1fr;
+  }
+}

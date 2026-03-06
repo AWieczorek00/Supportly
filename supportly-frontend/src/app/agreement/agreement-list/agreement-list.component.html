@@ -1,61 +1,65 @@
 <div style="display: flex; justify-content: center; align-items: start; height: auto; padding-top: 20px">
   <div style="display: flex; flex-direction: column; align-items: center; width: 90%;">
     <mat-accordion style="width: 100%">
-      <mat-expansion-panel>
-        <mat-expansion-panel-header>
+      <mat-expansion-panel class="search-criteria-panel">
+        <mat-expansion-panel-header >
           <mat-panel-title> Kryteria wyszukiwania</mat-panel-title>
         </mat-expansion-panel-header>
 
-        <form [formGroup]="registrationForm" (ngSubmit)="onSubmit()" style="padding: 10px" class="registration-form">
-          <mat-form-field appearance="outline" >
-            <mat-label>Nazwa firmy</mat-label>
-            <input matInput formControlName="name"/>
-          </mat-form-field>
+        <form [formGroup]="registrationForm" (ngSubmit)="onSubmit()" style="padding: 10px">
+          <div class="search-grid">
+            <mat-form-field appearance="outline">
+              <mat-label>Nazwa firmy</mat-label>
+              <input matInput formControlName="name"/>
+            </mat-form-field>
 
-          <mat-form-field appearance="outline" >
-            <mat-label>Dzień zawarcia umowy</mat-label>
-            <input matInput [matDatepicker]="pickerFrom" formControlName="dateFrom">
-            <mat-hint>MM/DD/YYYY</mat-hint>
-            <mat-datepicker-toggle matIconSuffix [for]="pickerFrom"></mat-datepicker-toggle>
-            <mat-datepicker #pickerFrom></mat-datepicker>
-          </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Dzień zawarcia umowy</mat-label>
+              <input matInput [matDatepicker]="pickerFrom" formControlName="dateFrom">
+              <mat-hint>MM/DD/YYYY</mat-hint>
+              <mat-datepicker-toggle matIconSuffix [for]="pickerFrom"></mat-datepicker-toggle>
+              <mat-datepicker #pickerFrom></mat-datepicker>
+            </mat-form-field>
 
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Dzień zakończenia umowy</mat-label>
-            <input matInput [matDatepicker]="pickerTo" formControlName="dateTo">
-            <mat-hint>MM/DD/YYYY</mat-hint>
-            <mat-datepicker-toggle matIconSuffix [for]="pickerTo"></mat-datepicker-toggle>
-            <mat-datepicker #pickerTo></mat-datepicker>
-          </mat-form-field>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Dzień zakończenia umowy</mat-label>
+              <input matInput [matDatepicker]="pickerTo" formControlName="dateTo">
+              <mat-hint>MM/DD/YYYY</mat-hint>
+              <mat-datepicker-toggle matIconSuffix [for]="pickerTo"></mat-datepicker-toggle>
+              <mat-datepicker #pickerTo></mat-datepicker>
+            </mat-form-field>
 
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>NIP</mat-label>
-            <input matInput formControlName="nip"/>
-          </mat-form-field>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>NIP</mat-label>
+              <input matInput formControlName="nip"/>
+            </mat-form-field>
 
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Email</mat-label>
-            <input matInput type="email" formControlName="email"/>
-            <mat-error *ngIf="registrationForm.get('email')?.hasError('email')">Niepoprawny format emaila</mat-error>
-          </mat-form-field>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Email</mat-label>
+              <input matInput type="email" formControlName="email"/>
+              <mat-error *ngIf="registrationForm.get('email')?.hasError('email')">Niepoprawny format emaila</mat-error>
+            </mat-form-field>
 
 
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Okres</mat-label>
-            <input matInput  type="number" formControlName="period"/>
-          </mat-form-field>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Okres</mat-label>
+              <input matInput type="number" formControlName="period"/>
+            </mat-form-field>
+          </div>
 
           <!-- Dodanie przycisków poniżej pól formularza -->
-          <div class="form-buttons" style="display: flex; justify-content: space-between; width: 100%;">
+          <div class="search-actions">
             <button mat-raised-button color="warn" type="button" (click)="onClear()">
               Wyczyść
             </button>
-            <button mat-stroked-button color="warn" type="button" routerLink="/agreement/add">
-              Dodaj nowa umowę
-            </button>
-            <button mat-raised-button color="primary" type="submit">
-              Szukaj
-            </button>
+            <div class="search-actions-right">
+              <button mat-stroked-button color="warn" type="button" routerLink="/agreement/add">
+                Dodaj nowa umowę
+              </button>
+              <button mat-raised-button color="primary" type="submit">
+                Szukaj
+              </button>
+            </div>
           </div>
         </form>
       </mat-expansion-panel>

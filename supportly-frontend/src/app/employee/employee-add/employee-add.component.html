@@ -1,42 +1,40 @@
-<h2 mat-dialog-title>Wprowadź dane</h2>
+<div class="custom-dialog-container">
+  <div class="dialog-header bg-promont-blue">
+    <h2 mat-dialog-title class="m-0 text-white">Wprowadź dane</h2>
+  </div>
 
-<mat-dialog-content [formGroup]="create">
-  <div class="form-grid">
-    <div class="form-column">
-      <mat-form-field appearance="fill">
+  <div mat-dialog-content class="dialog-content">
+    <form [formGroup]="create" class="form-grid">
+
+      <mat-form-field appearance="outline" class="full-width">
         <mat-label>Imię</mat-label>
-        <input matInput formControlName="firstName">
+        <input matInput formControlName="firstName" placeholder="np. Jan">
       </mat-form-field>
 
-      <div class="form-column">
-        <mat-form-field appearance="fill">
-          <mat-label>Nazwisko</mat-label>
-          <input matInput formControlName="lastName">
-        </mat-form-field>
-
-        <mat-form-field appearance="fill">
-          <mat-label>Numer telefonu</mat-label>
-          <input matInput formControlName="phoneNumber">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Nazwisko</mat-label>
+        <input matInput formControlName="lastName" placeholder="np. Kowalski">
       </mat-form-field>
 
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Numer telefonu</mat-label>
+        <input matInput formControlName="phoneNumber" placeholder="np. 500 600 700">
+      </mat-form-field>
 
-
-
-      <mat-form-field appearance="fill">
+      <mat-form-field appearance="outline" class="full-width">
         <mat-label>Rola</mat-label>
-        <mat-select formControlName="role">
+        <mat-select formControlName="role" placeholder="Wybierz rolę">
           <mat-option *ngFor="let role of roles" [value]="role">
             {{ role.name }}
           </mat-option>
         </mat-select>
       </mat-form-field>
-    </div>
 
-    </div>
+    </form>
   </div>
-</mat-dialog-content>
 
-<mat-dialog-actions align="end">
-  <button mat-button (click)="cancel()">Anuluj</button>
-  <button mat-flat-button color="primary" (click)="submit()">Zapisz</button>
-</mat-dialog-actions>
+  <div mat-dialog-actions align="end" class="dialog-footer">
+    <button mat-button (click)="cancel()">Anuluj</button>
+    <button mat-raised-button color="primary" (click)="submit()" [disabled]="create.invalid">Zapisz</button>
+  </div>
+</div>

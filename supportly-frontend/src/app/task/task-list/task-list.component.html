@@ -1,48 +1,56 @@
 <div style="display: flex; justify-content: center; align-items: start; height: auto; padding-top: 20px">
   <div style="display: flex; flex-direction: column; align-items: center; width: 90%;">
     <mat-accordion style="width: 100%">
-      <mat-expansion-panel>
+      <mat-expansion-panel class="search-criteria-panel">
         <mat-expansion-panel-header>
           <mat-panel-title> Kryteria wyszukiwania</mat-panel-title>
         </mat-expansion-panel-header>
 
-        <form [formGroup]="criteriaForm" (ngSubmit)="onSubmit()" style="padding: 10px" class="registration-form">
-          <mat-form-field appearance="outline">
-            <mat-label>Nazwa zadania</mat-label>
-            <input matInput formControlName="name"/>
-          </mat-form-field>
+        <form [formGroup]="criteriaForm" (ngSubmit)="onSubmit()" style="padding: 10px">
+          <div class="search-grid">
 
-          <mat-form-field appearance="outline">
-            <mat-label>Imię pracownika</mat-label>
-            <input matInput formControlName="firstName"/>
-          </mat-form-field>
 
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Nazwisko pracownika</mat-label>
-            <input matInput formControlName="lastName"/>
-          </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Nazwa zadania</mat-label>
+              <input matInput formControlName="name"/>
+            </mat-form-field>
 
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Nazwa firmy</mat-label>
-            <input matInput formControlName="companyName"/>
-          </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Imię pracownika</mat-label>
+              <input matInput formControlName="firstName"/>
+            </mat-form-field>
 
-          <mat-checkbox formControlName="done">
-            Wykonane?
-          </mat-checkbox>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Nazwisko pracownika</mat-label>
+              <input matInput formControlName="lastName"/>
+            </mat-form-field>
 
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Nazwa firmy</mat-label>
+              <input matInput formControlName="companyName"/>
+            </mat-form-field>
+
+            <div class="search-checkbox-container">
+              <mat-checkbox formControlName="done" color="primary">
+                Wykonane?
+              </mat-checkbox>
+            </div>
+          </div>
 
           <!-- Dodanie przycisków poniżej pól formularza -->
-          <div class="form-buttons" style="display: flex; justify-content: space-between; width: 100%;">
+          <div class="search-actions">
             <button mat-raised-button color="warn" type="button" (click)="onClear()">
               Wyczyść
             </button>
-            <button mat-stroked-button color="warn" type="button" (click)="openDialog()">
-              Dodaj nowe zadanie
-            </button>
-            <button mat-raised-button color="primary" type="submit">
-              Szukaj
-            </button>
+            <div class="search-actions-right">
+
+              <button mat-stroked-button color="warn" type="button" (click)="openDialog()">
+                Dodaj nowe zadanie
+              </button>
+              <button mat-raised-button color="primary" type="submit">
+                Szukaj
+              </button>
+            </div>
           </div>
         </form>
       </mat-expansion-panel>
